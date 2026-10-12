@@ -3,6 +3,8 @@
 Источники: sitemap.xml и sitemap потоков; страницы проекта Tilda (MCP, только чтение — если есть ключ);
 живые адреса из слепка ~/Documents/teyes-sibir-slepok (если есть). Карточки товаров (/tproduct/)
 и служебные адреса /tilda/ не берутся — товары будут на этапе 2 из данных магазина.
+Tilda отдаёт адреса без учёта регистра (/works/Audi = /works/audi): такие варианты — одна страница,
+основной — тот, что в sitemap (он же canonical), остальные пишутся с alias_of.
 Пишет data/pages.csv и raw/html/<путь>. Повторный запуск докачивает только недостающее (--fresh — всё заново).
 """
 import csv
@@ -107,20 +109,30 @@ def fetch(url, fresh):
 
 def main():
     fresh = "--fresh" in sys.argv
-    urls = sorted(from_sitemaps() | from_tilda() | from_slepok())
+    in_sitemap = from_sitemaps()
+    groups = {}
+    for url in sorted(in_sitemap | from_tilda() | from_slepok()):
+        groups.setdefault(url.lower(), []).append(url)
+    main_of = {}
+    for variants in groups.values():
+        main_url = next((u for u in variants if u in in_sitemap), variants[0])
+        main_of.update({u: main_url for u in variants})
+    urls = sorted(set(main_of.values()))
     rows = []
     with ThreadPoolExecutor(WORKERS) as pool:
         for n, (url, status) in enumerate(pool.map(lambda u: fetch(u, fresh), urls), 1):
-            rows.append({"url": url, "status": status, "local": local_path(url) if status == "200" else ""})
+            rows.append({"url": url, "status": status, "local": local_path(url) if status == "200" else "", "alias_of": ""})
             if n % 200 == 0:
                 print(f"  {n} из {len(urls)}", flush=True)
+    by_url = {r["url"]: r for r in rows}
+    rows += [{**by_url[m], "url": u, "alias_of": m} for u, m in sorted(main_of.items()) if u != m]
     DATA.mkdir(exist_ok=True)
     with (DATA / "pages.csv").open("w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=["url", "status", "local"])
+        w = csv.DictWriter(f, fieldnames=["url", "status", "local", "alias_of"])
         w.writeheader()
         w.writerows(rows)
-    ok = sum(r["status"] == "200" for r in rows)
-    print(f"Адресов {len(rows)}, отвечают 200: {ok}, остальные (редиректы, 404) не копируются")
+    ok = sum(r["status"] == "200" and not r["alias_of"] for r in rows)
+    print(f"Адресов {len(rows)}, страниц {len(urls)}, отвечают 200: {ok}; редиректы и 404 не копируются")
 
 
 if __name__ == "__main__":
