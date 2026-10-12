@@ -168,7 +168,7 @@ def classify(url):
         return "счётчик внутри виджета Яндекс.Карт"
     if host in ("fonts.googleapis.com", "fonts.gstatic.com"):
         return None
-    if re.match(r"(store2?|feeds)\.tilda(api|cdn)\.", host) and p.path.endswith(("/getproductslist/", "/getfeed/")):
+    if re.match(r"(store2?|feeds)\.tilda(api|cdn)\.", host) and p.path.endswith(("/getproductslist/", "/getfilters/", "/getfeed/")):
         return None  # снимок каталога или ленты не сработал: Tilda ответит «configured for another domain»
     if host.endswith("tildacdn.com") and host != "feeds.tildacdn.com":  # прочие запросы лент – посты по клику
         if re.match(r"/stor[0-9a-f-]+/", p.path):

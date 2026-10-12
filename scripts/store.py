@@ -3,7 +3,7 @@
 API магазина (store.tildaapi.com) и лент (feeds.tildaapi.com) отдают данные только домену teyes-sibir.ru:
 из браузера на чужом домене приходит «ERROR: The … is configured for another domain». Без заголовков
 Origin/Referer API отвечают. Поэтому: открываем в Chrome каждую страницу копии с каталогом или лентой,
-записываем запросы (getproductslist, getfeed), снимаем их ответы и все страницы пагинации (по total/size)
+записываем запросы (getproductslist, getfilters, getfeed), снимаем их ответы и все страницы пагинации (по total/size)
 в raw/store/, рядом пишем raw/store/snapshot.js – вставку, которая подменяет адрес запроса на снимок.
 build.py кладёт это в public/assets/store/ и подключает на этих страницах. Запросы с фильтрами или
 сортировкой, выбранными посетителем, уходят в Tilda как есть. Ссылки на страницы сайта в снимке ведут
@@ -32,7 +32,7 @@ OUT, DATA = ROOT / "raw" / "store", ROOT / "data"
 NEW = OUT / "new"  # новый снимок собирается здесь и подменяет старый только целиком
 NOT_FOUND = "ERROR: Category is not found"  # раздел удалён в Tilda: живой сайт показывает ту же ошибку
 BLOCK = re.compile(r"t_(?:store|feed)_init\('(\d+)'")  # блоки каталога и ленты в HTML страницы
-API = re.compile(r"/api/(getproductslist|getfeed)/$")
+API = re.compile(r"/api/(getproductslist|getfilters|getfeed)/$")  # товары, фильтры каталога, посты
 LIVE_LINK = re.compile(r"https://(?:www\.)?teyes-sibir\.ru(?:/[^\"\s\\<>]*)?")
 SKIP = ("c", "getparts", "getoptions")  # метка времени и флаги первого запроса не влияют на выбор снимка
 WORKERS = 4
@@ -40,7 +40,7 @@ SHIM = """/* Снимок каталогов и лент Tilda для копии
    отвечаются из assets/store/, остальные (фильтры и сортировка посетителя) уходят в Tilda как есть. */
 (function(){var snap=%s,base=%s,skip=%s,open=XMLHttpRequest.prototype.open;
 XMLHttpRequest.prototype.open=function(m,url){try{var u=new URL(url,location.href),
-api=u.pathname.match(/\\/api\\/(getproductslist|getfeed)\\/$/);
+api=u.pathname.match(/\\/api\\/(getproductslist|getfilters|getfeed)\\/$/);
 if(api&&/^(store2?|feeds)\\.tilda(api|cdn)\\./.test(u.hostname)){var p=[["_api",api[1]]];
 u.searchParams.forEach(function(v,k){if(skip.indexOf(k)<0)p.push([k,v])});
 if(!p.some(function(x){return x[0]==="slice"}))p.push(["slice","1"]);
@@ -88,8 +88,8 @@ def fetch(url, site):
         data = json.loads(res.stdout)
     except ValueError:
         return None, (res.stdout or res.stderr)[:80], 0, 0
-    items = data.get("products", data.get("posts")) if isinstance(data, dict) else None
-    if not isinstance(items, list):
+    items = data.get("products", data.get("posts", data.get("filters"))) if isinstance(data, dict) else None
+    if not isinstance(items, list):  # getfilters отдаёт {"filters": [...], "sort", "search"} без total
         return None, res.stdout[:80], 0, 0
     text = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
     text = LIVE_LINK.sub(lambda m: site.link(m.group(0)), text)  # посты и страницы сайта – в копию
