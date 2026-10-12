@@ -1,0 +1,1 @@
+{"sort":true,"search":true,"filters":[{"id":2945358,"label":"Цена","control":"range","type":"product","name":"price","min":"52900","max":"63900"},{"id":3316694,"label":"Модель","control":"select","type":"option","values":[{"value":"12+256Gb","count":1},{"value":"8+128Gb","count":1}],"name":"option:2423770"}]}
