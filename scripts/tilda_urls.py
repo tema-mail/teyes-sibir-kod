@@ -2,7 +2,7 @@
 
 Общий модуль для assets.py (что скачать) и build.py (на что заменить).
 Ресурс описывается парой (адрес для скачивания, путь в копии без BASE).
-Заглушки ленивой подгрузки (thb …/-/resize/20x/, -/resizeb/20x/, -/empty/) качаются как есть — крошечные;
+Заглушки ленивой подгрузки (thb …/-/resize/20x/, -/resizeb/20x/, -/empty/) качаются как есть – крошечные;
 остальные варианты thb/optim (уменьшенные, webp) сводятся к оригиналу со static.
 """
 import hashlib
@@ -17,7 +17,7 @@ IMG_EXT = (".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg", ".ico", ".bmp", ".a
 
 
 def unescape(text):
-    """JSON внутри HTML пишет https:\\/\\/static… — приводим к обычному виду для поиска."""
+    """JSON внутри HTML пишет https:\\/\\/static… – приводим к обычному виду для поиска."""
     return text.replace("\\/", "/")
 
 
@@ -43,7 +43,7 @@ def resource(host, path):
 
 
 def gfonts(url):
-    """Стили Google Fonts → (адрес, путь в копии); имя файла — по хешу запроса."""
+    """Стили Google Fonts → (адрес, путь в копии); имя файла – по хешу запроса."""
     url = url.replace("&amp;", "&")
     return url, f"assets/fonts/g{hashlib.md5(url.encode()).hexdigest()[:10]}.css"
 

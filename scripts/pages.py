@@ -1,11 +1,11 @@
 """Шаг 1. Список всех страниц teyes-sibir.ru и их HTML как его отдаёт сайт.
 
-Источники: sitemap.xml и sitemap потоков; страницы проекта Tilda (MCP, только чтение — если есть ключ);
+Источники: sitemap.xml и sitemap потоков; страницы проекта Tilda (MCP, только чтение – если есть ключ);
 живые адреса из слепка ~/Documents/teyes-sibir-slepok (если есть). Карточки товаров (/tproduct/)
-и служебные адреса /tilda/ не берутся — товары будут на этапе 2 из данных магазина.
-Tilda отдаёт адреса без учёта регистра (/works/Audi = /works/audi): такие варианты — одна страница,
-основной — тот, что в sitemap (он же canonical), остальные пишутся с alias_of.
-Пишет data/pages.csv и raw/html/<путь>. Повторный запуск докачивает только недостающее (--fresh — всё заново).
+и служебные адреса /tilda/ не берутся – товары будут на этапе 2 из данных магазина.
+Tilda отдаёт адреса без учёта регистра (/works/Audi = /works/audi): такие варианты – одна страница,
+основной – тот, что в sitemap (он же canonical), остальные пишутся с alias_of.
+Пишет data/pages.csv и raw/html/<путь>. Повторный запуск докачивает только недостающее (--fresh – всё заново).
 """
 import csv
 import pathlib
@@ -77,7 +77,7 @@ def from_tilda():
         sys.path.insert(0, str(NA_TILDU))
         import na_tildu
         pages = na_tildu.Mcp().json("get_pages", projectid=PROJECT_ID)
-    except Exception as exc:  # нет ключа или сети — работаем без этого источника
+    except Exception as exc:  # нет ключа или сети – работаем без этого источника
         print(f"Tilda: пропущено ({str(exc)[:80]})")
         return set()
     found = {norm(f"/{p['alias'].strip('/')}" if p.get("alias") else f"/page{p['id']}.html") for p in pages}

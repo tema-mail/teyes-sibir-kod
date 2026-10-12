@@ -2,8 +2,8 @@
 
 Берёт скачанные картинки из data/assets.csv (raw/assets), кладёт в raw/img/<путь в копии>, пишет data/images.csv.
 Без изменений копируются: заглушки ленивой подгрузки, SVG/GIF/ICO/AVIF, анимация, файлы меньше 30 КБ
-(иконки — в том числе apple-touch-icon, которому нужен PNG) и всё, что WebP не уменьшил хотя бы на 20 %.
-Поворот по EXIF «впекается», цветовой профиль сохраняется — картинка выглядит как оригинал.
+(иконки – в том числе apple-touch-icon, которому нужен PNG) и всё, что WebP не уменьшил хотя бы на 20 %.
+Поворот по EXIF «впекается», цветовой профиль сохраняется – картинка выглядит как оригинал.
 Нужен Pillow. Повторный запуск пропускает уже готовое.
 """
 import csv
@@ -55,7 +55,7 @@ def convert(job):
                 tmp.replace(dst)
                 return url, local, out_local, size_in, dst.stat().st_size, "webp"
             tmp.unlink()
-        except Exception as exc:  # битый файл или анимация — оставляем оригинал
+        except Exception as exc:  # битый файл или анимация – оставляем оригинал
             print(f"  как есть ({exc}): {local}", flush=True)
     dst = OUT / local
     if not dst.exists():
