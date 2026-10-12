@@ -1,9 +1,10 @@
 """Шаг 2. Скачать все ресурсы страниц: картинки, стили и скрипты Tilda, шрифты.
 
-Берёт адреса из raw/html (список страниц — data/pages.csv), из скачанных CSS и скриптов блоков страниц
+Берёт адреса из raw/html (список страниц – data/pages.csv), из снимков лент (data/store.csv, если уже есть),
+из скачанных CSS и скриптов блоков страниц
 (ws/…/tilda-blocks-page*.js), пока не перестанут появляться новые. Кладёт в raw/assets/<хост>/<путь>,
 пишет data/assets.csv. Общие скрипты Tilda не разбираются: то, что они грузят сами
-(формы, корзина, магазин), остаётся на Tilda — см. docs/РЕШЕНИЯ.md.
+(формы, корзина, магазин), остаётся на Tilda – см. docs/РЕШЕНИЯ.md.
 Повторный запуск докачивает только недостающее.
 """
 import csv
@@ -73,6 +74,13 @@ def main():
     for local in pages:
         found.update(tilda_urls.find((RAW_HTML / local).read_text("utf-8", "ignore")).values())
     print(f"страниц {len(pages)}, ресурсов в HTML {len(found)}")
+    feeds = ROOT / "data" / "store.csv"  # обложки постов приходят в данных лент (снимок store.py), не в HTML
+    if feeds.exists():
+        with feeds.open(encoding="utf-8") as f:
+            snaps = [r["file"] for r in csv.DictReader(f) if '"getfeed"' in r["key"] and r["file"]]
+        for name in snaps:
+            found.update(tilda_urls.find((ROOT / "raw" / "store" / name).read_text("utf-8", "ignore")).values())
+        print(f"с картинками лент: {len(found)}")
     status, todo = {}, dict(found)
     while todo:
         with ThreadPoolExecutor(WORKERS) as pool:
