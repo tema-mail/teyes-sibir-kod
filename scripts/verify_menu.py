@@ -3,7 +3,7 @@
 1. Каждая ссылка и картинка из data/menu.json – существующий файл копии (с точным регистром).
 2. Поведение – синтетическими событиями в headless Chrome на двух видах шапки (главная, страница магазина):
    компьютер – наведение открывает панель, клик её не закрывает, списки Tilda T794 не видны, разворот и «назад»
-   работают, уход курсора и Esc закрывают; телефон (500 px) – тап по «Услугам» в меню Tilda T450 открывает экран,
+   работают, уход курсора и Esc закрывают, «Записаться» открывает попап записи Tilda, который есть на странице; телефон (500 px) – тап по «Услугам» в меню Tilda T450 открывает экран,
    вкладки, разворот и закрытие работают, подпункты Tilda не раскрываются. Только на локальном сервере:
    для теста рядом со страницей временно кладётся её копия со скриптом проверки.
 3. Снимки: raw/verify/menu/<страница>-<меню>-<ширина>.png (телефон – во фрейме 390 px).
@@ -22,7 +22,7 @@ PAGES = ["index.html", "store/closers/index.html"]  # тёмная закреп�
 EXPECT = {
     "desktop": {"hoverOpens": True, "ariaExpanded": "true", "tildaDropdownVisible": 0, "clickPrevented": True,
                 "stillOpenAfterClick": True, "drill": True, "backToStart": True, "closesOnLeave": True,
-                "ariaAfter": "false", "escCloses": True},
+                "ariaAfter": "false", "escCloses": True, "bookOpensPopup": True},
     "mobile": {"t450item": True, "clickPrevented": True, "sheetOpens": True, "tildaSubmenuOpened": False,
                "tabSwitch": "Все товары", "drill": True, "closed": True},
 }
@@ -40,7 +40,8 @@ try{ if(more){ R.mode='desktop'; ev(more,'mouseover'); setTimeout(function(){
   p.querySelector('.tsbm-back').click(); R.backToStart=!!p.querySelector('.tsbm-start');
   ev(more,'mouseout',document.body); setTimeout(function(){ R.closesOnLeave=!vis(p); R.ariaAfter=more.getAttribute('aria-expanded');
    ev(more,'mouseover'); setTimeout(function(){ document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));
-    R.escCloses=!vis(p); done(); },200)},400)},300);
+    R.escCloses=!vis(p); ev(more,'mouseover'); setTimeout(function(){ p.querySelector('[data-book]').click();
+     setTimeout(function(){ R.bookOpensPopup=!!document.querySelector('.t-popup.t-popup_show'); done(); },900)},200)},200)},400)},300);
  } else { R.mode='mobile';
   var sub=[].filter.call(document.querySelectorAll('.t450__link-item_submenu'),function(a){return a.textContent.trim()==='Услуги'})[0];
   R.t450item=!!sub; var c=ev(sub,'click'); R.clickPrevented=c.defaultPrevented;
