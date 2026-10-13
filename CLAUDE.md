@@ -8,7 +8,8 @@
 - Python 3 (стандартная библиотека + Pillow в `.venv/`, его создаёт `run.sh`) и `curl`, Chrome для проверки.
 - `./run.sh` – полный пересбор копии: `pages.py` (страницы) → `assets.py` (ресурсы) → `images.py` (WebP)
   → `store.py` (снимок каталогов и лент) → ещё раз `assets.py` и `images.py` (обложки постов из лент)
-  → `build.py` (`public/`) → `verify.py` (проверка).
+  → `menu.py` (данные мега-меню) → `build.py` (`public/`) → `verify.py` (проверка, меню – `verify_menu.py`).
+- Мега-меню «Услуги»/«Магазин»: интерфейс `src/menu/megamenu.js` + `.css` (чистый JS), данные `data/menu.json`.
   Адреса Tilda разбирает общий `tilda_urls.py`. Проверка выложенной копии: `verify.py --site <адрес>`.
 - `public/` – готовый сайт, его выкладывает `.github/workflows/pages.yml`. `raw/` – сырьё, в git не идёт.
 - Этап 2 (страницы на Astro, магазин из данных) – после разбора копии с владельцем.
