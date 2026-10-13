@@ -23,11 +23,12 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
     });
   }
-  function find(menu, id) {
+  function find(menu, id) {  // раздел с разворотом; у раздела без групп разворота нет – null
     var list = D.menus[menu].sections;
-    for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
+    for (var i = 0; i < list.length; i++) if (list[i].id === id && list[i].groups) return list[i];
     return null;
   }
+  function sectionId(menu, id) { return id && find(menu, id) ? id : null; }
   function tile(s, extra) {
     var inner = '<img class="tsbm-tile__img" src="' + esc(s.img) + '" alt="" loading="lazy" decoding="async">' +
       '<span class="tsbm-tile__body"><span class="tsbm-tile__text"><span class="tsbm-tile__title">' + esc(s.title) +
@@ -38,7 +39,7 @@
       : '<a class="tsbm-tile' + extra + '" href="' + esc(s.href) + '">' + inner + '</a>';
   }
   function actions(light) {
-    return '<a class="tsbm-btn tsbm-btn--accent" href="' + esc(D.book) + '" data-book>Записаться на установку</a>' +
+    return '<a class="tsbm-btn tsbm-btn--accent" href="' + esc(D.contacts) + '" data-book>Записаться на установку</a>' +
       '<a class="tsbm-btn tsbm-btn--ghost' + (light ? '' : ' tsbm-only-wide') + '" href="' + esc(D.tel) + '">Позвонить</a>';
   }
   function start(menu) {
@@ -107,7 +108,7 @@
     if (state.trigger && state.trigger !== trigger) state.trigger.setAttribute('aria-expanded', 'false');
     var changed = state.menu !== menu || !panel.isConnected || panel.hidden;
     state.menu = menu; state.trigger = trigger;
-    if (changed || section !== undefined) { state.section = section || null; renderPanel(); }
+    if (changed || section !== undefined) { state.section = sectionId(menu, section); renderPanel(); }
     panel.hidden = false;
     trigger.setAttribute('aria-expanded', 'true');
     place();
@@ -125,9 +126,9 @@
     clearTimeout(hideTimer); clearTimeout(showTimer);
     hideTimer = setTimeout(function () { closePanel(false); }, 250);
   }
-  function wide(trigger) {
-    var r = trigger.getBoundingClientRect();
-    return r.width > 0 && r.left >= 0 && r.right <= document.documentElement.clientWidth;
+  function wide(trigger) {  // панель – только с 960 px; уже (планшет вертикально) – экран по шагам
+    var r = trigger.getBoundingClientRect(), w = document.documentElement.clientWidth;
+    return w >= 960 && r.width > 0 && r.left >= 0 && r.right <= w;
   }
 
   /* ---------- Телефон: экран по шагам ---------- */
@@ -148,11 +149,12 @@
             '<span class="tsbm-hero__all">Перейти в раздел →</span></a>' : '') + groups(s)
         : start(state.menu)) + '</div>' +
       '<div class="tsbm-sheet__cta"><a class="tsbm-btn tsbm-btn--ghost" href="' + esc(D.tel) + '">Позвонить</a>' +
-      '<a class="tsbm-btn tsbm-btn--accent" href="' + esc(D.book) + '" data-book>Записаться</a></div>';
+      '<a class="tsbm-btn tsbm-btn--accent" href="' + esc(D.contacts) + '" data-book>Записаться</a></div>';
     sheet.setAttribute('aria-label', m.label);
     sheet.focus();  // фокус в экран меню (без рамки); дальше Tab идёт по его кнопкам
   }
   function openSheet(menu, section) {
+    if (!sheet || sheet.hidden) state.opener = document.activeElement;  // сюда вернётся фокус после закрытия
     if (!sheet) {
       sheet = document.createElement('div');
       sheet.className = 'tsbm tsbm-sheet';
@@ -163,7 +165,7 @@
       sheet.addEventListener('click', onInnerClick);
       document.body.appendChild(sheet);
     }
-    state.menu = menu; state.section = section || null;
+    state.menu = menu; state.section = sectionId(menu, section);
     sheet.hidden = false;
     document.documentElement.classList.add('tsbm-lock');
     renderSheet();
@@ -172,6 +174,18 @@
     if (!sheet || sheet.hidden) return;
     sheet.hidden = true;
     document.documentElement.classList.remove('tsbm-lock');
+    if (state.opener && state.opener.focus) state.opener.focus();  // назад на пункт меню Tilda
+  }
+
+  function bookLink() {
+    for (var i = 0; i < D.book.length; i++) {
+      if (!document.querySelector('[data-tooltip-hook="' + D.book[i] + '"]')) continue;
+      var link = [].filter.call(document.querySelectorAll('a[href="' + D.book[i] + '"]'), function (a) {
+        return !a.closest('.tsbm');
+      })[0];
+      if (link) return link;
+    }
+    return null;
   }
 
   /* ---------- Общие клики внутри меню ---------- */
@@ -180,20 +194,16 @@
     if (!t) return;
     var inSheet = sheet && sheet.contains(t);
     if (t.hasAttribute('data-book')) {
-      // попап записи Tilda: закрыть меню и нажать ссылку на попап, которая уже есть на странице
-      var link = [].filter.call(document.querySelectorAll('a[href="' + D.book + '"]'), function (a) {
-        return !a.closest('.tsbm');
-      })[0];
-      if (!link) return;  // попапа на странице нет – обычный переход по якорю
-      e.preventDefault();
+      // попап записи Tilda, который реально есть на этой странице: нажать ссылку на него; нет – переход на «Контакты»
+      var link = bookLink();
       closePanel(false); closeSheet();
-      link.click();
+      if (link) { e.preventDefault(); link.click(); }
       return;
     }
     e.preventDefault();
     if (t.hasAttribute('data-close')) { closeSheet(); return; }
     if (t.hasAttribute('data-menu')) { state.menu = t.getAttribute('data-menu'); state.section = null; renderSheet(); return; }
-    state.section = t.getAttribute('data-section') || null;
+    state.section = sectionId(state.menu, t.getAttribute('data-section'));
     if (inSheet) { renderSheet(); sheet.querySelector('.tsbm-sheet__body').scrollTop = 0; }
     else { renderPanel(); var f = panel.querySelector('.tsbm-back, .tsbm-tile'); if (f && e.detail === 0) f.focus(); }
   }
@@ -235,14 +245,30 @@
     if (t && !t.mobile && !(panel && panel.contains(e.relatedTarget))) scheduleHide();
   }, true);
   document.addEventListener('keydown', function (e) {
+    var open = sheet && !sheet.hidden;
+    if (e.key === 'Tab' && open) {  // экран телефона модальный: Tab ходит по кругу внутри него
+      var items = sheet.querySelectorAll('a[href], button'), first = items[0], last = items[items.length - 1];
+      if (e.shiftKey && (document.activeElement === first || document.activeElement === sheet)) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      return;
+    }
     if (e.key !== 'Escape') return;
-    if (sheet && !sheet.hidden) closeSheet();
+    if (open) closeSheet();
     else closePanel(true);
   });
   document.addEventListener('focusin', function (e) {
     if (panel && !panel.hidden && !panel.contains(e.target) && e.target !== state.trigger) closePanel(false);
   });
-  window.addEventListener('resize', function () { place(); if (sheet && !sheet.hidden && window.innerWidth >= 960) closeSheet(); });
+  window.addEventListener('resize', function () {  // ширина – как в wide(): clientWidth, без полосы прокрутки
+    place();
+    if (sheet && !sheet.hidden && document.documentElement.clientWidth >= 960) closeSheet();
+  });
+  // шапка на главной закреплена и при прокрутке ужимается, на страницах магазина уезжает: панель держится у
+  // кнопки, а когда кнопка ушла за экран – закрывается
+  window.addEventListener('scroll', function () {
+    if (!panel || panel.hidden || !state.trigger) return;
+    if (state.trigger.getBoundingClientRect().bottom <= 0) closePanel(false); else place();
+  }, { passive: true });
 
   document.documentElement.classList.add('tsbm-on');
   [].forEach.call(document.querySelectorAll('a[href="#submenu:more"], a[href="#submenu:catalog"]'), function (a) {

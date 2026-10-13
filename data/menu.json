@@ -1,9 +1,14 @@
 {
  "phone": "+7 (995) 437-92-66",
  "tel": "tel:+79954379266",
- "book": "#popup:zapisizxedera",
  "address": "Новосибирск, ул. Сухарная 35, корпус 13",
  "hours": "пн–пт с 11:00 до 19:00",
+ "book": [
+  "#popup:zapisizxedera",
+  "#popup:zapisystanovka",
+  "#popup:zapisizpodvala"
+ ],
+ "contacts": "/teyes-sibir-kod/contacts/",
  "cta": "Не знаете, что выбрать? Оставьте заявку – подберём под вашу машину и назовём цену.",
  "menus": {
   "services": {
@@ -165,6 +170,14 @@
         {
          "name": "Fiat",
          "href": "/teyes-sibir-kod/multimedia_teyes/fiat/"
+        },
+        {
+         "name": "BMW 3 Series F30",
+         "href": "/teyes-sibir-kod/multimedia_teyes/3-series-f30/"
+        },
+        {
+         "name": "BMW 7 Series F01",
+         "href": "/teyes-sibir-kod/multimedia_teyes/7-series-f01/"
         }
        ]
       },
@@ -207,7 +220,7 @@
        ]
       }
      ],
-     "meta": "39 марок · 216 моделей"
+     "meta": "37 марок · 221 модель"
     },
     {
      "id": "noise",
@@ -238,15 +251,11 @@
         {
          "name": "Сигнализации StarLine",
          "href": "/teyes-sibir-kod/services/starline/"
-        },
-        {
-         "name": "Сигнализации в магазине",
-         "href": "/teyes-sibir-kod/store/signaling/"
         }
        ]
       }
      ],
-     "meta": "3 раздела"
+     "meta": "2 раздела"
     },
     {
      "id": "rus",

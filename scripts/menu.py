@@ -3,7 +3,8 @@
 Всё берётся из живых страниц копии: адреса – только существующие страницы (иначе ошибка), подписи марок –
 с кнопок сайта (заголовки многих страниц на Tilda ошибочны: «Установка Teyes на Subaru» у Audi и т.п.),
 порядок марок – как на сайте, картинки плиток – фото со страниц сайта (уменьшенные копии в raw/menu), число товаров – из снимка каталогов
-(data/store.csv, raw/store). Пустые разделы магазина и дубли <uid>-<марка> в меню не попадают.
+(data/store.csv, raw/store). Пустые марки комплектов и дубли <uid>-<марка> в меню не попадают; разделы магазина
+остаются все, как в меню Tilda, даже пустые (7 из 9 пусты и на живом сайте – решает владелец).
 Раскладка разделов и групп ниже – единственное, что задано руками.
 """
 import csv
@@ -24,8 +25,11 @@ DATA, PUBLIC, STORE = ROOT / "data", ROOT / "public", ROOT / "raw" / "store"
 THUMBS = ROOT / "raw" / "menu"  # лёгкие копии фото для плиток (build.py кладёт их в public/assets/menu/)
 THUMB_W = 720
 SITE = build.LIVE
-CONTACTS = {"phone": "+7 (995) 437-92-66", "tel": "tel:+79954379266", "book": "#popup:zapisizxedera",
+CONTACTS = {"phone": "+7 (995) 437-92-66", "tel": "tel:+79954379266",
             "address": "Новосибирск, ул. Сухарная 35, корпус 13", "hours": "пн–пт с 11:00 до 19:00"}
+# Попапы записи сайта: на 695 страницах – zapisizxedera, на страницах магазина – zapisystanovka.
+# Меню открывает первый, который есть на странице; если ни одного – ведёт на «Контакты».
+BOOK = ["#popup:zapisizxedera", "#popup:zapisystanovka", "#popup:zapisizpodvala"]
 CTA = "Не знаете, что выбрать? Оставьте заявку – подберём под вашу машину и назовём цену."
 
 # Страна марки – для групп в развороте. Марки без страны попадают в «Другие».
@@ -39,6 +43,8 @@ COUNTRY = {
     "Россия": "lada gaz uaz",
 }
 COUNTRY = {slug: c for c, slugs in COUNTRY.items() for slug in slugs.split()}
+# Страницы моделей, которые на сайте лежат на уровне марки (/multimedia_teyes/hijet): считаются моделями своей марки
+MODEL_OF = {"3-series-f30": "bmw", "7-series-f01": "bmw", "hijet": "daihatsu", "move": "daihatsu", "yrv": "daihatsu"}
 # Подписи там, где на сайте нет кнопки с названием (страницы моделей на уровне марки, приложения)
 # или на кнопке опечатка («Shevrolet», «Сhery» с русской С, «Sitroen», «Porshe») – эти подписи главнее кнопок
 FIXED = {"chevrolet": "Chevrolet", "chery": "Chery", "citroen": "Citroen", "porche": "Porsche", "gaz": "ГАЗ", "uaz": "УАЗ"}
@@ -59,8 +65,7 @@ SERVICES = [
     {"id": "alarm", "title": "Сигнализации", "href": "/services/alarm_installation",
      "img": "assets/tild3864-6236-4563-b263-373766663637/Rectangle_30468_1.webp",
      "groups": [("Охрана и автозапуск", None, [("Установка сигнализаций", "/services/alarm_installation"),
-                                               ("Сигнализации StarLine", "/services/starline"),
-                                               ("Сигнализации в магазине", "/store/signaling")])]},
+                                               ("Сигнализации StarLine", "/services/starline")])]},
     {"id": "rus", "title": "Русификация и приложения", "href": "/services/russification_of_cars",
      "img": "assets/tild6132-3439-4731-a530-623231613763/image_28_1.webp", "rus": True},
     {"id": "cams", "title": "Камеры и мониторы", "href": None,
@@ -167,7 +172,7 @@ class Menu:
         groups = defaultdict(list)
         for path in self.paths:
             slug = path.removeprefix(prefix)
-            if not path.startswith(prefix) or "/" in slug or re.match(r"\d+-", slug):
+            if not path.startswith(prefix) or "/" in slug or re.match(r"\d{6,}-", slug):  # <uid>-<марка> – дубли
                 continue
             if counts is not None and not counts.get(path):
                 continue  # пустой раздел магазина («Category is not found» или 0 товаров)
@@ -198,9 +203,11 @@ class Menu:
                "href": self.link(s["href"]) if s.get("href") else None}
         if s.get("brands") and not store:
             out["groups"] = self.brand_groups(s["brands"], None)
-            models = sum(1 for p in self.paths if p.startswith(s["brands"]) and p.count("/") == 3)
-            out["meta"] = f"{plural(sum(len(g['items']) for g in out['groups']), 'марка', 'марки', 'марок')} · " \
-                          f"{plural(models, 'модель', 'модели', 'моделей')}"
+            slugs = [p.removeprefix(s["brands"]) for p in self.paths if p.startswith(s["brands"]) and p.count("/") == 2]
+            brands = len({MODEL_OF.get(x, x) for x in slugs})
+            models = sum(1 for p in self.paths if p.startswith(s["brands"]) and p.count("/") == 3) + \
+                sum(1 for x in slugs if x in MODEL_OF)
+            out["meta"] = f"{plural(brands, 'марка', 'марки', 'марок')} · {plural(models, 'модель', 'модели', 'моделей')}"
         elif s.get("brands"):
             out["groups"] = self.brand_groups(s["brands"], self.totals)
             n = sum(int(i["meta"]) for g in out["groups"] for i in g["items"])
@@ -225,7 +232,7 @@ class Menu:
 
 def main():
     m = Menu()
-    data = {**CONTACTS, "cta": CTA, "menus": {
+    data = {**CONTACTS, "book": BOOK, "contacts": m.link("/contacts"), "cta": CTA, "menus": {
         "services": {"label": "Услуги", "all": {"title": "Все услуги", "href": m.link("/services"), "text": CTA},
                      "sections": [m.section(s, False) for s in SERVICES]},
         "store": {"label": "Магазин", "all": {"title": "Все товары", "href": m.link("/store"),

@@ -296,7 +296,7 @@
 .tsbm-crumbs { font-size: 14px; color: var(--tsbm-muted); }
 .tsbm-crumbs b { color: var(--tsbm-text); font-weight: 600; }
 .tsbm-drill__body { flex: 1; min-height: 0; display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 20px; }
-.tsbm-rail { min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+.tsbm-rail { min-height: 0; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 6px; }
 .tsbm .tsbm-rail__item {
   position: relative;
   flex: none;
@@ -333,6 +333,7 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain; /* колесо над списком не двигает страницу под панелью */
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
   align-content: start;
