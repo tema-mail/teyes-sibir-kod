@@ -8,6 +8,7 @@
 - вырезаны счётчики: блок <!-- Stat --> … </body> (Метрика 99532918 и статистика Tilda)
   и трекер zrok.cloud из кода шапки проекта;
 - добавлен <meta name="robots" content="noindex, nofollow"> – копия не должна попасть в поиск;
+- подключено мега-меню «Услуги» и «Магазин» (assets/menu/, данные – data/menu.json);
 - на страницах с каталогом или лентой подключён снимок assets/store/snapshot.js (его готовит store.py),
   потому что API магазина и лент Tilda не отдают данные чужому домену.
 Остальное – байт в байт как отдаёт Tilda. Сайт больше LIMIT_MB – сборка падает (лимит GitHub Pages 1 ГБ).
@@ -25,6 +26,7 @@ from assets import raw_path
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 RAW_HTML, IMG, PUBLIC, DATA = ROOT / "raw" / "html", ROOT / "raw" / "img", ROOT / "public", ROOT / "data"
 STORE = ROOT / "raw" / "store"
+MENU, MENU_SRC = ROOT / "data", ROOT / "src" / "menu"
 BASE = "/teyes-sibir-kod"  # путь копии на GitHub Pages; со своим доменом станет ""
 PUBLIC_URL = "https://tema-mail.github.io" + BASE
 LIVE, HOST = "https://teyes-sibir.ru", "teyes-sibir.ru"
@@ -92,6 +94,9 @@ class Site:
         text = ZROK.sub("", text)
         text = ROBOTS.sub("", text)
         head = NOINDEX
+        if (MENU / "menu.json").exists():  # мега-меню «Услуги» и «Магазин» (scripts/menu.py, src/menu/)
+            head += f'\n<link rel="stylesheet" href="{BASE}/assets/menu/megamenu.css">' \
+                    f'\n<script src="{BASE}/assets/menu/megamenu.js" defer></script>'
         if ("t_store_init(" in text or "t_feed_init(" in text) and (STORE / "snapshot.js").exists():
             head += f'\n<script src="{BASE}/assets/store/snapshot.js"></script>'
         text = HEAD.sub(lambda m: f"{m.group(0)}\n{head}", text, count=1)
@@ -142,6 +147,12 @@ def main():
             copy(raw_path(r["url"]), r["local"])
     for r in site.images:
         copy(IMG / r["out"], r["out"])
+    if (MENU / "menu.json").exists():
+        copy(MENU_SRC / "megamenu.css", "assets/menu/megamenu.css")
+        for f in sorted((ROOT / "raw" / "menu").glob("*.webp")):
+            copy(f, f"assets/menu/{f.name}")
+        write("assets/menu/megamenu.js", "window.TSB_MENU = " + (MENU / "menu.json").read_text("utf-8") + ";\n"
+              + (MENU_SRC / "megamenu.js").read_text("utf-8"))
     for f in sorted(STORE.glob("*.js")) + sorted(STORE.glob("*.json")):
         text = f.read_text("utf-8")
         # в лентах обложки постов – свои файлы; в каталогах фото товаров остаются на CDN Tilda (этап 2)
