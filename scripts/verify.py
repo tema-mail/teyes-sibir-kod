@@ -4,6 +4,7 @@
 python3 scripts/verify.py                 – проверка файлов + браузер на локальном сервере
 python3 scripts/verify.py --site URL      – браузер на выложенной копии + все страницы отвечают 200
 python3 scripts/verify.py --files         – только проверка файлов
+Мега-меню проверяет verify_menu.py (данные, поведение, снимки raw/verify/menu/).
 Снимки экрана: raw/verify/<страница>-<ширина>[-live].png (live – тот же адрес на teyes-sibir.ru).
 Код выхода 1, если найдено что-то из «нельзя».
 """
@@ -224,6 +225,8 @@ def main():
         ok = check_browser(site, live="--live" in args) and ok
         if site:
             ok = check_site(site) and ok
+        import verify_menu  # здесь, а не наверху: verify_menu сам импортирует verify
+        ok = verify_menu.check_menu(site) and ok
     print("ИТОГ:", "всё в порядке" if ok else "есть проблемы")
     sys.exit(0 if ok else 1)
 
