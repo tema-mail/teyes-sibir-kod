@@ -17,7 +17,7 @@
     {
      "id": "teyes",
      "title": "Установка Teyes",
-     "img": "/teyes-sibir-kod/assets/tild3631-3161-4233-b566-626262383765/Group_1171274811.webp",
+     "img": "/teyes-sibir-kod/assets/menu/tild3631-3161-4233-b566-626262383765-Group_1171274811.webp",
      "href": "/teyes-sibir-kod/services/installation_teyes/",
      "groups": [
       {
@@ -212,19 +212,19 @@
     {
      "id": "noise",
      "title": "Шумоизоляция",
-     "img": "/teyes-sibir-kod/assets/tild3330-3236-4833-b836-633165663633/4wAAAgG5KeA-1920.webp",
+     "img": "/teyes-sibir-kod/assets/menu/tild3330-3236-4833-b836-633165663633-4wAAAgG5KeA-1920.webp",
      "href": "/teyes-sibir-kod/services/installing_sound_insulation/"
     },
     {
      "id": "audio",
      "title": "Автозвук",
-     "img": "/teyes-sibir-kod/assets/tild3762-6530-4939-b034-363762646263/Rectangle_30468.webp",
+     "img": "/teyes-sibir-kod/assets/menu/tild3762-6530-4939-b034-363762646263-Rectangle_30468.webp",
      "href": "/teyes-sibir-kod/services/installing_car_audio/"
     },
     {
      "id": "alarm",
      "title": "Сигнализации",
-     "img": "/teyes-sibir-kod/assets/tild3864-6236-4563-b263-373766663637/Rectangle_30468_1.webp",
+     "img": "/teyes-sibir-kod/assets/menu/tild3864-6236-4563-b263-373766663637-Rectangle_30468_1.webp",
      "href": "/teyes-sibir-kod/services/alarm_installation/",
      "groups": [
       {
@@ -251,7 +251,7 @@
     {
      "id": "rus",
      "title": "Русификация и приложения",
-     "img": "/teyes-sibir-kod/assets/tild6132-3439-4731-a530-623231613763/image_28_1.webp",
+     "img": "/teyes-sibir-kod/assets/menu/tild6132-3439-4731-a530-623231613763-image_28_1.webp",
      "href": "/teyes-sibir-kod/services/russification_of_cars/",
      "groups": [
       {
@@ -380,7 +380,7 @@
     {
      "id": "cams",
      "title": "Камеры и мониторы",
-     "img": "/teyes-sibir-kod/assets/tild3835-3466-4735-b563-323832623664/work_06.webp",
+     "img": "/teyes-sibir-kod/assets/menu/tild3835-3466-4735-b563-323832623664-work_06.webp",
      "href": null,
      "groups": [
       {
@@ -417,7 +417,7 @@
     {
      "id": "comfort",
      "title": "Комфорт и подогрев",
-     "img": "/teyes-sibir-kod/assets/tild3364-6332-4461-b330-343031653261/image_11.webp",
+     "img": "/teyes-sibir-kod/assets/menu/tild3364-6332-4461-b330-343031653261-image_11.webp",
      "href": null,
      "groups": [
       {
@@ -454,7 +454,7 @@
     {
      "id": "film",
      "title": "Тонировка и защита",
-     "img": "/teyes-sibir-kod/assets/tild6132-3362-4166-b536-633733323762/image.webp",
+     "img": "/teyes-sibir-kod/assets/menu/tild6132-3362-4166-b536-633733323762-image.webp",
      "href": null,
      "groups": [
       {
@@ -487,14 +487,14 @@
     {
      "id": "teyes",
      "title": "Магнитолы Teyes",
-     "img": "/teyes-sibir-kod/assets/tild3539-6661-4439-b438-346434386535/184549ad-5ac1-4176-8.webp",
+     "img": "/teyes-sibir-kod/assets/menu/tild3539-6661-4439-b438-346434386535-184549ad-5ac1-4176-8.webp",
      "href": "/teyes-sibir-kod/store/catalog_teyes/",
      "meta": "10 товаров"
     },
     {
      "id": "kits",
      "title": "Комплекты Teyes",
-     "img": "/teyes-sibir-kod/assets/tild3631-3161-4233-b566-626262383765/Group_1171274811.webp",
+     "img": "/teyes-sibir-kod/assets/menu/tild3631-3161-4233-b566-626262383765-Group_1171274811.webp",
      "href": "/teyes-sibir-kod/store/catalog/",
      "groups": [
       {
@@ -843,7 +843,7 @@
     {
      "id": "cams",
      "title": "Камеры Teyes",
-     "img": "/teyes-sibir-kod/assets/tild3565-3635-4463-a364-313063396337/f69df2bd-6e61-465b-a.webp",
+     "img": "/teyes-sibir-kod/assets/menu/tild3565-3635-4463-a364-313063396337-f69df2bd-6e61-465b-a.webp",
      "href": "/teyes-sibir-kod/store/camera/",
      "groups": [
       {
@@ -866,31 +866,31 @@
     {
      "id": "audio",
      "title": "Автозвук",
-     "img": "/teyes-sibir-kod/assets/tild3433-3965-4665-b165-336639326431/6e70c1d9-a59e-40ad-8.webp",
+     "img": "/teyes-sibir-kod/assets/menu/tild3433-3965-4665-b165-336639326431-6e70c1d9-a59e-40ad-8.webp",
      "href": "/teyes-sibir-kod/store/autosound/"
     },
     {
      "id": "closers",
      "title": "Доводчики и электроприводы",
-     "img": "/teyes-sibir-kod/assets/tild3834-3832-4238-b763-373366653339/c5cb099c-1ec7-46d4-9.webp",
+     "img": "/teyes-sibir-kod/assets/menu/tild3834-3832-4238-b763-373366653339-c5cb099c-1ec7-46d4-9.webp",
      "href": "/teyes-sibir-kod/store/closers/"
     },
     {
      "id": "acc",
      "title": "Дополнительное оборудование",
-     "img": "/teyes-sibir-kod/assets/tild6330-6335-4232-b831-653131643233/12d48b74-acb8-47a1-a.webp",
+     "img": "/teyes-sibir-kod/assets/menu/tild6330-6335-4232-b831-653131643233-12d48b74-acb8-47a1-a.webp",
      "href": "/teyes-sibir-kod/store/accessories/"
     },
     {
      "id": "alarm",
      "title": "Автосигнализации",
-     "img": "/teyes-sibir-kod/assets/tild3530-3033-4533-b863-306264363039/322c5411-a795-44ed-9.webp",
+     "img": "/teyes-sibir-kod/assets/menu/tild3530-3033-4533-b863-306264363039-322c5411-a795-44ed-9.webp",
      "href": "/teyes-sibir-kod/store/signaling/"
     },
     {
      "id": "sale",
      "title": "Акции и распродажи",
-     "img": "/teyes-sibir-kod/assets/tild6631-3061-4438-a165-316662626437/db50e8aa-aea2-4385-b.webp",
+     "img": "/teyes-sibir-kod/assets/menu/tild6631-3061-4438-a165-316662626437-db50e8aa-aea2-4385-b.webp",
      "href": "/teyes-sibir-kod/store/action/"
     }
    ]

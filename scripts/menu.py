@@ -2,7 +2,7 @@
 
 Всё берётся из живых страниц копии: адреса – только существующие страницы (иначе ошибка), подписи марок –
 с кнопок сайта (заголовки многих страниц на Tilda ошибочны: «Установка Teyes на Subaru» у Audi и т.п.),
-порядок марок – как на сайте, картинки плиток – фото со страниц сайта, число товаров – из снимка каталогов
+порядок марок – как на сайте, картинки плиток – фото со страниц сайта (уменьшенные копии в raw/menu), число товаров – из снимка каталогов
 (data/store.csv, raw/store). Пустые разделы магазина и дубли <uid>-<марка> в меню не попадают.
 Раскладка разделов и групп ниже – единственное, что задано руками.
 """
@@ -15,10 +15,14 @@ import sys
 import urllib.parse
 from collections import Counter, defaultdict
 
+from PIL import Image
+
 import build
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DATA, PUBLIC, STORE = ROOT / "data", ROOT / "public", ROOT / "raw" / "store"
+THUMBS = ROOT / "raw" / "menu"  # лёгкие копии фото для плиток (build.py кладёт их в public/assets/menu/)
+THUMB_W = 720
 SITE = build.LIVE
 CONTACTS = {"phone": "+7 (995) 437-92-66", "tel": "tel:+79954379266", "book": "#popup:zapisizxedera",
             "address": "Новосибирск, ул. Сухарная 35, корпус 13", "hours": "пн–пт с 11:00 до 19:00"}
@@ -120,9 +124,19 @@ class Menu:
         return url
 
     def img(self, local):
-        if not (PUBLIC / local).is_file():
+        """Фото сайта → уменьшенная копия для плитки (оригиналы до 2560 px грузились бы секундами)."""
+        src = PUBLIC / local
+        if not src.is_file():
             self.missing.append(local)
-        return f"{build.BASE}/{local}"
+            return ""
+        name = local.removeprefix("assets/").replace("/", "-").rsplit(".", 1)[0] + ".webp"
+        out = THUMBS / name
+        if not out.exists():
+            THUMBS.mkdir(parents=True, exist_ok=True)
+            with Image.open(src) as im:
+                im.thumbnail((THUMB_W, THUMB_W * 2))
+                im.save(out, "WEBP", quality=80)
+        return f"{build.BASE}/assets/menu/{name}"
 
     def button_labels(self):
         """Подписи и порядок марок с кнопок Zero-блоков сайта: {путь: подпись}, [пути по порядку]."""
