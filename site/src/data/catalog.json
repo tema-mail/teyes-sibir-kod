@@ -1,0 +1,445 @@
+{
+ "sections": [
+  {
+   "slug": "audi",
+   "name": "Audi",
+   "country": "Европа",
+   "count": 1,
+   "total": 59
+  },
+  {
+   "slug": "baic",
+   "name": "BAIC",
+   "country": "Китай",
+   "count": 1,
+   "total": 5
+  },
+  {
+   "slug": "bmw",
+   "name": "BMW",
+   "country": "Европа",
+   "count": 1,
+   "total": 61
+  },
+  {
+   "slug": "buick",
+   "name": "Buick",
+   "country": "США",
+   "count": 1,
+   "total": 26
+  },
+  {
+   "slug": "byd",
+   "name": "BYD",
+   "country": "Китай",
+   "count": 1,
+   "total": 4
+  },
+  {
+   "slug": "cadillac",
+   "name": "Cadillac",
+   "country": "США",
+   "count": 1,
+   "total": 4
+  },
+  {
+   "slug": "catalog",
+   "name": "catalog",
+   "country": "",
+   "count": 1,
+   "total": 5
+  },
+  {
+   "slug": "changan",
+   "name": "Changan",
+   "country": "Китай",
+   "count": 1,
+   "total": 6
+  },
+  {
+   "slug": "chery",
+   "name": "Chery",
+   "country": "Китай",
+   "count": 1,
+   "total": 24
+  },
+  {
+   "slug": "chevrolet",
+   "name": "Chevrolet",
+   "country": "США",
+   "count": 1,
+   "total": 71
+  },
+  {
+   "slug": "citroen",
+   "name": "Citroen",
+   "country": "Европа",
+   "count": 1,
+   "total": 27
+  },
+  {
+   "slug": "dacia",
+   "name": "Dacia",
+   "country": "Европа",
+   "count": 1,
+   "total": 2
+  },
+  {
+   "slug": "daihatsu",
+   "name": "Daihatsu",
+   "country": "Япония",
+   "count": 1,
+   "total": 4
+  },
+  {
+   "slug": "dongfeng",
+   "name": "Dongfeng",
+   "country": "Китай",
+   "count": 1,
+   "total": 4
+  },
+  {
+   "slug": "faw",
+   "name": "FAW",
+   "country": "Китай",
+   "count": 1,
+   "total": 10
+  },
+  {
+   "slug": "fiat",
+   "name": "Fiat",
+   "country": "Европа",
+   "count": 1,
+   "total": 28
+  },
+  {
+   "slug": "ford",
+   "name": "Ford",
+   "country": "США",
+   "count": 1,
+   "total": 108
+  },
+  {
+   "slug": "foton",
+   "name": "Foton",
+   "country": "Китай",
+   "count": 1,
+   "total": 5
+  },
+  {
+   "slug": "gac",
+   "name": "GAC",
+   "country": "Китай",
+   "count": 1,
+   "total": 6
+  },
+  {
+   "slug": "gaz",
+   "name": "ГАЗ",
+   "country": "Россия",
+   "count": 1,
+   "total": 4
+  },
+  {
+   "slug": "geely",
+   "name": "Geely",
+   "country": "Китай",
+   "count": 1,
+   "total": 32
+  },
+  {
+   "slug": "gmc",
+   "name": "GMC",
+   "country": "США",
+   "count": 1,
+   "total": 2
+  },
+  {
+   "slug": "greatwall",
+   "name": "Great Wall",
+   "country": "Китай",
+   "count": 1,
+   "total": 15
+  },
+  {
+   "slug": "haval",
+   "name": "Haval",
+   "country": "Китай",
+   "count": 1,
+   "total": 8
+  },
+  {
+   "slug": "honda",
+   "name": "Honda",
+   "country": "Япония",
+   "count": 1,
+   "total": 183
+  },
+  {
+   "slug": "hummer",
+   "name": "Hummer",
+   "country": "США",
+   "count": 1,
+   "total": 4
+  },
+  {
+   "slug": "hyundai",
+   "name": "Hyundai",
+   "country": "Корея",
+   "count": 1,
+   "total": 173
+  },
+  {
+   "slug": "infiniti",
+   "name": "Infiniti",
+   "country": "Япония",
+   "count": 1,
+   "total": 7
+  },
+  {
+   "slug": "isuzu",
+   "name": "Isuzu",
+   "country": "Япония",
+   "count": 1,
+   "total": 7
+  },
+  {
+   "slug": "iveco",
+   "name": "Iveco",
+   "country": "Европа",
+   "count": 1,
+   "total": 2
+  },
+  {
+   "slug": "jac",
+   "name": "JAC",
+   "country": "Китай",
+   "count": 1,
+   "total": 9
+  },
+  {
+   "slug": "jeep",
+   "name": "Jeep",
+   "country": "США",
+   "count": 1,
+   "total": 42
+  },
+  {
+   "slug": "kia",
+   "name": "Kia",
+   "country": "Корея",
+   "count": 1,
+   "total": 92
+  },
+  {
+   "slug": "lada",
+   "name": "Lada",
+   "country": "Россия",
+   "count": 1,
+   "total": 31
+  },
+  {
+   "slug": "landrover",
+   "name": "Land Rover",
+   "country": "Европа",
+   "count": 1,
+   "total": 20
+  },
+  {
+   "slug": "leopaard",
+   "name": "Leopaard",
+   "country": "Китай",
+   "count": 1,
+   "total": 2
+  },
+  {
+   "slug": "lexus",
+   "name": "Lexus",
+   "country": "Япония",
+   "count": 1,
+   "total": 91
+  },
+  {
+   "slug": "lifan",
+   "name": "Lifan",
+   "country": "Китай",
+   "count": 1,
+   "total": 8
+  },
+  {
+   "slug": "lincoln",
+   "name": "Lincoln",
+   "country": "США",
+   "count": 1,
+   "total": 2
+  },
+  {
+   "slug": "luxgen",
+   "name": "Luxgen",
+   "country": "Другие",
+   "count": 1,
+   "total": 2
+  },
+  {
+   "slug": "maserati",
+   "name": "Maserati",
+   "country": "Европа",
+   "count": 1,
+   "total": 5
+  },
+  {
+   "slug": "maxus",
+   "name": "Maxus",
+   "country": "Китай",
+   "count": 1,
+   "total": 7
+  },
+  {
+   "slug": "mazda",
+   "name": "Mazda",
+   "country": "Япония",
+   "count": 1,
+   "total": 80
+  },
+  {
+   "slug": "mercedes",
+   "name": "Mercedes Benz",
+   "country": "Европа",
+   "count": 1,
+   "total": 65
+  },
+  {
+   "slug": "mg",
+   "name": "MG",
+   "country": "Китай",
+   "count": 1,
+   "total": 2
+  },
+  {
+   "slug": "mitsubishi",
+   "name": "Mitsubishi",
+   "country": "Япония",
+   "count": 1,
+   "total": 55
+  },
+  {
+   "slug": "nissan",
+   "name": "Nissan",
+   "country": "Япония",
+   "count": 1,
+   "total": 116
+  },
+  {
+   "slug": "opel",
+   "name": "Opel",
+   "country": "Европа",
+   "count": 1,
+   "total": 32
+  },
+  {
+   "slug": "peugeot",
+   "name": "Peugeot",
+   "country": "Европа",
+   "count": 1,
+   "total": 44
+  },
+  {
+   "slug": "porche",
+   "name": "Porsche",
+   "country": "Европа",
+   "count": 1,
+   "total": 4
+  },
+  {
+   "slug": "renault",
+   "name": "Renault",
+   "country": "Европа",
+   "count": 1,
+   "total": 54
+  },
+  {
+   "slug": "roewe",
+   "name": "Roewe",
+   "country": "Китай",
+   "count": 1,
+   "total": 2
+  },
+  {
+   "slug": "seat",
+   "name": "Seat",
+   "country": "Европа",
+   "count": 1,
+   "total": 18
+  },
+  {
+   "slug": "skoda",
+   "name": "Skoda",
+   "country": "Европа",
+   "count": 1,
+   "total": 32
+  },
+  {
+   "slug": "ssangyong",
+   "name": "SsangYong",
+   "country": "Корея",
+   "count": 1,
+   "total": 6
+  },
+  {
+   "slug": "subaru",
+   "name": "Subaru",
+   "country": "Япония",
+   "count": 1,
+   "total": 32
+  },
+  {
+   "slug": "suzuki",
+   "name": "Suzuki",
+   "country": "Япония",
+   "count": 1,
+   "total": 23
+  },
+  {
+   "slug": "teyes",
+   "name": "teyes",
+   "country": "",
+   "count": 1,
+   "total": 10
+  },
+  {
+   "slug": "toyota",
+   "name": "Toyota",
+   "country": "Япония",
+   "count": 1,
+   "total": 266
+  },
+  {
+   "slug": "uaz",
+   "name": "УАЗ",
+   "country": "Россия",
+   "count": 1,
+   "total": 5
+  },
+  {
+   "slug": "volkswagen",
+   "name": "Volkswagen",
+   "country": "Европа",
+   "count": 1,
+   "total": 105
+  },
+  {
+   "slug": "volvo",
+   "name": "Volvo",
+   "country": "Европа",
+   "count": 1,
+   "total": 8
+  },
+  {
+   "slug": "zotye",
+   "name": "Zotye",
+   "country": "Китай",
+   "count": 1,
+   "total": 1
+  }
+ ]
+}
