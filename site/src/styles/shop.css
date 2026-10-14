@@ -76,3 +76,13 @@
 }
 .chip:hover { border-color: var(--tx-accent); }
 .chip.is-on { background: var(--tx-ink); border-color: var(--tx-ink); color: #fff; }
+
+/* ---------- Каталог категории ---------- */
+.catalog { display: grid; gap: 20px; }
+.catalog__filters { display: grid; gap: 12px; }
+.catalog__chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: thin; }
+.catalog__row { display: flex; flex-wrap: wrap; gap: 10px; }
+.catalog__search, .catalog__sort { min-height: 44px; padding: 0 16px; border: 1px solid var(--tx-line); border-radius: 999px; font: inherit; font-size: 16px; background: var(--tx-bg); color: var(--tx-ink); }
+.catalog__search { flex: 1 1 260px; min-width: 0; }
+.catalog__count, .catalog__none { margin: 0; color: var(--tx-muted); font-size: 14px; }
+.catalog__more { justify-self: center; }

@@ -1,0 +1,110 @@
+---
+// Категории магазина на месте страниц Tilda: /store (хаб разделов), /store/catalog (Комплекты Teyes – марки),
+// /store/catalog/<марка>, /store/catalog_teyes, разделы магазина. Плитки и марки – те же данные, что у мега-меню
+// (data/menu.json); товары – site/src/data (по PER_SECTION на категорию, total – сколько их в магазине).
+import Base from '../../layouts/Base.astro';
+import Catalog from '../../islands/Catalog';
+import { SECTIONS, bySection, toCard, models, sectionName } from '../../lib/catalog';
+import { u } from '../../lib/site';
+import menu from '../../../../data/menu.json';
+import '../../styles/shop.css';
+
+type Item = { name: string; href: string; meta?: string };
+type Sec = { id: string; title: string; href: string | null; img: string; meta?: string; groups?: { name: string; items: Item[] }[] };
+const store = (menu as any).menus.store as { all: { text: string }; sections: Sec[] };
+const strip = (href: string) => href.replace(import.meta.env.BASE_URL.replace(/\/$/, ''), '').replace(/^\/|\/$/g, '');
+
+export function getStaticPaths() {
+  const m = (menu as any).menus.store.sections as Sec[];
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+  const local = (h: string) => h.replace(base, '').replace(/^\/|\/$/g, '');
+  const paths: { params: { section: string | undefined } }[] = [{ params: { section: undefined } }];
+  m.forEach((s) => {
+    if (s.href) paths.push({ params: { section: local(s.href).replace(/^store\/?/, '') || undefined } });
+    s.groups?.forEach((g) => g.items.forEach((i) => paths.push({ params: { section: local(i.href).replace(/^store\//, '') } })));
+  });
+  const seen = new Set<string>();
+  return paths.filter((p) => { const k = String(p.params.section); return seen.has(k) ? false : (seen.add(k), true); });
+}
+
+const section = Astro.params.section || '';
+const kits = store.sections.find((s) => s.id === 'kits')!;
+const slug = section === 'catalog_teyes' ? 'teyes' : section === 'catalog' ? 'catalog' : section.startsWith('catalog/') ? section.slice(8) : '';
+const sec = store.sections.find((s) => s.href && strip(s.href) === 'store/' + section);
+const info = SECTIONS.find((s) => s.slug === slug);
+const title = !section ? 'Магазин' : slug ? sectionName(slug) : sec?.title || section;
+const cards = slug ? bySection(slug).map(toCard) : [];
+const hrefs = Object.fromEntries(cards.map((c) => [c.id, u(c.path + '/')]));
+const h1 = !section ? 'Магазин TEYES SIBIR' : slug && slug !== 'teyes' && slug !== 'catalog' ? `Штатные магнитолы Teyes ${title}` : title;
+---
+<Base title={`${h1} – купить с установкой в Новосибирске | TEYES SIBIR`} description={`${h1}: цены, наличие, установка в Новосибирске.`}>
+  <div class="wrap shop">
+    <ol class="crumbs">
+      <li><a href={u('/')}>Главная</a></li>
+      {section && <li><a href={u('/store/')}>Магазин</a></li>}
+      {section.startsWith('catalog/') && <li><a href={u('/store/catalog/')}>Комплекты Teyes</a></li>}
+    </ol>
+    <h1>{h1}</h1>
+    {!section && <p class="shop__lead">{store.all.text}</p>}
+
+    {!section && (
+      <div class="tiles">
+        {store.sections.map((s) => (
+          <a class="tile" href={s.href || u('/store/')}>
+            <img src={s.img} alt="" loading="lazy" width="720" height="480" />
+            <span class="tile__title">{s.title}</span>
+            {s.meta && <span class="tile__meta">{s.meta}</span>}
+          </a>
+        ))}
+      </div>
+    )}
+
+    {section === 'catalog' && kits.groups && (
+      <div class="brands">
+        {kits.groups.map((g) => (
+          <section class="brands__group">
+            <h2>{g.name}</h2>
+            <ul>{g.items.map((i) => <li><a class="chip" href={i.href}>{i.name}{i.meta && <small>{i.meta}</small>}</a></li>)}</ul>
+          </section>
+        ))}
+      </div>
+    )}
+
+    {slug && cards.length > 0 && (
+      <>
+        {info && info.total > info.count && (
+          <p class="shop__sample">На копии сайта – пример: {info.count === 1 ? '1 товар' : `${info.count} товара`} из {info.total} в этой категории.</p>
+        )}
+        <Catalog client:load cards={cards} hrefs={hrefs} models={models(cards)} />
+      </>
+    )}
+
+    {section && !slug && <p class="shop__empty">В этом разделе пока нет товаров. Подберём по вашей машине – позвоните или напишите.</p>}
+    {section && !slug && sec?.groups && (
+      <ul class="shop__links">{sec.groups.flatMap((g) => g.items).filter((i) => strip(i.href) !== 'store/' + section)
+        .map((i) => <li><a class="chip" href={i.href}>{i.name}</a></li>)}</ul>
+    )}
+  </div>
+</Base>
+
+<style>
+  .shop { padding-top: 20px; display: grid; gap: 20px; }
+  .shop h1 { font-size: clamp(28px, 4vw, 44px); }
+  .shop__lead, .shop__sample, .shop__empty { margin: 0; max-width: 68ch; color: var(--tx-muted); }
+  .shop__sample { font-size: 14px; padding: 10px 14px; border-radius: 12px; background: var(--tx-surface); justify-self: start; }
+  .tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  @media (min-width: 900px) { .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; } }
+  .tile { position: relative; min-width: 0; min-height: 160px; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; padding: 16px; border-radius: var(--tx-r); overflow: hidden; background: #0b0e16; color: #fff; text-decoration: none; }
+  .tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.6; transition: transform 0.4s, opacity 0.3s; }
+  .tile::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11, 14, 22, 0) 35%, rgba(11, 14, 22, 0.9)); }
+  .tile:hover img { transform: scale(1.04); opacity: 0.75; }
+  .tile__title, .tile__meta { position: relative; z-index: 1; }
+  .tile__title { font-family: var(--tx-display); font-size: 18px; line-height: 1.2; }
+  .tile__meta { font-size: 13px; opacity: 0.85; }
+  @media (min-width: 900px) { .tile { min-height: 220px; } .tile__title { font-size: 20px; } }
+  .brands { display: grid; gap: 24px; }
+  .brands h2 { font-size: 20px; margin-bottom: 12px; }
+  .brands ul { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+  .brands small { margin-left: 8px; color: var(--tx-muted); font-variant-numeric: tabular-nums; }
+  .shop__links { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+</style>
