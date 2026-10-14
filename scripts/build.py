@@ -15,12 +15,14 @@
 (магазин и товары, этап 2). Сайт больше LIMIT_MB – сборка падает (лимит GitHub Pages 1 ГБ).
 """
 import csv
+import json
 import pathlib
 import re
 import shutil
 import sys
 import urllib.parse
 
+import overlay
 import tilda_urls
 from assets import raw_path
 
@@ -43,6 +45,7 @@ STAT = re.compile(r"<!-- Stat -->.*?(?=</body>)", re.S)
 ZROK = re.compile(r"<script>[^<]*zrok\.cloud[^<]*</script>\s*")
 ROBOTS = re.compile(r"<meta\s+name=[\"'](?:robots|googlebot)[\"'][^>]*>\s*", re.I)
 HEAD = re.compile(r"<head\b[^>]*>", re.I)
+REC = re.compile(r'id="rec(\d+)"')
 
 
 class Site:
@@ -136,6 +139,30 @@ def copy(src, local):
     shutil.copyfile(src, out)
 
 
+def prune_snapshot(site):
+    """Снимки каталогов Tilda, нужные только страницам, которые теперь на коде (магазин), не выкладываем:
+    место на Pages (лимит 1 ГБ). Остаются ответы для блоков (recid), которые есть на оставшихся страницах Tilda."""
+    shim = PUBLIC / "assets" / "store" / "snapshot.js"
+    if not shim.exists():
+        return
+    code = set(site.code_pages)
+    recs = set()
+    for local in site.page_files:
+        if local not in code:
+            recs.update(REC.findall((PUBLIC / local).read_text("utf-8", errors="ignore")))
+    text = shim.read_text("utf-8")
+    start = text.index("var snap=") + len("var snap=")
+    snap, end = json.JSONDecoder().raw_decode(text[start:])
+    need = lambda key: dict(json.loads(key)).get("recid") in recs | {None, ""}
+    keep = {k: f for k, f in snap.items() if need(k)}
+    gone = set(snap.values()) - set(keep.values())
+    freed = sum((shim.parent / f).stat().st_size for f in gone if (shim.parent / f).exists()) / 2**20
+    for f in gone:
+        (shim.parent / f).unlink(missing_ok=True)
+    shim.write_text(text[:start] + json.dumps(keep, ensure_ascii=False) + text[start + end:], "utf-8")
+    print(f"снимок каталогов: оставлено {len(keep)} из {len(snap)}, освобождено {freed:.0f} МБ")
+
+
 def main():
     site = Site()
     shutil.rmtree(PUBLIC, ignore_errors=True)
@@ -165,10 +192,9 @@ def main():
         # в лентах обложки постов – свои файлы; в каталогах фото товаров остаются на CDN Tilda (этап 2)
         write(f"assets/store/{f.name}", site.cdn(text) if text.startswith('{"feeduid"') else text)
     if SITE_DIST.exists():  # страницы на коде заменяют одноимённые страницы Tilda (магазин) и добавляют товары
-        for f in sorted(SITE_DIST.rglob("*")):
-            if f.is_file():
-                copy(f, f.relative_to(SITE_DIST).as_posix())
+        overlay.overlay()  # тот же шаг делает GitHub Actions после сохранения в админке
         print(f"страниц на коде (site/dist): {len(site.code_pages)}")
+        prune_snapshot(site)
     size = sum(f.stat().st_size for f in PUBLIC.rglob("*") if f.is_file()) / 2**20
     print(f"страниц {len(site.page_files)}, ресурсов {len(site.assets)}, сайт {size:.0f} МБ")
     if no_stat:

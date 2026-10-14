@@ -1,10 +1,12 @@
 name: Публикация копии на GitHub Pages
 
-# Выкладывается готовая папка public/ (её собирает ./run.sh локально); в CI ничего не качается с Tilda
+# Выкладывается папка public/ (копию Tilda собирает ./run.sh локально, в CI с Tilda ничего не качается).
+# Страницы на коде (site/, магазин и админка) собираются здесь и кладутся поверх: так правки из админки сайта
+# (коммит в site/src/data или site/public/img/p) попадают на сайт без локального пересбора.
 on:
   push:
     branches: [main]
-    paths: ["public/**", ".github/workflows/pages.yml"]
+    paths: ["public/**", "site/**", "scripts/overlay.py", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
 permissions:
@@ -24,6 +26,14 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - run: npm ci --no-audit --no-fund && npm run build
+        working-directory: site
+      - run: python3 scripts/overlay.py
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
