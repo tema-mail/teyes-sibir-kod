@@ -13,9 +13,12 @@ export function getStaticPaths() {
 }
 const { p } = Astro.props as { p: Product };
 const others = similar(p);
-// В описаниях Tilda из разметки только переносы строк: остальное экранируем
+// Описания Tilda: из разметки там только p, strong, h3, ul, li, br без атрибутов (у 840 товаров). Всё экранируем,
+// затем возвращаем ровно эти теги без атрибутов; сущности (&quot;, &nbsp;) сначала раскрываем – иначе задвоятся.
+const ENT: Record<string, string> = { quot: '"', nbsp: ' ', amp: '&', lt: '<', gt: '>', apos: "'", '#39': "'" };
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-const text = esc(p.text).replace(/&lt;br\s*\/?&gt;/gi, '<br>').replace(/\n/g, '<br>');
+const text = esc(p.text.replace(/&(quot|nbsp|amp|lt|gt|apos|#39);/g, (_, k) => ENT[k]))
+  .replace(/&lt;(\/?)(p|strong|h3|ul|li|br)\s*\/?&gt;/gi, (_, sl, tag) => `<${sl}${tag.toLowerCase()}>`).replace(/\n/g, '<br>');
 const lowest = minPrice(p);
 // Фото – полные адреса там, где они реально лежат: на копии (GitHub Pages) или на своём домене
 const origin = BASE ? 'https://tema-mail.github.io' : LIVE;
