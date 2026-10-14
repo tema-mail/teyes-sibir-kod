@@ -1,0 +1,109 @@
+---
+// Общая раскладка страниц на коде (этап 2): шрифты сайта из копии, цвета, noindex и canonical на живой
+// teyes-sibir.ru (как у копии Tilda), мега-меню «Услуги»/«Магазин» (assets/menu – кладёт scripts/build.py),
+// шапка, подвал. Слоты: по умолчанию – содержимое страницы; actions / actions-wide – кнопки корзины в шапке.
+import Header from '../components/Header.astro';
+import { u, LIVE, NOINDEX, SITE, ASSET, FOOTER } from '../lib/site';
+interface Props { title: string; description?: string; current?: string }
+const { title, description = '', current = '' } = Astro.props;
+const path = Astro.url.pathname.replace(import.meta.env.BASE_URL.replace(/\/$/, ''), '') || '/';
+// Шрифты сайта – файлы копии; адреса зависят от BASE, поэтому @font-face собирается здесь
+const face = (family: string, file: string, format: string, weight: number) =>
+  `@font-face{font-family:'${family}';src:url("${u(file)}") format('${format}');font-weight:${weight};font-display:swap}`;
+const fonts = '<style>' + face('CenturyGothic', ASSET.century, 'woff', 400) +
+  face('TildaSans', ASSET.tildaSans + 'TildaSans-Regular.woff2', 'woff2', 400) +
+  face('TildaSans', ASSET.tildaSans + 'TildaSans-Bold.woff2', 'woff2', 700) + '</style>';
+---
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <Fragment set:html={NOINDEX} />
+  <title>{title}</title>
+  {description && <meta name="description" content={description} />}
+  <link rel="canonical" href={LIVE + path.replace(/\/$/, '')} />
+  <link rel="stylesheet" href={u('/assets/menu/megamenu.css')} />
+  <script is:inline defer src={u('/assets/menu/megamenu.js')}></script>
+  <Fragment set:html={fonts} />
+</head>
+<body>
+  <Header current={current}>
+    <slot name="actions" slot="actions" />
+    <slot name="actions-wide" slot="actions-wide" />
+  </Header>
+  <main><slot /></main>
+  <footer class="ftr">
+    <div class="wrap ftr__grid">
+      <div class="ftr__col">
+        <img src={u(ASSET.logo)} alt="TEYES SIBIR" width="186" height="25" loading="lazy" />
+        <p>{SITE.slogan}</p>
+      </div>
+      <div class="ftr__col">
+        <p class="ftr__h">Адрес</p><p>{SITE.address}</p>
+        <p class="ftr__h">Время работы</p><p>{SITE.hours}<br />{SITE.weekend}</p>
+      </div>
+      <div class="ftr__col">
+        <p class="ftr__h">Контакты</p>
+        <p><a href={SITE.tel}>{SITE.phone}</a><br /><a href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
+        <p><a href={SITE.telegram} target="_blank" rel="noopener">Telegram</a> · <a href={SITE.max} target="_blank" rel="noopener">MAX</a></p>
+      </div>
+      <nav class="ftr__col" aria-label="Разделы">
+        <p class="ftr__h">Разделы</p>
+        <ul>{FOOTER.links.map(([t, h]) => <li><a href={u(h)}>{t}</a></li>)}</ul>
+      </nav>
+      <div class="ftr__col">
+        <p class="ftr__h">Документы</p>
+        <ul>{FOOTER.docs.map(([t, h]) => <li><a href={u(h)}>{t}</a></li>)}</ul>
+      </div>
+    </div>
+    <p class="wrap ftr__by"><a href="https://deford-studio.ru/" target="_blank" rel="noopener">Design by Deford</a></p>
+  </footer>
+  <slot name="end" />
+</body>
+</html>
+
+<style is:global>
+  :root {
+    --tx-bg: #ffffff; --tx-surface: #f4f5f7; --tx-ink: #232323; --tx-muted: #6b7280; --tx-line: #e6e8ec;
+    --tx-accent: #009ae7; --tx-accent-2: #9a00e7; --tx-grad: linear-gradient(0.384turn, #009ae7 0%, #9a00e7 100%);
+    --tx-sale: #ff4a4a; --tx-ok: #12805c;
+    --tx-display: 'CenturyGothic', 'TildaSans', Arial, sans-serif;
+    --tx-font: 'TildaSans', Arial, sans-serif;
+    --tx-r: 16px; --tx-gutter: 16px; --tx-max: 1200px;
+    color-scheme: light;
+  }
+  @media (min-width: 768px) { :root { --tx-gutter: 24px; } }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--tx-bg); color: var(--tx-ink); font-family: var(--tx-font); font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  img { max-width: 100%; height: auto; display: block; }
+  a { color: inherit; }
+  [hidden] { display: none !important; }
+  .wrap { width: 100%; max-width: var(--tx-max); margin-inline: auto; padding-inline: var(--tx-gutter); }
+  h1, h2, h3 { font-family: var(--tx-display); font-weight: 400; line-height: 1.15; margin: 0; text-wrap: balance; }
+  :where(a, button, input, select, textarea, summary):focus-visible { outline: 2px solid var(--tx-accent); outline-offset: 2px; border-radius: 6px; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 24px;
+    border: 0; border-radius: 999px; font: inherit; font-size: 15px; font-weight: 700; text-decoration: none; cursor: pointer; white-space: nowrap;
+  }
+  .btn--accent { background: var(--tx-grad); color: #fff; }
+  .btn--accent:hover { filter: brightness(1.08); }
+  .btn--ghost { background: var(--tx-bg); color: var(--tx-ink); border: 1px solid var(--tx-line); }
+  .btn--ghost:hover { border-color: var(--tx-accent); }
+  .crumbs { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: 13px; color: var(--tx-muted); }
+  .crumbs li + li::before { content: '/'; margin-right: 6px; }
+  .crumbs a { text-decoration: none; }
+  .crumbs a:hover { color: var(--tx-accent); }
+  .ftr { margin-top: 64px; background: var(--tx-bg); border-top: 1px solid var(--tx-line); padding-block: 40px 24px; font-size: 14px; color: var(--tx-muted); } /* белый: у логотипа белый фон */
+  .ftr__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); gap: 24px; }
+  .ftr__col { min-width: 0; }
+  .ftr__col p { margin: 0 0 8px; }
+  .ftr__col img { width: 160px; margin-bottom: 12px; }
+  .ftr__h { color: var(--tx-ink); font-weight: 700; margin-top: 4px; }
+  .ftr ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+  .ftr a { text-decoration: none; }
+  .ftr a:hover { color: var(--tx-accent); }
+  .ftr__by { margin: 24px auto 0; font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+</style>

@@ -1,0 +1,85 @@
+---
+// Шапка страниц на коде – как светлая шапка страниц магазина Tilda: логотип, адрес, мессенджеры, телефон,
+// «Запись на установку»; ниже – пункты меню. «Услуги» и «Магазин» – триггеры мега-меню (#submenu:*),
+// на телефоне бургер открывает экран меню (window.tsbmOpen из src/menu/megamenu.js).
+import { NAV, SITE, ASSET, u } from '../lib/site';
+interface Props { current?: string }
+const { current = '' } = Astro.props;
+---
+<header class="hdr">
+  <div class="hdr__top wrap">
+    <a class="hdr__logo" href={u('/')} aria-label="TEYES SIBIR – на главную">
+      <img src={u(ASSET.logo)} alt="TEYES SIBIR" width="186" height="25" />
+    </a>
+    <p class="hdr__addr">{SITE.address}</p>
+    <div class="hdr__msg">
+      <a class="hdr__icon" href={SITE.telegram} target="_blank" rel="noopener" aria-label="Написать в Telegram"><img src={u(ASSET.telegram)} alt="" width="34" height="34" /></a>
+      <a class="hdr__icon" href={SITE.max} target="_blank" rel="noopener" aria-label="Написать в MAX"><img src={u(ASSET.max)} alt="" width="34" height="34" /></a>
+      <span class="hdr__note">Быстрая<br />консультация</span>
+    </div>
+    <div class="hdr__phone">
+      <a href={SITE.tel}>{SITE.phone}</a>
+      <span>{SITE.hours}</span>
+    </div>
+    <a class="hdr__book" href={u('/contacts/')} data-lead>Запись на установку</a>
+    <div class="hdr__mobile">
+      <a class="hdr__round" href={SITE.tel} aria-label={`Позвонить ${SITE.phone}`}><img src={u(ASSET.phone)} alt="" width="34" height="34" /></a>
+      <slot name="actions" />
+      <button class="hdr__burger" type="button" aria-label="Открыть меню" onclick="window.tsbmOpen && window.tsbmOpen('services')"><span></span></button>
+    </div>
+  </div>
+  <nav class="hdr__nav wrap" aria-label="Разделы сайта">
+    <span class="hdr__slogan">{SITE.slogan}</span>
+    <ul>
+      {NAV.map(([title, href]) => (
+        <li><a href={u(href)} aria-current={current === href ? 'page' : undefined}>{title}{href.startsWith('#') && <i aria-hidden="true">▾</i>}</a></li>
+      ))}
+    </ul>
+    <div class="hdr__actions"><slot name="actions-wide" /></div>
+  </nav>
+</header>
+
+<style>
+  .hdr { position: relative; background: var(--tx-bg); border-bottom: 1px solid var(--tx-line); box-shadow: 0 10px 30px rgba(17, 24, 39, 0.06); }
+  .hdr__top { display: flex; align-items: center; gap: 14px; min-height: 64px; }
+  .hdr__logo { flex: none; display: flex; }
+  .hdr__logo img { width: 150px; height: auto; }
+  .hdr__addr, .hdr__msg, .hdr__phone, .hdr__book, .hdr__nav { display: none; }
+  .hdr__mobile { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .hdr__round, .hdr__burger {
+    width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+    border-radius: 12px; background: var(--tx-surface); border: 0; cursor: pointer;
+  }
+  .hdr__round img { width: 28px; height: 28px; }
+  .hdr__burger span, .hdr__burger span::before, .hdr__burger span::after {
+    display: block; width: 20px; height: 2px; border-radius: 2px; background: var(--tx-ink); position: relative; content: '';
+  }
+  .hdr__burger span::before { position: absolute; top: -6px; }
+  .hdr__burger span::after { position: absolute; top: 6px; }
+
+  @media (min-width: 1024px) {
+    .hdr__top { min-height: 88px; gap: 24px; }
+    .hdr__logo img { width: 186px; }
+    .hdr__mobile { display: none; }
+    .hdr__addr { display: block; max-width: 220px; margin: 0; font-size: 12px; line-height: 1.4; color: var(--tx-muted); }
+    .hdr__msg { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+    .hdr__icon img { width: 34px; height: 34px; }
+    .hdr__note { font-size: 11px; line-height: 1.25; color: var(--tx-muted); }
+    .hdr__phone { display: grid; gap: 2px; }
+    .hdr__phone a { font-size: 17px; font-weight: 600; color: var(--tx-ink); text-decoration: none; white-space: nowrap; }
+    .hdr__phone span { font-size: 11px; color: var(--tx-muted); }
+    .hdr__book {
+      display: inline-flex; align-items: center; min-height: 44px; padding: 0 20px; border-radius: 10px;
+      border: 1px solid var(--tx-accent); color: var(--tx-ink); font-size: 14px; text-decoration: none; white-space: nowrap;
+    }
+    .hdr__book:hover { background: var(--tx-surface); }
+    .hdr__nav { display: flex; align-items: center; gap: 24px; min-height: 52px; border-top: 1px solid var(--tx-line); }
+    .hdr__slogan { font-size: 12px; color: var(--tx-muted); }
+    .hdr__slogan::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 10px; border-radius: 50%; background: var(--tx-accent); vertical-align: 2px; }
+    .hdr__nav ul { display: flex; gap: 22px; margin: 0 0 0 auto; padding: 0; list-style: none; }
+    .hdr__nav a { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; font-size: 13px; color: var(--tx-ink); text-decoration: none; }
+    .hdr__nav a:hover, .hdr__nav a[aria-current='page'] { color: var(--tx-accent); }
+    .hdr__nav i { font-style: normal; font-size: 10px; }
+    .hdr__actions { display: flex; gap: 8px; }
+  }
+</style>
