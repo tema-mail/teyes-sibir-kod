@@ -1,0 +1,94 @@
+---
+// Страница товара по адресу Tilda (/store/catalog/<марка>/tproduct/<uid>-<slug>): галерея, цена, варианты
+// и доп. опции (остров ProductBuy), характеристики, описание, похожие товары, разметка Product для поиска.
+import Base from '../layouts/Base.astro';
+import ProductBuy from '../islands/ProductBuy';
+import ProductCard from '../islands/ProductCard';
+import { PRODUCTS, img, sectionHref, sectionName, similar, type Product } from '../lib/catalog';
+import { u, LIVE, BASE, SITE } from '../lib/site';
+import '../styles/shop.css';
+
+export function getStaticPaths() {
+  return PRODUCTS.map((p) => ({ params: { product: p.path.slice(1) }, props: { p } }));
+}
+const { p } = Astro.props as { p: Product };
+const others = similar(p);
+// В описаниях Tilda из разметки только переносы строк: остальное экранируем
+const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const text = esc(p.text).replace(/&lt;br\s*\/?&gt;/gi, '<br>').replace(/\n/g, '<br>');
+const minPrice = Math.min(p.price, ...p.editions.map((e) => e.price || p.price));
+// Фото – полные адреса там, где они реально лежат: на копии (GitHub Pages) или на своём домене
+const origin = BASE ? 'https://tema-mail.github.io' : LIVE;
+const ld = {
+  '@context': 'https://schema.org', '@type': 'Product', name: p.title, description: p.descr || p.title,
+  image: p.images.map((i) => origin + img(i)), brand: { '@type': 'Brand', name: 'Teyes' },
+  offers: { '@type': 'Offer', priceCurrency: 'RUB', price: minPrice, availability: 'https://schema.org/InStock', url: LIVE + p.path },
+};
+---
+<Base title={`${p.title} – купить с установкой в Новосибирске | TEYES SIBIR`} description={p.descr || p.title}>
+  <div class="wrap product">
+    <ol class="crumbs">
+      <li><a href={u('/')}>Главная</a></li>
+      <li><a href={u('/store/')}>Магазин</a></li>
+      {p.section !== 'teyes' && p.section !== 'catalog' && <li><a href={u('/store/catalog/')}>Комплекты Teyes</a></li>}
+      <li><a href={u(sectionHref(p.section))}>{sectionName(p.section)}</a></li>
+    </ol>
+    <div class="product__main">
+      <div class="gallery">
+        <div class="gallery__track" id="gallery">
+          {p.images.map((name, i) => (
+            <img src={img(name)} alt={i ? `${p.title}, фото ${i + 1}` : p.title} width="720" height="720"
+              loading={i ? 'lazy' : 'eager'} fetchpriority={i ? undefined : 'high'} decoding="async" />
+          ))}
+        </div>
+        {p.images.length > 1 && (
+          <div class="gallery__thumbs">
+            {p.images.map((name, i) => (
+              <button type="button" data-go={i} aria-label={`Фото ${i + 1}`}><img src={img(name)} alt="" loading="lazy" width="80" height="80" /></button>
+            ))}
+          </div>
+        )}
+      </div>
+      <div class="product__info">
+        {p.mark && <span class={`product__mark${p.mark === 'SALE' ? ' is-sale' : ''}`}>{p.mark === 'SALE' ? 'Скидка' : 'Новинка'}</span>}
+        <h1>{p.title}</h1>
+        {p.model && <p class="product__model">Модель магнитолы: <b>Teyes {p.model}</b></p>}
+        {p.descr && <p class="product__descr">{p.descr}</p>}
+        <ProductBuy client:load id={p.id} title={p.title} path={p.path} image={img(p.images[0])} price={p.price} priceOld={p.priceOld}
+          options={p.options} editions={p.editions} addons={p.addons} orderHref={u('/order/')} leadHref={u('/contacts/')} />
+        <p class="product__note">Подскажем по совместимости с вашей машиной: <a href={SITE.tel}>{SITE.phone}</a>.</p>
+      </div>
+    </div>
+
+    {p.characteristics.length > 0 && (
+      <section class="product__block">
+        <h2>Характеристики</h2>
+        <dl class="specs">{p.characteristics.map((c) => (<><dt>{c.title}</dt><dd>{c.value}</dd></>))}</dl>
+      </section>
+    )}
+    {p.text && (
+      <section class="product__block">
+        <h2>Описание</h2>
+        <div class="product__text" set:html={text} />
+      </section>
+    )}
+    {others.length > 0 && (
+      <section class="product__block">
+        <h2>Похожие товары</h2>
+        <div class="grid">
+          {others.map((c) => <ProductCard client:visible card={c} href={u(c.path + '/')} />)}
+        </div>
+      </section>
+    )}
+  </div>
+  <script type="application/ld+json" set:html={JSON.stringify(ld)} />
+  <script>
+    // Миниатюры листают ленту фото
+    const track = document.getElementById('gallery');
+    document.querySelectorAll<HTMLButtonElement>('[data-go]').forEach((b) =>
+      b.addEventListener('click', () => {
+        const i = Number(b.dataset.go);
+        track?.scrollTo({ left: (track.clientWidth) * i, behavior: 'smooth' });
+      }));
+  </script>
+</Base>
