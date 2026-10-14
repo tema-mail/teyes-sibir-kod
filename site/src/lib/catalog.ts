@@ -1,5 +1,6 @@
 // Товары и категории магазина для страниц на коде. Данные – site/src/data/*.json (готовит scripts/products.py
-// из снимка магазина Tilda): на сайт идёт по PER_SECTION товаров категории, total – сколько их в магазине.
+// из снимка магазина Tilda): все товары (PER_SECTION = None), total – сколько их в категории магазина;
+// parts – служебные страницы разделов Tilda /store/catalog/<uid>-<имя>, товар туда попадает по своим parts.
 import products from '../data/products.json';
 import catalog from '../data/catalog.json';
 import { u } from './site';
@@ -10,8 +11,10 @@ export type Product = {
   id: string; path: string; section: string; brand: string; title: string; descr: string; text: string;
   price: number; priceOld: number; mark: string; model: string; sort: number;
   options: { title: string; values: string[] }[]; editions: Edition[]; addons: Addon[];
-  characteristics: { title: string; value: string }[]; images: string[];
+  characteristics: { title: string; value: string }[]; images: string[]; parts: string[];
+  hidden?: boolean; // скрыт в админке – нет на сайте (ни страницы, ни в каталогах)
 };
+export type Part = { uid: string; path: string; title: string; count: number };
 export type Section = { slug: string; name: string; country: string; count: number; total: number };
 /** То, что нужно сетке каталога и корзине, без описаний. */
 export type Card = { id: string; path: string; title: string; price: number; priceOld: number; from: boolean; mark: string; model: string; image: string; brand: string };
@@ -20,8 +23,10 @@ export type Card = { id: string; path: string; title: string; price: number; pri
  *  В магазине Tilda базовая цена у 295 товаров ниже любого варианта (29 500 в каталоге, 50 400 при покупке). */
 export const minPrice = (p: Product) => (p.editions.length ? Math.min(...p.editions.map((e) => e.price || p.price)) : p.price);
 
-export const PRODUCTS = products as Product[];
+export const ALL_PRODUCTS = products as Product[]; // со скрытыми – для админки
+export const PRODUCTS = ALL_PRODUCTS.filter((p) => !p.hidden);
 export const SECTIONS = (catalog as { sections: Section[] }).sections;
+export const PARTS = (catalog as { parts: Part[] }).parts;
 
 /** Фото товара: site/public/img/p/<имя>.webp. */
 export const img = (name?: string) => (name ? u(`/img/p/${name}`) : '');
@@ -40,6 +45,7 @@ export const toCard = (p: Product): Card => ({
 });
 
 export const bySection = (slug: string) => PRODUCTS.filter((p) => p.section === slug);
+export const byPart = (uid: string) => PRODUCTS.filter((p) => p.parts.includes(uid));
 
 /** Похожие: та же модель магнитолы в других марках, затем остальные; без самого товара. */
 export function similar(p: Product, n = 8): Card[] {

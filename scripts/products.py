@@ -4,11 +4,16 @@
 не пишем и заново не опрашиваем. Каждый товар один раз (по uid), адрес – как у Tilda
 (/store/catalog/<марка>/tproduct/<uid>-<slug>). Варианты (editions: «Модель 6+64Gb» со своей ценой),
 доп. опции с доплатой (properties «…=+5500»), характеристики и метки NEW/SALE сохраняются.
-Владелец 14.10.2026: «по одному товару с категории, чтобы не занимать место» – на сайт идут PER_SECTION
-товаров каждой категории (первые по порядку сайта, с фото); всех товаров в категории – в catalog.json (total).
+Владелец 14.10.2026: «по одному товару с категории»; 15.10: «чтобы были товары все» – PER_SECTION = None
+(число – столько первых товаров категории); всех товаров в категории – в catalog.json (total).
+Служебные страницы разделов Tilda /store/catalog/<uid>-<имя> (75 штук по ~600 КБ) тоже собираются на коде:
+товар попадает туда по своему partuids, список страниц и названия – catalog.json (parts).
 Фото выбранных: оригиналы в raw/products/, в site/public/img/p/ – одна копия 720 px WebP q72 на картинку
 (одинаковые по содержимому склеиваются), лишние файлы прошлых запусков удаляются.
 Названия марок – из data/menu.json (там опечатки кнопок сайта уже исправлены).
+С 15.10.2026 товары ведутся в админке сайта (/admin/products/): она правит products.json прямо в репозитории.
+Поэтому без флага --from-tilda скрипт ничего не трогает; с флагом – пересобирает всё из снимка Tilda и затирает
+правки админки (и её загруженные фото). products.json – по товару на строку, чтобы правки были видны в git.
 """
 import csv
 import hashlib
@@ -27,7 +32,7 @@ DATA, STORE = ROOT / "data", ROOT / "raw" / "store"
 ORIG, OUT_IMG = ROOT / "raw" / "products", ROOT / "site" / "public" / "img" / "p"
 OUT_DATA = ROOT / "site" / "src" / "data"
 SIDE, QUALITY, WORKERS = 720, 72, 8
-PER_SECTION = 1  # товаров на категорию на сайте; все – None (тогда ≈90 МБ фото и 2 167 страниц)
+PER_SECTION = None  # все товары (владелец 15.10: «чтобы были товары все»); на категорию – число
 EDITION_SERVICE = {"uid", "externalid", "sku", "price", "priceold", "quantity", "img"}
 MODEL = re.compile(r"Teyes\s+(LUX\s*ONE|CC4\s*Pro|CC4L|CC4|CC3\s*2K|CC3L\s*Pro|CC3L|CC3|SPRO\s*Plus|SPRO|TPRO\s*2|TPRO|X1|CC2\s*Plus|CC2L|CC2)", re.I)
 
@@ -94,6 +99,7 @@ def normalize(p, brands):
         "model": model, "sort": p.get("sort") or 0, "options": options, "editions": editions(p),
         "addons": addons(p.get("properties")), "characteristics": chars,
         "gallery": [g["img"] for g in json.loads(p.get("gallery") or "[]") if g.get("img")],
+        "parts": [str(x) for x in json.loads(p.get("partuids") or "[]")],
     }
 
 
@@ -126,6 +132,10 @@ def webp(src):
 
 
 def main():
+    if (OUT_DATA / "products.json").exists() and "--from-tilda" not in sys.argv:
+        print("товары ведёт админка сайта (site/src/data/products.json) – не трогаю; пересобрать из снимка Tilda "
+              "и затереть правки админки: products.py --from-tilda")
+        return 0
     menu = json.loads((DATA / "menu.json").read_text("utf-8"))
     kits = next(s for s in menu["menus"]["store"]["sections"] if s["id"] == "kits")
     brands, countries = {}, {}
@@ -162,9 +172,20 @@ def main():
                                                "country": countries.get(p["section"], ""), "count": 0,
                                                "total": totals[p["section"]]})
         s["count"] += 1
+    parts = []  # служебные страницы разделов Tilda: /store/catalog/<uid>-<имя>
+    with (DATA / "pages.csv").open(encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            m = re.match(r"https://teyes-sibir\.ru(/store/catalog/(\d+)-[^/]+)$", r["url"])
+            if m and r["status"] == "200":
+                html = (ROOT / "raw" / "html" / r["local"]).read_text("utf-8", errors="ignore")
+                t = re.search(r"<title>([^<]*)", html)
+                parts.append({"uid": m.group(2), "path": m.group(1), "title": (t.group(1).strip() if t else "") or m.group(1),
+                              "count": sum(1 for p in products if m.group(2) in p["parts"])})
     OUT_DATA.mkdir(parents=True, exist_ok=True)
-    (OUT_DATA / "products.json").write_text(json.dumps(products, ensure_ascii=False, separators=(",", ":")), "utf-8")
-    (OUT_DATA / "catalog.json").write_text(json.dumps({"sections": sorted(sections.values(), key=lambda s: s["slug"])},
+    lines = ",\n".join(json.dumps(p, ensure_ascii=False, separators=(",", ":")) for p in products)
+    (OUT_DATA / "products.json").write_text(f"[\n{lines}\n]\n", "utf-8")  # по товару на строку – как пишет админка
+    (OUT_DATA / "catalog.json").write_text(json.dumps({"sections": sorted(sections.values(), key=lambda s: s["slug"]),
+                                                       "parts": sorted(parts, key=lambda x: x["path"])},
                                                       ensure_ascii=False, indent=1), "utf-8")
     size = sum(f.stat().st_size for f in OUT_IMG.glob("*.webp")) / 2**20
     print(f"фото в WebP: {len(set(names.values()))} файлов, {size:.0f} МБ; не скачались: {len(failed)}")
@@ -172,7 +193,8 @@ def main():
         print(f"  {u}")
     no_img = sum(1 for p in products if not p["images"])
     print(f"разделов {len(sections)}, на сайт товаров {len(products)} из {len(every)}, без фото {no_img}, "
-          f"без модели Teyes {sum(1 for p in products if not p['model'])}")
+          f"без модели Teyes {sum(1 for p in products if not p['model'])}; страниц разделов Tilda {len(parts)}, "
+          f"пустых {sum(1 for x in parts if not x['count'])}")
     return 1 if failed else 0
 
 

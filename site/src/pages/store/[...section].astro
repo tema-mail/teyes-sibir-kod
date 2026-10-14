@@ -1,10 +1,11 @@
 ---
 // Категории магазина на месте страниц Tilda: /store (хаб разделов), /store/catalog (Комплекты Teyes – марки),
-// /store/catalog/<марка>, /store/catalog_teyes, разделы магазина. Плитки и марки – те же данные, что у мега-меню
-// (data/menu.json); товары – site/src/data (по PER_SECTION на категорию, total – сколько их в магазине).
+// /store/catalog/<марка>, /store/catalog_teyes, разделы магазина, служебные страницы разделов Tilda
+// /store/catalog/<uid>-<имя> (товары по parts). Плитки и марки – те же данные, что у мега-меню (data/menu.json);
+// товары – site/src/data (все товары магазина).
 import Base from '../../layouts/Base.astro';
 import Catalog from '../../islands/Catalog';
-import { SECTIONS, bySection, toCard, models, sectionName } from '../../lib/catalog';
+import { SECTIONS, PARTS, bySection, byPart, toCard, models, sectionName } from '../../lib/catalog';
 import { u } from '../../lib/site';
 import menu from '../../../../data/menu.json';
 import '../../styles/shop.css';
@@ -23,19 +24,21 @@ export function getStaticPaths() {
     if (s.href) paths.push({ params: { section: local(s.href).replace(/^store\/?/, '') || undefined } });
     s.groups?.forEach((g) => g.items.forEach((i) => paths.push({ params: { section: local(i.href).replace(/^store\//, '') } })));
   });
+  PARTS.forEach((x) => paths.push({ params: { section: x.path.replace(/^\/store\//, '') } }));
   const seen = new Set<string>();
   return paths.filter((p) => { const k = String(p.params.section); return seen.has(k) ? false : (seen.add(k), true); });
 }
 
 const section = Astro.params.section || '';
 const kits = store.sections.find((s) => s.id === 'kits')!;
-const slug = section === 'catalog_teyes' ? 'teyes' : section === 'catalog' ? 'catalog' : section.startsWith('catalog/') ? section.slice(8) : '';
+const part = PARTS.find((x) => x.path === '/store/' + section);
+const slug = part ? '' : section === 'catalog_teyes' ? 'teyes' : section === 'catalog' ? 'catalog' : section.startsWith('catalog/') ? section.slice(8) : '';
 const sec = store.sections.find((s) => s.href && strip(s.href) === 'store/' + section);
 const info = SECTIONS.find((s) => s.slug === slug);
 // Подраздел без своей плитки (например, омыватели камер внутри «Камер») – название из групп меню
 const sub = store.sections.flatMap((s) => s.groups || []).flatMap((g) => g.items).find((i) => strip(i.href) === 'store/' + section);
-const title = !section ? 'Магазин' : slug ? sectionName(slug) : sec?.title || sub?.name || section;
-const cards = slug ? bySection(slug).map(toCard) : [];
+const title = !section ? 'Магазин' : part ? part.title : slug ? sectionName(slug) : sec?.title || sub?.name || section;
+const cards = part ? byPart(part.uid).map(toCard) : slug ? bySection(slug).map(toCard) : [];
 const hrefs = Object.fromEntries(cards.map((c) => [c.id, u(c.path + '/')]));
 const h1 = !section ? 'Магазин TEYES SIBIR' : slug && slug !== 'teyes' && slug !== 'catalog' ? `Штатные магнитолы Teyes ${title}` : title;
 ---
@@ -72,7 +75,7 @@ const h1 = !section ? 'Магазин TEYES SIBIR' : slug && slug !== 'teyes' &&
       </div>
     )}
 
-    {slug && cards.length > 0 && (
+    {(slug || part) && cards.length > 0 && (
       <>
         {info && info.total > info.count && (
           <p class="shop__sample">На копии сайта – пример: {info.count === 1 ? '1 товар' : `${info.count} товара`} из {info.total} в этой категории.</p>
@@ -81,7 +84,7 @@ const h1 = !section ? 'Магазин TEYES SIBIR' : slug && slug !== 'teyes' &&
       </>
     )}
 
-    {section && !slug && <p class="shop__empty">В этом разделе пока нет товаров. Подберём по вашей машине – позвоните или напишите.</p>}
+    {section && !slug && !cards.length && <p class="shop__empty">В этом разделе пока нет товаров. Подберём по вашей машине – позвоните или напишите.</p>}
     {section && !slug && sec?.groups && (
       <ul class="shop__links">{sec.groups.flatMap((g) => g.items).filter((i) => strip(i.href) !== 'store/' + section)
         .map((i) => <li><a class="chip" href={i.href}>{i.name}</a></li>)}</ul>
