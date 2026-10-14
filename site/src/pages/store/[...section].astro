@@ -32,7 +32,9 @@ const kits = store.sections.find((s) => s.id === 'kits')!;
 const slug = section === 'catalog_teyes' ? 'teyes' : section === 'catalog' ? 'catalog' : section.startsWith('catalog/') ? section.slice(8) : '';
 const sec = store.sections.find((s) => s.href && strip(s.href) === 'store/' + section);
 const info = SECTIONS.find((s) => s.slug === slug);
-const title = !section ? 'Магазин' : slug ? sectionName(slug) : sec?.title || section;
+// Подраздел без своей плитки (например, омыватели камер внутри «Камер») – название из групп меню
+const sub = store.sections.flatMap((s) => s.groups || []).flatMap((g) => g.items).find((i) => strip(i.href) === 'store/' + section);
+const title = !section ? 'Магазин' : slug ? sectionName(slug) : sec?.title || sub?.name || section;
 const cards = slug ? bySection(slug).map(toCard) : [];
 const hrefs = Object.fromEntries(cards.map((c) => [c.id, u(c.path + '/')]));
 const h1 = !section ? 'Магазин TEYES SIBIR' : slug && slug !== 'teyes' && slug !== 'catalog' ? `Штатные магнитолы Teyes ${title}` : title;

@@ -81,7 +81,7 @@ const ld = {
       </section>
     )}
   </div>
-  <script type="application/ld+json" set:html={JSON.stringify(ld)} />
+  <script type="application/ld+json" set:html={JSON.stringify(ld).replace(/</g, '\\u003c')} />
   <script>
     // Миниатюры листают ленту фото
     const track = document.getElementById('gallery');
