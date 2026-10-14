@@ -12,7 +12,9 @@
 - Мега-меню «Услуги»/«Магазин»: интерфейс `src/menu/megamenu.js` + `.css` (чистый JS), данные `data/menu.json`.
   Адреса Tilda разбирает общий `tilda_urls.py`. Проверка выложенной копии: `verify.py --site <адрес>`.
 - `public/` – готовый сайт, его выкладывает `.github/workflows/pages.yml`. `raw/` – сырьё, в git не идёт.
-- Этап 2 (страницы на Astro, магазин из данных) – после разбора копии с владельцем.
+- Этап 2 начат: `site/` – Astro + Preact (магазин из снимка `products.py`, корзина, заказ, запись,
+  `/admin/metrika/`). `run.sh` собирает его (`npm ci && npm run build`, нужен Node) до `build.py`, который
+  вливает `site/dist` в `public/` поверх страниц Tilda. Страницы Astro – `site/src/pages`, острова – `site/src/islands`.
 
 ## Границы
 - В Tilda ничего не писать: только чтение (правило владельца – запись в Tilda только с его «да»).
