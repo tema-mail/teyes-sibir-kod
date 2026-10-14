@@ -18,12 +18,13 @@ import tempfile
 import verify
 
 MENU_SHOTS = verify.SHOTS / "menu"
-PAGES = ["index.html", "store/closers/index.html"]  # тёмная закреплённая шапка и светлая шапка магазина
+# тёмная закреплённая шапка Tilda, светлая шапка магазина Tilda (раздел, оставшийся на Tilda) и шапка страниц на коде
+PAGES = ["index.html", "store/catalog/acura/index.html", "store/catalog/toyota/index.html"]
 EXPECT = {
     "desktop": {"hoverOpens": True, "ariaExpanded": "true", "tildaDropdownVisible": 0, "clickPrevented": True,
                 "stillOpenAfterClick": True, "drill": True, "backToStart": True, "closesOnLeave": True,
                 "ariaAfter": "false", "escCloses": True, "bookOpensPopup": True},
-    "mobile": {"t450item": True, "clickPrevented": True, "sheetOpens": True, "tildaSubmenuOpened": False,
+    "mobile": {"trigger": True, "sheetOpens": True, "tildaSubmenuOpened": False,
                "tabSwitch": "Все товары", "drill": True, "closed": True},
 }
 TEST = r"""<script>window.addEventListener('load',function(){setTimeout(function(){
@@ -40,11 +41,16 @@ try{ if(more){ R.mode='desktop'; ev(more,'mouseover'); setTimeout(function(){
   p.querySelector('.tsbm-back').click(); R.backToStart=!!p.querySelector('.tsbm-start');
   ev(more,'mouseout',document.body); setTimeout(function(){ R.closesOnLeave=!vis(p); R.ariaAfter=more.getAttribute('aria-expanded');
    ev(more,'mouseover'); setTimeout(function(){ document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));
-    R.escCloses=!vis(p); ev(more,'mouseover'); setTimeout(function(){ p.querySelector('[data-book]').click();
-     setTimeout(function(){ R.bookOpensPopup=!!document.querySelector('.t-popup.t-popup_show'); done(); },900)},200)},200)},400)},300);
+    R.escCloses=!vis(p); ev(more,'mouseover'); setTimeout(function(){ var bk=p.querySelector('[data-book]');
+     // нет ни попапа записи Tilda, ни окна записи на коде – кнопка честно ведёт на «Контакты»
+     if(!document.querySelector('[data-tooltip-hook^="#popup:zapis"]') && !document.querySelector('.hdr__burger')){
+      R.bookOpensPopup=/\/contacts\/$/.test(bk.getAttribute('href')); done(); return; }
+     bk.click();
+     setTimeout(function(){ R.bookOpensPopup=!!document.querySelector('.t-popup.t-popup_show, .lead'); done(); },900)},200)},200)},400)},300);
  } else { R.mode='mobile';
   var sub=[].filter.call(document.querySelectorAll('.t450__link-item_submenu'),function(a){return a.textContent.trim()==='Услуги'})[0];
-  R.t450item=!!sub; var c=ev(sub,'click'); R.clickPrevented=c.defaultPrevented;
+  var burger=document.querySelector('.hdr__burger');  // шапка страниц на коде: бургер вызывает window.tsbmOpen
+  R.trigger=!!(sub||burger); if(sub){ var c=ev(sub,'click'); R.t450prevented=c.defaultPrevented; } else burger.click();
   var s=q('.tsbm-sheet'); R.sheetOpens=vis(s); R.tildaSubmenuOpened=!!document.querySelector('.t450__submenu_opened, .t-menusub__menu_show');
   s.querySelector('[data-menu="store"]').click(); R.tabSwitch=s.querySelector('.tsbm-all__title').textContent.trim();
   s.querySelector('button.tsbm-tile').click(); R.drill=!!s.querySelector('.tsbm-links');
