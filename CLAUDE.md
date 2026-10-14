@@ -14,7 +14,11 @@
 - `public/` – готовый сайт, его выкладывает `.github/workflows/pages.yml`. `raw/` – сырьё, в git не идёт.
 - Этап 2 начат: `site/` – Astro + Preact (магазин из снимка `products.py`, корзина, заказ, запись,
   `/admin/metrika/`). `run.sh` собирает его (`npm ci && npm run build`, нужен Node) до `build.py`, который
-  вливает `site/dist` в `public/` поверх страниц Tilda. Страницы Astro – `site/src/pages`, острова – `site/src/islands`.
+  вливает `site/dist` в `public/` поверх страниц Tilda (`scripts/overlay.py`, его же зовёт GitHub Actions после
+  каждого коммита). Страницы Astro – `site/src/pages`, острова – `site/src/islands`.
+- Товары ведёт админка сайта `/admin/` (коммит в `site/src/data/products.json` и `site/public/img/p` через GitHub
+  API): руками и `products.py` их не править; `products.py --from-tilda` пересобирает из снимка Tilda и затирает
+  правки админки – только по решению владельца. Лимит Pages – 1 ГБ (сайт ~0,9 ГБ).
 
 ## Границы
 - В Tilda ничего не писать: только чтение (правило владельца – запись в Tilda только с его «да»).
