@@ -1,12 +1,12 @@
 // Карточка товара в сетке (каталог, похожие, избранное): фото, метка, модель Teyes, название, цена, сердечко.
 import type { Card } from '../lib/catalog';
-import { favs, isFav, toggleFav } from '../lib/store';
+import { favs, isFav, toggleFav, useMounted } from '../lib/store';
 
 const rub = (n: number) => new Intl.NumberFormat('ru-RU').format(Math.round(n)) + ' ₽';
 
 export default function ProductCard({ card, href }: { card: Card; href: string }) {
   favs.value; // подписка на избранное
-  const on = isFav(card.id);
+  const on = useMounted() && isFav(card.id);
   return (
     <article class="card">
       <a class="card__link" href={href}>

@@ -1,6 +1,7 @@
 // Корзина и избранное (как в milovini-samara): сигналы Preact, хранение в localStorage браузера,
 // синхронизация между вкладками. Позиция корзины – товар + выбранный вариант + доп. опции.
 import { signal, computed } from '@preact/signals';
+import { useEffect, useState } from 'preact/hooks';
 
 export type CartItem = {
   key: string; id: string; title: string; path: string; image: string;
@@ -32,8 +33,11 @@ if (browser) {
 
 const saveCart = (items: CartItem[]) => { cart.value = items; write(CART, items); };
 
+/** Ключ позиции: опции сортируются – порядок кликов по галочкам не плодит одинаковые строки. */
+export const lineKey = (id: string, variant: string, addons: string[]) => [id, variant, ...[...addons].sort()].join('|');
+
 export function addToCart(item: Omit<CartItem, 'key' | 'qty'>, qty = 1) {
-  const key = [item.id, item.variant, ...item.addons].join('|');
+  const key = lineKey(item.id, item.variant, item.addons);
   const items = cart.value.slice();
   const found = items.find((i) => i.key === key);
   if (found) found.qty += qty; else items.push({ ...item, key, qty });
@@ -50,6 +54,14 @@ export function toggleFav(id: string) {
   favs.value = isFav(id) ? favs.value.filter((x) => x !== id) : [...favs.value, id];
   write(FAV, favs.value);
   showToast(isFav(id) ? 'Добавлено в избранное' : 'Убрано из избранного');
+}
+
+/** false при сборке и гидрации: корзина и избранное есть только в браузере, а Preact при гидрации не
+ *  обновляет атрибуты (сердечко осталось бы пустым). Состояние из localStorage – после монтирования. */
+export function useMounted() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  return mounted;
 }
 
 let toastTimer = 0;

@@ -2,7 +2,7 @@
 // итог; «В корзину», «Оформить заказ», «Записаться на установку», избранное.
 import { useMemo, useState } from 'preact/hooks';
 import type { Addon, Edition } from '../lib/catalog';
-import { addToCart, isFav, toggleFav, favs, sheet } from '../lib/store';
+import { addToCart, cart, isFav, lineKey, toggleFav, favs, sheet, useMounted } from '../lib/store';
 
 type Props = {
   id: string; title: string; path: string; image: string; price: number; priceOld: number;
@@ -17,6 +17,7 @@ export default function ProductBuy(p: Props) {
   const [extra, setExtra] = useState<string[]>([]);
   const [qty, setQty] = useState(1);
   favs.value; // подписка: сердечко перерисуется при изменении избранного
+  const mounted = useMounted();
 
   const edition = useMemo(() => p.editions.find((e) =>
     p.options.every((o) => e.options[o.title] === choice[o.title])), [choice]);
@@ -27,6 +28,9 @@ export default function ProductBuy(p: Props) {
   const variant = p.options.map((o) => `${o.title}: ${choice[o.title]}`).join(', ');
 
   const add = () => addToCart({ id: p.id, title: p.title, path: p.path, image: p.image, variant, addons: extra, price: unit }, qty);
+  // «Оформить заказ» после «В корзину» не удваивает позицию
+  const order = () => { if (!cart.value.some((i) => i.key === lineKey(p.id, variant, extra))) add(); };
+  const fav = mounted && isFav(p.id);
 
   return (
     <div class="buy">
@@ -65,13 +69,13 @@ export default function ProductBuy(p: Props) {
           <button type="button" aria-label="Больше" onClick={() => setQty(qty + 1)}>+</button>
         </div>
         <button type="button" class="btn btn--accent buy__cart" onClick={() => { add(); sheet.value = 'cart'; }}>В корзину</button>
-        <button type="button" class={`buy__fav${isFav(p.id) ? ' is-on' : ''}`} aria-pressed={isFav(p.id)}
-          aria-label={isFav(p.id) ? 'Убрать из избранного' : 'В избранное'} onClick={() => toggleFav(p.id)}>
+        <button type="button" class={`buy__fav${fav ? ' is-on' : ''}`} aria-pressed={fav}
+          aria-label={fav ? 'Убрать из избранного' : 'В избранное'} onClick={() => toggleFav(p.id)}>
           <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 5 6.5 5c2 0 3.3 1 4.1 2.2.1.1.3.1.4 0C11.8 6 13.1 5 15.1 5 18.6 5 20.7 8.4 19.2 11.8 17.1 16.4 12 21 12 21z" fill="currentColor" /></svg>
         </button>
       </div>
       <div class="buy__row">
-        <a class="btn btn--ghost" href={p.orderHref} onClick={add}>Оформить заказ</a>
+        <a class="btn btn--ghost" href={p.orderHref} onClick={order}>Оформить заказ</a>
         <a class="btn btn--ghost" href={p.leadHref} data-lead={p.title}>Записаться на установку</a>
       </div>
     </div>
