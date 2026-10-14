@@ -1,20 +1,34 @@
 // Корзина в шапке: кнопка с числом и шторка (позиции с вариантом и опциями, количество, сумма, «Оформить»),
 // плюс всплывающее «Добавлено». Экземпляров два (телефон и компьютер); шторку и тост рисует только drawer.
 import { createPortal } from 'preact/compat';
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { cart, cartCount, cartTotal, sheet, toast, setQty, removeFromCart } from '../lib/store';
 
 const rub = (n: number) => new Intl.NumberFormat('ru-RU').format(Math.round(n)) + ' ₽';
+// Tab не уходит из открытой шторки под неё
+const trap = (e: KeyboardEvent, box: HTMLElement) => {
+  const f = box.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input');
+  if (!f.length) return;
+  const first = f[0], last = f[f.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+};
 
 export default function Cart({ drawer = false, orderHref, favHref }: { drawer?: boolean; orderHref: string; favHref: string }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+  const box = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!drawer || sheet.value !== 'cart') return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') sheet.value = null; };
+    const back = document.activeElement as HTMLElement | null; // после закрытия фокус вернётся туда, откуда открыли
+    box.current?.querySelector<HTMLElement>('.drawer__close')?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') sheet.value = null;
+      if (e.key === 'Tab' && box.current) trap(e, box.current);
+    };
     document.addEventListener('keydown', onKey);
     document.documentElement.style.overflow = 'hidden';
-    return () => { document.removeEventListener('keydown', onKey); document.documentElement.style.overflow = ''; };
+    return () => { document.removeEventListener('keydown', onKey); document.documentElement.style.overflow = ''; back?.focus(); };
   }, [drawer, sheet.value]);
 
   const count = mounted ? cartCount.value : 0;
@@ -35,7 +49,7 @@ export default function Cart({ drawer = false, orderHref, favHref }: { drawer?: 
   const panel = (
     <>
       {sheet.value === 'cart' && (
-        <div class="drawer" role="dialog" aria-modal="true" aria-label="Корзина">
+        <div class="drawer" role="dialog" aria-modal="true" aria-label="Корзина" ref={box}>
           <button type="button" class="drawer__shade" aria-label="Закрыть корзину" onClick={() => (sheet.value = null)} />
           <div class="drawer__panel">
             <div class="drawer__head">

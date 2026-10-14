@@ -36,7 +36,11 @@ export default function Lead({ policyHref, phone }: { policyHref: string; phone:
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, [open]);
-  const close = () => { setOpen(false); opener.current?.focus(); };
+  const close = () => {
+    setOpen(false);
+    const o = opener.current; // кнопка мега-меню к этому времени скрыта вместе с меню – туда фокус не вернуть
+    if (o && o.isConnected && o.getClientRects().length) o.focus();
+  };
 
   const submit = async (e: Event) => {
     e.preventDefault();
