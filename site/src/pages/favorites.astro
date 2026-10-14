@@ -1,0 +1,23 @@
+---
+// Избранное (как в milovini-samara): товары, отмеченные сердечком.
+import Base from '../layouts/Base.astro';
+import FavPage from '../islands/FavPage';
+import { PRODUCTS, toCard } from '../lib/catalog';
+import { u } from '../lib/site';
+const cards = PRODUCTS.map(toCard);
+const hrefs = Object.fromEntries(cards.map((c) => [c.id, u(c.path + '/')]));
+---
+<Base title="Избранное | TEYES SIBIR" description="Избранные товары магазина TEYES SIBIR.">
+  <div class="wrap favpage">
+    <ol class="crumbs"><li><a href={u('/')}>Главная</a></li><li><a href={u('/store/')}>Магазин</a></li></ol>
+    <h1>Избранное</h1>
+    <FavPage client:load cards={cards} hrefs={hrefs} storeHref={u('/store/')} />
+  </div>
+</Base>
+
+<style is:global>
+  .favpage { padding-top: 20px; display: grid; gap: 20px; }
+  .favpage h1 { font-size: clamp(28px, 4vw, 40px); }
+  .fav__empty { display: grid; gap: 14px; justify-items: start; color: var(--tx-muted); }
+  .fav__empty p { margin: 0; }
+</style>
