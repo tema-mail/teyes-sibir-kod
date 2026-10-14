@@ -2,7 +2,8 @@
    Пункты шапки Tilda остаются: на компьютере наведение на «Услуги» (#submenu:more) и «Магазин»/«Каталог»
    (#submenu:catalog) открывает панель под шапкой вместо маленьких списков Tilda; на телефоне тап по
    «Услугам»/«Каталогу» в боковом меню T450 открывает экран по шагам. Данные – window.TSB_MENU (data/menu.json,
-   встраивает build.py). ?menu=services|store[:раздел] открывает меню сразу – для проверки снимками. */
+   встраивает build.py). ?menu=services|store[:раздел] открывает меню сразу – для проверки снимками.
+   На страницах на коде (site/) бургер вызывает window.tsbmOpen('services'). */
 (function () {
   var D = window.TSB_MENU;
   if (!D) return;
@@ -269,6 +270,9 @@
     if (!panel || panel.hidden || !state.trigger) return;
     if (state.trigger.getBoundingClientRect().bottom <= 0) closePanel(false); else place();
   }, { passive: true });
+
+  // для страниц на коде (site/, Astro): бургер шапки открывает экран меню без бокового меню Tilda
+  window.tsbmOpen = function (menu) { openSheet(D.menus[menu] ? menu : 'services'); };
 
   document.documentElement.classList.add('tsbm-on');
   [].forEach.call(document.querySelectorAll('a[href="#submenu:more"], a[href="#submenu:catalog"]'), function (a) {
