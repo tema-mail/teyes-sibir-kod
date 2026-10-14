@@ -1,8 +1,10 @@
 ---
 // Общая раскладка страниц на коде (этап 2): шрифты сайта из копии, цвета, noindex и canonical на живой
 // teyes-sibir.ru (как у копии Tilda), мега-меню «Услуги»/«Магазин» (assets/menu – кладёт scripts/build.py),
-// шапка, подвал. Слоты: по умолчанию – содержимое страницы; actions / actions-wide – кнопки корзины в шапке.
+// шапка с корзиной и избранным (остров Cart), подвал. Слот – содержимое страницы.
 import Header from '../components/Header.astro';
+import Cart from '../islands/Cart';
+import '../styles/shop.css';
 import { u, LIVE, NOINDEX, SITE, ASSET, FOOTER } from '../lib/site';
 interface Props { title: string; description?: string; current?: string }
 const { title, description = '', current = '' } = Astro.props;
@@ -29,8 +31,8 @@ const fonts = '<style>' + face('CenturyGothic', ASSET.century, 'woff', 400) +
 </head>
 <body>
   <Header current={current}>
-    <slot name="actions" slot="actions" />
-    <slot name="actions-wide" slot="actions-wide" />
+    <Cart slot="actions" client:idle orderHref={u('/order/')} favHref={u('/favorites/')} />
+    <Cart slot="actions-wide" client:idle drawer orderHref={u('/order/')} favHref={u('/favorites/')} />
   </Header>
   <main><slot /></main>
   <footer class="ftr">

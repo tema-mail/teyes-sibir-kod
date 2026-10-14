@@ -86,3 +86,25 @@
 .catalog__search { flex: 1 1 260px; min-width: 0; }
 .catalog__count, .catalog__none { margin: 0; color: var(--tx-muted); font-size: 14px; }
 .catalog__more { justify-self: center; }
+
+/* ---------- Корзина в шапке и шторка ---------- */
+.cartbtns { display: flex; gap: 8px; }
+.cartbtn { position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 0; border-radius: 12px; background: var(--tx-surface); color: var(--tx-ink); cursor: pointer; }
+.cartbtn__n { position: absolute; top: -4px; right: -4px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px; background: var(--tx-grad); color: #fff; font-size: 12px; font-weight: 700; line-height: 20px; text-align: center; }
+.drawer { position: fixed; inset: 0; z-index: 10040; display: flex; justify-content: flex-end; }
+.drawer__shade { position: absolute; inset: 0; border: 0; background: rgba(17, 24, 39, 0.45); cursor: pointer; }
+.drawer__panel { position: relative; width: min(440px, 100%); height: 100%; display: flex; flex-direction: column; background: var(--tx-bg); box-shadow: -20px 0 50px rgba(0, 0, 0, 0.2); }
+.drawer__head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--tx-line); }
+.drawer__title { margin: 0; font-family: var(--tx-display); font-size: 22px; }
+.drawer__close, .line__del { width: 44px; height: 44px; border: 0; background: none; font-size: 26px; line-height: 1; color: var(--tx-muted); cursor: pointer; }
+.drawer__empty { padding: 20px; color: var(--tx-muted); }
+.drawer__list { flex: 1; overflow-y: auto; margin: 0; padding: 8px 20px; list-style: none; }
+.line { display: grid; grid-template-columns: 72px minmax(0, 1fr) 44px; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--tx-line); }
+.line img { width: 72px; height: 72px; object-fit: contain; border-radius: 10px; background: var(--tx-surface); }
+.line__body { min-width: 0; display: grid; gap: 4px; }
+.line__title { margin: 0; font-size: 14px; line-height: 1.35; }
+.line__meta { margin: 0; font-size: 12px; color: var(--tx-muted); }
+.line__row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 4px; }
+.drawer__foot { padding: 16px 20px calc(16px + env(safe-area-inset-bottom)); border-top: 1px solid var(--tx-line); display: grid; gap: 12px; }
+.drawer__sum { margin: 0; display: flex; justify-content: space-between; font-size: 18px; }
+.toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); z-index: 10060; transform: translateX(-50%); padding: 12px 20px; border-radius: 999px; background: var(--tx-ink); color: #fff; font-size: 14px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25); }
