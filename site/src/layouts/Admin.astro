@@ -1,0 +1,35 @@
+---
+// Каркас админки сайта (по образцу админки Elite Rose): шапка-вкладки как в Тильде, адрес сайта справа.
+// Закрыта от поиска всегда (не только пока копия под noindex), ссылок на неё с сайта нет.
+import '../styles/admin.css';
+import { u, NOINDEX, ASSET } from '../lib/site';
+import { ALL_PRODUCTS } from '../lib/catalog';
+interface Props { title: string; active: 'pages' | 'products' }
+const { title, active } = Astro.props;
+const site = new URL(u('/'), 'https://tema-mail.github.io').href;
+const tabs = [
+  ['pages', '/admin/', 'Страницы сайта', ''],
+  ['products', '/admin/products/', 'Товары', String(ALL_PRODUCTS.length)],
+  ['metrika', '/admin/metrika/', 'Метрика и каналы', ''],
+] as const;
+---
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <Fragment set:html={NOINDEX} />
+    <title>{title} – админка TEYES SIBIR</title>
+    <link rel="icon" type="image/svg+xml" href={u(ASSET.icon)} />
+  </head>
+  <body class="adm">
+    <nav class="topnav" aria-label="Разделы админки">
+      <span class="brand">TEYES SIBIR</span>
+      {tabs.map(([key, href, label, n]) => (
+        <a class:list={['tab', { on: active === key }]} href={u(href)}>{label}{n && <span class="n">{n}</span>}</a>
+      ))}
+      <span class="site">Сайт: <a href={site} target="_blank" rel="noopener">{site.replace(/^https?:\/\//, '')}</a></span>
+    </nav>
+    <main><slot /></main>
+  </body>
+</html>

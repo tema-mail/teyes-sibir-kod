@@ -1,0 +1,61 @@
+---
+// «Страницы сайта» в админке: магазин раскрывается до марок и карточек товаров – по любой можно перейти на сайт
+// или открыть товар в редакторе. Остальные ~860 страниц сайта – копия Tilda, здесь не перечисляются.
+import Admin from '../../layouts/Admin.astro';
+import { ALL_PRODUCTS, SECTIONS, img, minPrice, sectionHref, sectionName, type Product } from '../../lib/catalog';
+import { u, rub } from '../../lib/site';
+const site = (p: string) => new URL(u(p), 'https://tema-mail.github.io').href;
+const groups = [...SECTIONS].sort((a, b) =>
+  (a.slug === 'teyes' ? -2 : a.slug === 'catalog' ? -1 : 0) - (b.slug === 'teyes' ? -2 : b.slug === 'catalog' ? -1 : 0)
+  || a.name.localeCompare(b.name, 'ru'));
+const inSection = (slug: string) => ALL_PRODUCTS.filter((p) => p.section === slug);
+const price = (p: Product) => (p.editions.length > 1 ? 'от ' : '') + rub(minPrice(p));
+const tech = [
+  { name: 'Оформление заказа', path: '/order/' },
+  { name: 'Избранное', path: '/favorites/' },
+  { name: 'Метрика и каналы (по паролю админки)', path: '/admin/metrika/' },
+];
+---
+<Admin title="Страницы сайта" active="pages">
+  <div class="tools">
+    <h1>Страницы сайта</h1>
+    <span class="muted">магазин: {groups.length} разделов, {ALL_PRODUCTS.length} карточек товара</span>
+    <a class="btn" href={u('/')} target="_blank">Открыть сайт ↗</a>
+    <a class="btn primary" href={u('/admin/products/')}>Товары</a>
+  </div>
+  <div class="pages">
+    <div class="phead"><span></span><span>Страница</span><span>Адрес</span><span style="text-align:right">Сущность</span></div>
+    <div class="pgroup">Главная и магазин <span>2</span></div>
+    <div class="prow"><span></span><span class="pname">Главная</span><a class="purl" href={u('/')} target="_blank">{site('/')}</a><span class="pkind">Главная</span></div>
+    <div class="prow"><span></span><span class="pname">Магазин</span><a class="purl" href={u('/store/')} target="_blank">{site('/store/')}</a><span class="pkind">Хаб</span></div>
+
+    <div class="pgroup">Каталоги <span>{groups.length} · {ALL_PRODUCTS.length} карточек товара</span></div>
+    {groups.map((s) => {
+      const list = inSection(s.slug);
+      return (
+        <details class="pcat">
+          <summary class="prow">
+            {list[0]?.images[0] ? <img class="thumb" src={img(list[0].images[0])} alt="" loading="lazy" /> : <span></span>}
+            <div><span class="pname"><i class="caret"></i>{sectionName(s.slug)}</span><div class="muted" style="font-size:12px">{list.length} товаров{list.some((p) => p.hidden) && ` · скрыто ${list.filter((p) => p.hidden).length}`}</div></div>
+            <a class="purl" href={u(sectionHref(s.slug))} target="_blank">{site(sectionHref(s.slug))}</a>
+            <span class="pkind">Каталог</span>
+          </summary>
+          {list.map((p) => (
+            <div class="prow lvl1">
+              {p.images[0] ? <img class="thumb" src={img(p.images[0])} alt="" loading="lazy" /> : <span></span>}
+              <div><span class="pname">{p.title}{p.hidden && <span class="chip" style="margin-left:8px">скрыт</span>}</span>
+                <div class="muted" style="font-size:12px">{price(p)} · <a href={u(`/admin/products/#${p.id}`)}>изменить</a></div></div>
+              {p.hidden ? <span class="purl muted">нет на сайте</span> : <a class="purl" href={u(p.path + '/')} target="_blank">{p.path}</a>}
+              <span class="pkind">Карточка товара</span>
+            </div>
+          ))}
+        </details>
+      );
+    })}
+
+    <div class="pgroup">Технические страницы <span>{tech.length}</span></div>
+    {tech.map((t) => (
+      <div class="prow"><span></span><span class="pname">{t.name}</span><a class="purl" href={u(t.path)} target="_blank">{site(t.path)}</a><span class="pkind">Техническая</span></div>
+    ))}
+  </div>
+</Admin>
