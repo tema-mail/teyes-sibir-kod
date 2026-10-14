@@ -55,7 +55,9 @@ def exists(ref):
 
 def check_files():
     with (DATA / "pages.csv").open(encoding="utf-8") as f:
-        pages = sorted({r["local"] for r in csv.DictReader(f) if r["status"] == "200"})
+        pages = {r["local"] for r in csv.DictReader(f) if r["status"] == "200"}
+    dist = ROOT / "site" / "dist"  # страницы на коде (этап 2) проверяются теми же правилами
+    pages = sorted(pages | ({f.relative_to(dist).as_posix() for f in dist.rglob("index.html")} if dist.exists() else set()))
     with (DATA / "assets.csv").open(encoding="utf-8") as f:
         dead = {r["url"] for r in csv.DictReader(f) if r["status"] != "200"}  # битые на самой Tilda
     problems, broken, leftover = [], {}, {}

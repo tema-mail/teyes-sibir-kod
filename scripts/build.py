@@ -11,7 +11,8 @@
 - подключено мега-меню «Услуги» и «Магазин» (assets/menu/, данные – data/menu.json);
 - на страницах с каталогом или лентой подключён снимок assets/store/snapshot.js (его готовит store.py),
   потому что API магазина и лент Tilda не отдают данные чужому домену.
-Остальное – байт в байт как отдаёт Tilda. Сайт больше LIMIT_MB – сборка падает (лимит GitHub Pages 1 ГБ).
+Остальное – байт в байт как отдаёт Tilda. В конце поверх копии вливаются страницы на коде из site/dist
+(магазин и товары, этап 2). Сайт больше LIMIT_MB – сборка падает (лимит GitHub Pages 1 ГБ).
 """
 import csv
 import pathlib
@@ -27,6 +28,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 RAW_HTML, IMG, PUBLIC, DATA = ROOT / "raw" / "html", ROOT / "raw" / "img", ROOT / "public", ROOT / "data"
 STORE = ROOT / "raw" / "store"
 MENU, MENU_SRC = ROOT / "data", ROOT / "src" / "menu"
+SITE_DIST = ROOT / "site" / "dist"  # страницы на коде (этап 2, Astro): вливаются поверх копии в конце сборки
 BASE = "/teyes-sibir-kod"  # путь копии на GitHub Pages; со своим доменом станет ""
 PUBLIC_URL = "https://tema-mail.github.io" + BASE
 LIVE, HOST = "https://teyes-sibir.ru", "teyes-sibir.ru"
@@ -58,6 +60,11 @@ class Site:
         for r in rows:
             path = urllib.parse.urlsplit(r["url"]).path.rstrip("/").lower() or "/"
             self.pages[path] = r["local"]
+        # страницы на коде (товары /…/tproduct/…, /order, /favorites): ссылки копии на них ведут внутрь копии
+        self.code_pages = sorted(f.relative_to(SITE_DIST).as_posix() for f in SITE_DIST.rglob("index.html")) \
+            if SITE_DIST.exists() else []
+        for local in self.code_pages:
+            self.pages.setdefault("/" + local.removesuffix("index.html").rstrip("/").lower() or "/", local)
 
     def asset(self, res, original):
         if res and res[0] in self.files:
@@ -157,6 +164,11 @@ def main():
         text = f.read_text("utf-8")
         # в лентах обложки постов – свои файлы; в каталогах фото товаров остаются на CDN Tilda (этап 2)
         write(f"assets/store/{f.name}", site.cdn(text) if text.startswith('{"feeduid"') else text)
+    if SITE_DIST.exists():  # страницы на коде заменяют одноимённые страницы Tilda (магазин) и добавляют товары
+        for f in sorted(SITE_DIST.rglob("*")):
+            if f.is_file():
+                copy(f, f.relative_to(SITE_DIST).as_posix())
+        print(f"страниц на коде (site/dist): {len(site.code_pages)}")
     size = sum(f.stat().st_size for f in PUBLIC.rglob("*") if f.is_file()) / 2**20
     print(f"страниц {len(site.page_files)}, ресурсов {len(site.assets)}, сайт {size:.0f} МБ")
     if no_stat:

@@ -1,7 +1,7 @@
 #!/bin/sh
 # Полный пересбор копии teyes-sibir.ru: страницы → ресурсы → сжатие картинок → сборка public/
 # → снимок каталогов и лент (сам собирает копию без него) → докачка обложек постов из лент
-# → данные мега-меню → сборка со снимком и меню → проверка.
+# → данные мега-меню → товары и страницы на коде (site/, Astro) → сборка копии с ними → проверка.
 # Повторный запуск докачивает только недостающее; ./run.sh --fresh – заново скачать HTML страниц.
 set -e
 cd "$(dirname "$0")"
@@ -14,5 +14,7 @@ $PY scripts/store.py
 $PY scripts/assets.py
 $PY scripts/images.py
 $PY scripts/menu.py
+$PY scripts/products.py
+(cd site && npm ci --no-audit --no-fund && npm run build)
 $PY scripts/build.py
 $PY scripts/verify.py
