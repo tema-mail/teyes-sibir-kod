@@ -31,6 +31,8 @@ export const ASSET = {
   phone: '/assets/tild6235-3234-4565-a365-313434306133/div_3.png',
   century: '/assets/tild3838-6532-4461-a162-633633616134/CenturyGothic.woff',
   tildaSans: '/assets/fonts/tildasans/',
+  icon: '/assets/tild6536-6530-4532-b864-343564653336/Group_1171274793.svg', // иконки вкладки – как у страниц Tilda
+  touchIcon: '/assets/tild3263-3136-4962-a666-633436343030/Group_1171274793.png',
 };
 
 /** Пункты шапки как на сайте; «Услуги» и «Магазин» открывают мега-меню (src/menu/megamenu.js). */

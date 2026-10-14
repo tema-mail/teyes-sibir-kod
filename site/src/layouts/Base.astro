@@ -26,6 +26,8 @@ const fonts = '<style>' + face('CenturyGothic', ASSET.century, 'woff', 400) +
   <title>{title}</title>
   {description && <meta name="description" content={description} />}
   <link rel="canonical" href={LIVE + path.replace(/\/$/, '')} />
+  <link rel="icon" type="image/svg+xml" href={u(ASSET.icon)} />
+  <link rel="apple-touch-icon" href={u(ASSET.touchIcon)} />
   <link rel="stylesheet" href={u('/assets/menu/megamenu.css')} />
   <script is:inline defer src={u('/assets/menu/megamenu.js')}></script>
   <Fragment set:html={fonts} />
