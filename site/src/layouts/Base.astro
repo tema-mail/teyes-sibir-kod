@@ -4,6 +4,7 @@
 // шапка с корзиной и избранным (остров Cart), подвал. Слот – содержимое страницы.
 import Header from '../components/Header.astro';
 import Cart from '../islands/Cart';
+import Lead from '../islands/Lead';
 import '../styles/shop.css';
 import { u, LIVE, NOINDEX, SITE, ASSET, FOOTER } from '../lib/site';
 interface Props { title: string; description?: string; current?: string }
@@ -61,7 +62,7 @@ const fonts = '<style>' + face('CenturyGothic', ASSET.century, 'woff', 400) +
     </div>
     <p class="wrap ftr__by"><a href="https://deford-studio.ru/" target="_blank" rel="noopener">Design by Deford</a></p>
   </footer>
-  <slot name="end" />
+  <Lead client:idle policyHref={u('/politica/')} phone={SITE.phone} />
 </body>
 </html>
 
