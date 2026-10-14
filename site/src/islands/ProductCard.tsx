@@ -18,7 +18,7 @@ export default function ProductCard({ card, href }: { card: Card; href: string }
           {card.model && <span class="card__model">Teyes {card.model}</span>}
           <span class="card__title">{card.title}</span>
           <span class="card__price">
-            <b>{rub(card.price)}</b>
+            <b>{card.from ? 'от ' : ''}{rub(card.price)}</b>
             {card.priceOld > card.price && <s>{rub(card.priceOld)}</s>}
           </span>
         </span>

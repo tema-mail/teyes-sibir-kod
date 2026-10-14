@@ -4,7 +4,7 @@
 import Base from '../layouts/Base.astro';
 import ProductBuy from '../islands/ProductBuy';
 import ProductCard from '../islands/ProductCard';
-import { PRODUCTS, img, sectionHref, sectionName, similar, type Product } from '../lib/catalog';
+import { PRODUCTS, img, sectionHref, sectionName, similar, minPrice, type Product } from '../lib/catalog';
 import { u, LIVE, BASE, SITE } from '../lib/site';
 import '../styles/shop.css';
 
@@ -16,13 +16,13 @@ const others = similar(p);
 // В описаниях Tilda из разметки только переносы строк: остальное экранируем
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const text = esc(p.text).replace(/&lt;br\s*\/?&gt;/gi, '<br>').replace(/\n/g, '<br>');
-const minPrice = Math.min(p.price, ...p.editions.map((e) => e.price || p.price));
+const lowest = minPrice(p);
 // Фото – полные адреса там, где они реально лежат: на копии (GitHub Pages) или на своём домене
 const origin = BASE ? 'https://tema-mail.github.io' : LIVE;
 const ld = {
   '@context': 'https://schema.org', '@type': 'Product', name: p.title, description: p.descr || p.title,
   image: p.images.map((i) => origin + img(i)), brand: { '@type': 'Brand', name: 'Teyes' },
-  offers: { '@type': 'Offer', priceCurrency: 'RUB', price: minPrice, availability: 'https://schema.org/InStock', url: LIVE + p.path },
+  offers: { '@type': 'Offer', priceCurrency: 'RUB', price: lowest, availability: 'https://schema.org/InStock', url: LIVE + p.path },
 };
 ---
 <Base title={`${p.title} – купить с установкой в Новосибирске | TEYES SIBIR`} description={p.descr || p.title}>

@@ -14,7 +14,11 @@ export type Product = {
 };
 export type Section = { slug: string; name: string; country: string; count: number; total: number };
 /** То, что нужно сетке каталога и корзине, без описаний. */
-export type Card = { id: string; path: string; title: string; price: number; priceOld: number; mark: string; model: string; image: string; brand: string };
+export type Card = { id: string; path: string; title: string; price: number; priceOld: number; from: boolean; mark: string; model: string; image: string; brand: string };
+
+/** Цена, за которую товар реально можно купить: у товаров с вариантами – самый дешёвый вариант.
+ *  В магазине Tilda базовая цена у 295 товаров ниже любого варианта (29 500 в каталоге, 50 400 при покупке). */
+export const minPrice = (p: Product) => (p.editions.length ? Math.min(...p.editions.map((e) => e.price || p.price)) : p.price);
 
 export const PRODUCTS = products as Product[];
 export const SECTIONS = (catalog as { sections: Section[] }).sections;
@@ -30,7 +34,8 @@ export const sectionName = (slug: string) =>
   slug === 'teyes' ? 'Магнитолы Teyes' : slug === 'catalog' ? 'Комплекты Teyes' : SECTIONS.find((s) => s.slug === slug)?.name || slug;
 
 export const toCard = (p: Product): Card => ({
-  id: p.id, path: p.path, title: p.title, price: p.price, priceOld: p.priceOld, mark: p.mark, model: p.model,
+  id: p.id, path: p.path, title: p.title, price: minPrice(p), priceOld: p.editions.length ? 0 : p.priceOld,
+  from: new Set(p.editions.map((e) => e.price)).size > 1, mark: p.mark, model: p.model,
   image: img(p.images[0]), brand: p.brand,
 });
 
