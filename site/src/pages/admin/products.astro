@@ -1,0 +1,14 @@
+---
+// «Товары» в админке: список всех товаров магазина с разделами, поиском и редактором (островок ProductsAdmin).
+// Сами товары островок берёт из репозитория (с ключом GitHub) или с сайта (/admin/products.json) – в HTML их нет.
+import Admin from '../../layouts/Admin.astro';
+import ProductsAdmin from '../../islands/admin/ProductsAdmin';
+import { SECTIONS, sectionName } from '../../lib/catalog';
+import { BASE } from '../../lib/site';
+const sections = [...SECTIONS].map((s) => ({ slug: s.slug, name: sectionName(s.slug) }))
+  .sort((a, b) => (a.slug === 'teyes' ? -2 : a.slug === 'catalog' ? -1 : 0) - (b.slug === 'teyes' ? -2 : b.slug === 'catalog' ? -1 : 0)
+    || a.name.localeCompare(b.name, 'ru'));
+---
+<Admin title="Товары" active="products">
+  <ProductsAdmin client:load sections={sections} base={BASE} />
+</Admin>
