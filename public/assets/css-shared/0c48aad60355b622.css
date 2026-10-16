@@ -1,0 +1,109 @@
+
+/* Фиксим сам HTML-блок крошек */
+#rec2404677391,
+#rec2404677391 .t123,
+#rec2404677391 .t123 > div {
+    background: transparent !important;
+    box-sizing: border-box !important;
+}
+
+/* Обертка крошек — ширина и отступ будут выставляться JS по H1 статьи */
+.teyes-breadcrumbs-shell {
+    box-sizing: border-box !important;
+    padding-top: 18px;
+    padding-bottom: 14px;
+    background: transparent !important;
+}
+
+/* Сами крошки */
+.teyes-breadcrumbs {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 8px;
+
+    width: 100%;
+    max-width: 100%;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+
+    font-family: var(--t-text-font, Arial), sans-serif !important;
+    font-size: 12px;
+    line-height: 1.35;
+    font-weight: 400;
+
+    color: rgba(255, 255, 255, 0.58);
+
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.teyes-breadcrumbs::-webkit-scrollbar {
+    display: none;
+}
+
+.teyes-breadcrumbs a,
+.teyes-breadcrumbs span {
+    flex: 0 0 auto;
+    font-family: inherit !important;
+}
+
+.teyes-breadcrumbs a {
+    color: rgba(255, 255, 255, 0.58) !important;
+    text-decoration: none !important;
+    transition: color .2s ease, opacity .2s ease;
+}
+
+.teyes-breadcrumbs a:hover {
+    color: #ffffff !important;
+}
+
+.teyes-breadcrumbs-separator {
+    color: rgba(255, 255, 255, 0.28);
+    user-select: none;
+}
+
+.teyes-breadcrumbs-current {
+    color: rgba(255, 255, 255, 0.82) !important;
+    font-weight: 500 !important;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 62%;
+}
+
+/* Планшет */
+@media screen and (max-width: 768px) {
+    .teyes-breadcrumbs-shell {
+        padding-top: 14px;
+        padding-bottom: 10px;
+    }
+
+    .teyes-breadcrumbs {
+        font-size: 11px;
+        gap: 6px;
+    }
+
+    .teyes-breadcrumbs-current {
+        max-width: 50vw;
+    }
+}
+
+/* Мобильная версия */
+@media screen and (max-width: 480px) {
+    .teyes-breadcrumbs-shell {
+        padding-top: 12px;
+        padding-bottom: 8px;
+    }
+
+    .teyes-breadcrumbs {
+        font-size: 10px;
+        gap: 5px;
+    }
+
+    .teyes-breadcrumbs-current {
+        max-width: 52vw;
+    }
+}

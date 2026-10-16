@@ -17,4 +17,5 @@ $PY scripts/menu.py
 $PY scripts/products.py
 (cd site && npm ci --no-audit --no-fund && npm run build)
 $PY scripts/build.py
+$PY scripts/dedupe_styles.py  # одинаковые стили страниц Tilda – в общие файлы (лимит Pages 1 ГБ)
 $PY scripts/verify.py
