@@ -2,7 +2,7 @@
 // Отчёт собирает SEO-админка раз в день; страница берёт его с admin.teyes-sibir.ru/api/metrika по логину и паролю
 // админки. Пароль живёт только в памяти вкладки: localStorage и sessionStorage общие у всех сайтов
 // tema-mail.github.io. Весь текст из отчёта выводится через Preact (экранируется), без innerHTML.
-import { useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 
 const API = 'https://admin.teyes-sibir.ru/api/metrika';
 type R = any; // форма отчёта – seo_admin/providers/metrika_report.py (build, merge_previous)
@@ -384,6 +384,13 @@ export default function Metrika() {
     } finally { setBusy(false); }
   };
   const exit = () => { setAuth(''); setData(null); setPass(''); };
+  // Вход в кабинет (scripts/lock-admin.mjs) – тем же логином и паролем, что у SEO-админки: отчёт открывается сразу
+  useEffect(() => {
+    try {
+      const a = JSON.parse(sessionStorage.getItem('tx_admin_auth') || 'null');
+      if (a?.login && a?.pass) load('Basic ' + b64(`${a.login}:${a.pass}`));
+    } catch { /* нет входа – форма ниже */ }
+  }, []);
 
   if (data && auth) {
     if (!data.report) {
