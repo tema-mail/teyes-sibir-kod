@@ -1,14 +1,14 @@
-_astro/Admin.CiUyKoCw.css
+_astro/Admin.BRafXxDd.css
 _astro/Base.weDh7CYP.css
 _astro/Cart.35uMlxhW.js
 _astro/Catalog.EVdTSPOb.js
 _astro/FavPage.nOvB2iQZ.js
 _astro/Lead.CGC96nAA.js
-_astro/Metrika.SUJ8NM_O.js
+_astro/Metrika.CgfbPvM8.js
 _astro/Order.B_DAXa8S.js
 _astro/ProductBuy.DdppaEbM.js
 _astro/ProductCard.CprayCSc.js
-_astro/ProductsAdmin.BsSB4qLP.js
+_astro/ProductsAdmin.Cz0AUWMA.js
 _astro/client.C_cmRlMZ.js
 _astro/forms.DabzkjkL.js
 _astro/hooks.module.N036g3NG.js
@@ -19,7 +19,6 @@ _astro/signals.module.s8FPoujT.js
 _astro/store.DoQr35Wl.js
 admin/index.html
 admin/metrika/index.html
-admin/products.json
 admin/products/index.html
 favorites/index.html
 img/p/000b1e68c5142cf4.webp
