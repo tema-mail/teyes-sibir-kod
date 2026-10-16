@@ -46,6 +46,12 @@ jobs:
           PUBLIC_BASE: /teyes-sibir-kod/starline
           PUBLIC_SITE_URL: https://tema-mail.github.io/teyes-sibir-kod/starline
           PUBLIC_NOINDEX: '1'
+      # весь личный кабинет /admin/ – за логином и паролем; без секретов шаг падает и открытая админка не публикуется
+      - name: Закрыть админку логином и паролем
+        run: node scripts/lock-admin.mjs
+        env:
+          ADMIN_LOGIN: ${{ secrets.ADMIN_LOGIN }}
+          ADMIN_PASS: ${{ secrets.ADMIN_PASS }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
