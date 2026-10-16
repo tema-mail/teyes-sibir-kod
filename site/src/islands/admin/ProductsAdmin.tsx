@@ -8,6 +8,7 @@ import GhConnect from './GhConnect';
 import { PRODUCTS_PATH, IMG_DIR, buildOf, commit, humanError, getToken, readJson, productsText, slugify, type FileChange } from './gh';
 
 type Sec = { slug: string; name: string };
+const RAW = `https://raw.githubusercontent.com/tema-mail/teyes-sibir-kod/main/${PRODUCTS_PATH}`;
 type Status = { kind: 'idle' | 'saving' | 'building' | 'done' | 'error'; text: string; url?: string; sha?: string };
 const rub = (n: number) => new Intl.NumberFormat('ru-RU').format(Math.round(n)) + ' ₽';
 const minPrice = (p: Product) => (p.editions.length ? Math.min(...p.editions.map((e) => e.price || p.price)) : p.price);
@@ -36,7 +37,7 @@ export default function ProductsAdmin({ sections, base }: { sections: Sec[]; bas
   const load = async () => {
     try {
       const list = getToken() ? await readJson<Product[]>(PRODUCTS_PATH)
-        : await (await fetch(`${base}/admin/products.json`, { cache: 'no-store' })).json();
+        : await (await fetch(RAW, { cache: 'no-store' })).json(); // открытых файлов админки нет: публичный репозиторий
       setRaw(list);
       const id = location.hash.slice(1);
       if (id) { const p = list.find((x: Product) => x.id === id); if (p) setEdit(p); }

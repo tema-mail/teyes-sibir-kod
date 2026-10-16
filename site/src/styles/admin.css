@@ -131,3 +131,4 @@ details.pcat[open] .caret{transform:rotate(90deg)}
 /* Телефон: поля 16px – иначе iPhone увеличивает страницу при нажатии на поле */
 .pt__mprice{display:none;font-size:13px;font-weight:600;margin-top:2px}
 @media(max-width:700px){.adm input,.adm select,.adm textarea,.adm .tools input[type=search],.adm .tools select{font-size:16px}}
+.topnav .logout{background:none;border:0;color:rgba(255,255,255,.75);font:inherit;font-size:13px;cursor:pointer;padding:0;min-height:44px}
