@@ -2,7 +2,7 @@
 // получатели, что у попапа записи сайта). Открывается по ссылкам [data-lead] (в data-lead – товар) и по кнопке
 // «Записаться» мега-меню ([data-book]): на этих страницах нет попапа Tilda, без окна она вела бы на «Контакты».
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { sendForm, phoneOk } from '../lib/forms';
+import { sendForm, sendLead, phoneOk } from '../lib/forms';
 
 export default function Lead({ policyHref, phone }: { policyHref: string; phone: string }) {
   const [open, setOpen] = useState(false);
@@ -51,6 +51,8 @@ export default function Lead({ policyHref, phone }: { policyHref: string; phone:
       'Имя': name.trim(), 'Телефон': tel.trim(), 'Товар': about, 'Автомобиль и комментарий': car.trim(),
       'Источник': 'сайт на коде (копия teyes-sibir.ru)', 'Согласие': 'yes',
     });
+    if (ok) await sendLead({ form: 'Запись на установку', name: name.trim(), phone: tel.trim(), comment: car.trim(),
+      items: about ? [{ id: '', title: about, path: location.pathname.replace(/^\/teyes-sibir-kod/, '').replace(/\/$/, ''), variant: '', addons: [], qty: 1, price: 0 }] : [] });
     setBusy(false);
     if (!ok) { setError(`Не получилось отправить. Позвоните нам: ${phone}`); return; }
     setDone(true);

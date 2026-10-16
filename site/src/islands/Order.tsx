@@ -2,7 +2,7 @@
 // формой «Cart» (как живая корзина teyes-sibir.ru). Онлайн-оплату и «Долями» проводит только Tilda – здесь их нет.
 import { useEffect, useState } from 'preact/hooks';
 import { cart, cartTotal, clearCart, setQty, removeFromCart } from '../lib/store';
-import { sendForm, phoneOk } from '../lib/forms';
+import { sendForm, sendLead, phoneOk } from '../lib/forms';
 
 const rub = (n: number) => new Intl.NumberFormat('ru-RU').format(Math.round(n)) + ' ₽';
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, ''); // в корзине адрес товара – как на сайте, без подпапки копии
@@ -50,6 +50,8 @@ export default function Order({ storeHref, policyHref, phone }: { storeHref: str
       'Автомобиль и комментарий': car.trim(), 'Заказ': lines, 'Итого': rub(cartTotal.value),
       'Источник': 'сайт на коде (копия teyes-sibir.ru)', 'Согласие': 'yes',
     });
+    if (ok) await sendLead({ form: 'Заказ', name: name.trim(), phone: tel.trim(), email: email.trim(), comment: car.trim(),
+      total: cartTotal.value, items: items.map((i) => ({ id: i.id, title: i.title, path: i.path, variant: i.variant, addons: i.addons, qty: i.qty, price: i.price })) });
     setBusy(false);
     if (!ok) { setErrors({ send: `Не получилось отправить заказ. Позвоните нам: ${phone}` }); return; }
     clearCart();

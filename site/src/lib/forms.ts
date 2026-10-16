@@ -23,5 +23,20 @@ export async function sendForm(formName: string, fields: Record<string, string>)
   }
 }
 
+/** Копия заявки – в приёмник кабинета (SEO-админка, сервер с паролем): у сайта нет своего хранилища заявок,
+ *  а Tilda шлёт их только в Telegram и на почту. Отсюда их видит вкладка «Заявки» кабинета /admin/leads/.
+ *  Не мешает основной отправке: ошибка приёмника не считается ошибкой заказа. */
+export const LEADS_API = 'https://admin.teyes-sibir.ru/api/leads';
+export type LeadItem = { id: string; title: string; path: string; variant: string; addons: string[]; qty: number; price: number };
+export function sendLead(lead: { form: string; name: string; phone: string; email?: string; comment?: string; items?: LeadItem[]; total?: number }) {
+  const q = new URLSearchParams(location.search);
+  const utm = ['utm_source', 'utm_medium', 'utm_campaign'].map((k) => q.get(k) && `${k}=${q.get(k)}`).filter(Boolean).join(' ');
+  const source = utm || (document.referrer ? new URL(document.referrer).hostname : 'прямой заход');
+  return fetch(LEADS_API, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'omit', keepalive: true,
+    body: JSON.stringify({ ...lead, page: location.pathname, source }),
+  }).then((r) => r.ok, () => false);
+}
+
 /** Телефон: 10–11 цифр (с 8 или +7 в начале). */
 export const phoneOk = (v: string) => /^(\+?7|8)?\d{10}$/.test(v.replace(/[\s()-]/g, ''));
