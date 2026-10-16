@@ -132,3 +132,22 @@ details.pcat[open] .caret{transform:rotate(90deg)}
 .pt__mprice{display:none;font-size:13px;font-weight:600;margin-top:2px}
 @media(max-width:700px){.adm input,.adm select,.adm textarea,.adm .tools input[type=search],.adm .tools select{font-size:16px}}
 .topnav .logout{background:none;border:0;color:rgba(255,255,255,.75);font:inherit;font-size:13px;cursor:pointer;padding:0;min-height:44px}
+/* Заявки – доска (эталон Elite Rose / ALEX KROWN) */
+.kb{display:grid;grid-template-columns:repeat(4,minmax(240px,1fr));gap:14px;overflow-x:auto;align-items:start}
+.kb__col{background:#eceeed;border-radius:10px;padding:10px;display:grid;gap:10px}
+.kb__col h2{margin:4px 4px 2px;font-size:13px;font-weight:600}
+.kb__col h2 span{color:#8a938f;font-weight:400;margin-left:4px}
+.kb__col.is-over{outline:2px dashed #1c201f;outline-offset:-2px}
+.kb__card{background:#fff;border:1px solid #e2e5e3;border-radius:8px;padding:12px;font-size:13px;display:grid;gap:4px;cursor:pointer}
+.kb__card[draggable]{cursor:grab}
+.kb__card.is-drag{opacity:.45}
+.kb__card p{margin:0}
+.kb__top{display:flex;justify-content:space-between;align-items:center}
+.kb__who{font-weight:600}
+.kb__meta{display:flex;justify-content:space-between;color:#77817e;font-size:12px;margin-top:4px}
+.kb__meta b{color:#1e1e1e}
+.seg{display:inline-flex;border:1px solid #d9dedc;border-radius:8px;overflow:hidden;background:#fff}
+.seg button{height:34px;padding:0 13px;border:0;background:none;font:inherit;font-size:13px;color:#55605d;cursor:pointer}
+.seg button.on{background:#1c201f;color:#fff;font-weight:600}
+.tw{overflow-x:auto;background:#fff;border:1px solid #e2e5e3;border-radius:10px}
+.demo-note{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;margin:0 0 14px;border:1px solid #f0d9a8;background:#fffaf0;border-radius:10px;font-size:13px;color:#6b5a33}

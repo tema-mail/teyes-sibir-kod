@@ -1,0 +1,12 @@
+---
+// «Заявки» кабинета: доска по этапам (вид – эталон ALEX KROWN / EV), данные – живые с admin.teyes-sibir.ru.
+// В HTML – только названия категорий и раздел у товаров без раздела Tilda (для подписи «товар – категория»).
+import Admin from '../../layouts/Admin.astro';
+import Leads from '../../islands/admin/Leads';
+import { ALL_PRODUCTS, SECTIONS, sectionName } from '../../lib/catalog';
+const sections = Object.fromEntries(SECTIONS.map((s) => [s.slug, sectionName(s.slug)]));
+const extra = Object.fromEntries(ALL_PRODUCTS.filter((p) => !/^\/store\/catalog\/[^/]+\/tproduct\//.test(p.path)).map((p) => [p.id, p.section]));
+---
+<Admin title="Заявки" active="leads">
+  <Leads client:load sections={sections} extra={extra} />
+</Admin>
