@@ -84,7 +84,13 @@ const h1 = !section ? 'Магазин TEYES SIBIR' : slug && slug !== 'teyes' &&
       </>
     )}
 
-    {section && !slug && !cards.length && <p class="shop__empty">В этом разделе пока нет товаров. Подберём по вашей машине – позвоните или напишите.</p>}
+    {section === 'signaling' && (
+      <a class="tile shop__starline" href={u('/starline/')}>
+        <span class="tile__title">Каталог сигнализаций StarLine</span>
+        <span class="tile__meta">Охранные комплексы, фильтр по функциям, сравнение и комплектации</span>
+      </a>
+    )}
+    {section && !slug && !cards.length && section !== 'signaling' && <p class="shop__empty">В этом разделе пока нет товаров. Подберём по вашей машине – позвоните или напишите.</p>}
     {section && !slug && sec?.groups && (
       <ul class="shop__links">{sec.groups.flatMap((g) => g.items).filter((i) => strip(i.href) !== 'store/' + section)
         .map((i) => <li><a class="chip" href={i.href}>{i.name}</a></li>)}</ul>
@@ -111,5 +117,6 @@ const h1 = !section ? 'Магазин TEYES SIBIR' : slug && slug !== 'teyes' &&
   .brands h2 { font-size: 20px; margin-bottom: 12px; }
   .brands ul { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
   .brands small { margin-left: 8px; color: var(--tx-muted); font-variant-numeric: tabular-nums; }
+  .shop__starline { min-height: 140px; max-width: 560px; background: #0b0e16; }
   .shop__links { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
 </style>

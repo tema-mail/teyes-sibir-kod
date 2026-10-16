@@ -11,9 +11,10 @@
 Фото выбранных: оригиналы в raw/products/, в site/public/img/p/ – одна копия 720 px WebP q72 на картинку
 (одинаковые по содержимому склеиваются), лишние файлы прошлых запусков удаляются.
 Названия марок – из data/menu.json (там опечатки кнопок сайта уже исправлены).
+--add-extra (16.10.2026) добавляет к ним товары без раздела Tilda из product_pages.py (876).
 С 15.10.2026 товары ведутся в админке сайта (/admin/products/): она правит products.json прямо в репозитории.
 Поэтому без флага --from-tilda скрипт ничего не трогает; с флагом – пересобирает всё из снимка Tilda и затирает
-правки админки (и её загруженные фото). products.json – по товару на строку, чтобы правки были видны в git.
+правки админки (и её загруженные фото), а также 876 товаров без раздела – после него снова --add-extra. products.json – по товару на строку, чтобы правки были видны в git.
 """
 import csv
 import hashlib
@@ -131,7 +132,63 @@ def webp(src):
     return name
 
 
+LATIN = {"gaz": "GAZ", "uaz": "UAZ"}  # в меню марки кириллицей («ГАЗ», «УАЗ»), в названиях товаров – латиницей
+
+
+def brand_of(title, brands):
+    """Раздел для товара без раздела: первая марка, которая встречается в названии (по слову)."""
+    t = " " + re.sub(r"[^a-zа-я0-9]+", " ", title.lower()) + " "
+    names = [(slug, n) for slug, n in brands.items()] + [(slug, n) for slug, n in LATIN.items() if slug in brands]
+    hits = [(t.find(f" {n.lower()} "), slug) for slug, n in names if f" {n.lower()} " in t]
+    return min(hits)[1] if hits else "catalog"
+
+
+def add_extra():
+    """--add-extra: товары без раздела (product_pages.py) – добавить к products.json, не трогая остальные
+    (их ведёт админка). Раздел – по марке в названии, фото – так же 720 px WebP."""
+    menu = json.loads((DATA / "menu.json").read_text("utf-8"))
+    kits = next(s for s in menu["menus"]["store"]["sections"] if s["id"] == "kits")
+    brands = {i["href"].rstrip("/").rsplit("/", 1)[-1]: i["name"] for g in kits["groups"] for i in g["items"]}
+    current = json.loads((OUT_DATA / "products.json").read_text("utf-8"))
+    have = {p["id"] for p in current}
+    raw = json.loads((STORE / "extra_products.json").read_text("utf-8"))["products"]
+    new = []
+    for item in raw:
+        p = normalize(item, brands)
+        if p["id"] in have:
+            continue
+        if p["section"] == "catalog":
+            p["section"] = brand_of(p["title"], brands)
+            p["brand"] = brands.get(p["section"], "")
+        new.append(p)
+    urls = sorted({u for p in new for u in p["gallery"]})
+    ORIG.mkdir(parents=True, exist_ok=True)
+    OUT_IMG.mkdir(parents=True, exist_ok=True)
+    with ThreadPoolExecutor(WORKERS) as pool:
+        files = dict(pool.map(fetch, urls))
+    names = {}
+    with ThreadPoolExecutor(WORKERS) as pool:
+        ok = [u for u, f in files.items() if f]
+        for url, name in zip(ok, pool.map(webp, [files[u] for u in ok])):
+            names[url] = name
+    for p in new:
+        p["images"] = [names[u] for u in p.pop("gallery") if u in names]
+    out = current + new
+    lines = ",\n".join(json.dumps(p, ensure_ascii=False, separators=(",", ":")) for p in out)
+    (OUT_DATA / "products.json").write_text(f"[\n{lines}\n]\n", "utf-8")
+    cat = json.loads((OUT_DATA / "catalog.json").read_text("utf-8"))
+    for s in cat["sections"]:
+        s["count"] = s["total"] = sum(1 for p in out if p["section"] == s["slug"])
+    (OUT_DATA / "catalog.json").write_text(json.dumps(cat, ensure_ascii=False, indent=1), "utf-8")
+    failed = [u for u, f in files.items() if not f]
+    print(f"добавлено товаров без раздела: {len(new)} (по маркам: {sum(1 for p in new if p['section'] != 'catalog')}), "
+          f"всего {len(out)}; фото {len(names)}, не скачались {len(failed)}")
+    return 1 if failed else 0
+
+
 def main():
+    if "--add-extra" in sys.argv:
+        return add_extra()
     if (OUT_DATA / "products.json").exists() and "--from-tilda" not in sys.argv:
         print("товары ведёт админка сайта (site/src/data/products.json) – не трогаю; пересобрать из снимка Tilda "
               "и затереть правки админки: products.py --from-tilda")

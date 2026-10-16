@@ -18,8 +18,8 @@
    "slug": "bmw",
    "name": "BMW",
    "country": "Европа",
-   "count": 61,
-   "total": 61
+   "count": 67,
+   "total": 67
   },
   {
    "slug": "buick",
@@ -67,8 +67,8 @@
    "slug": "chevrolet",
    "name": "Chevrolet",
    "country": "США",
-   "count": 71,
-   "total": 71
+   "count": 107,
+   "total": 107
   },
   {
    "slug": "citroen",
@@ -109,15 +109,15 @@
    "slug": "fiat",
    "name": "Fiat",
    "country": "Европа",
-   "count": 28,
-   "total": 28
+   "count": 34,
+   "total": 34
   },
   {
    "slug": "ford",
    "name": "Ford",
    "country": "США",
-   "count": 108,
-   "total": 108
+   "count": 138,
+   "total": 138
   },
   {
    "slug": "foton",
@@ -137,15 +137,15 @@
    "slug": "gaz",
    "name": "ГАЗ",
    "country": "Россия",
-   "count": 4,
-   "total": 4
+   "count": 22,
+   "total": 22
   },
   {
    "slug": "geely",
    "name": "Geely",
    "country": "Китай",
-   "count": 32,
-   "total": 32
+   "count": 38,
+   "total": 38
   },
   {
    "slug": "gmc",
@@ -158,8 +158,8 @@
    "slug": "greatwall",
    "name": "Great Wall",
    "country": "Китай",
-   "count": 15,
-   "total": 15
+   "count": 21,
+   "total": 21
   },
   {
    "slug": "haval",
@@ -172,8 +172,8 @@
    "slug": "honda",
    "name": "Honda",
    "country": "Япония",
-   "count": 183,
-   "total": 183
+   "count": 211,
+   "total": 211
   },
   {
    "slug": "hummer",
@@ -186,8 +186,8 @@
    "slug": "hyundai",
    "name": "Hyundai",
    "country": "Корея",
-   "count": 173,
-   "total": 173
+   "count": 225,
+   "total": 225
   },
   {
    "slug": "infiniti",
@@ -228,22 +228,22 @@
    "slug": "kia",
    "name": "Kia",
    "country": "Корея",
-   "count": 92,
-   "total": 92
+   "count": 188,
+   "total": 188
   },
   {
    "slug": "lada",
    "name": "Lada",
    "country": "Россия",
-   "count": 31,
-   "total": 31
+   "count": 73,
+   "total": 73
   },
   {
    "slug": "landrover",
    "name": "Land Rover",
    "country": "Европа",
-   "count": 20,
-   "total": 20
+   "count": 26,
+   "total": 26
   },
   {
    "slug": "leopaard",
@@ -256,8 +256,8 @@
    "slug": "lexus",
    "name": "Lexus",
    "country": "Япония",
-   "count": 91,
-   "total": 91
+   "count": 103,
+   "total": 103
   },
   {
    "slug": "lifan",
@@ -298,15 +298,15 @@
    "slug": "mazda",
    "name": "Mazda",
    "country": "Япония",
-   "count": 80,
-   "total": 80
+   "count": 122,
+   "total": 122
   },
   {
    "slug": "mercedes",
    "name": "Mercedes Benz",
    "country": "Европа",
-   "count": 65,
-   "total": 65
+   "count": 83,
+   "total": 83
   },
   {
    "slug": "mg",
@@ -319,22 +319,22 @@
    "slug": "mitsubishi",
    "name": "Mitsubishi",
    "country": "Япония",
-   "count": 55,
-   "total": 55
+   "count": 115,
+   "total": 115
   },
   {
    "slug": "nissan",
    "name": "Nissan",
    "country": "Япония",
-   "count": 116,
-   "total": 116
+   "count": 152,
+   "total": 152
   },
   {
    "slug": "opel",
    "name": "Opel",
    "country": "Европа",
-   "count": 32,
-   "total": 32
+   "count": 44,
+   "total": 44
   },
   {
    "slug": "peugeot",
@@ -354,8 +354,8 @@
    "slug": "renault",
    "name": "Renault",
    "country": "Европа",
-   "count": 54,
-   "total": 54
+   "count": 126,
+   "total": 126
   },
   {
    "slug": "roewe",
@@ -375,8 +375,8 @@
    "slug": "skoda",
    "name": "Skoda",
    "country": "Европа",
-   "count": 32,
-   "total": 32
+   "count": 62,
+   "total": 62
   },
   {
    "slug": "ssangyong",
@@ -389,15 +389,15 @@
    "slug": "subaru",
    "name": "Subaru",
    "country": "Япония",
-   "count": 32,
-   "total": 32
+   "count": 56,
+   "total": 56
   },
   {
    "slug": "suzuki",
    "name": "Suzuki",
    "country": "Япония",
-   "count": 23,
-   "total": 23
+   "count": 47,
+   "total": 47
   },
   {
    "slug": "teyes",
@@ -410,22 +410,22 @@
    "slug": "toyota",
    "name": "Toyota",
    "country": "Япония",
-   "count": 266,
-   "total": 266
+   "count": 406,
+   "total": 406
   },
   {
    "slug": "uaz",
    "name": "УАЗ",
    "country": "Россия",
-   "count": 5,
-   "total": 5
+   "count": 23,
+   "total": 23
   },
   {
    "slug": "volkswagen",
    "name": "Volkswagen",
    "country": "Европа",
-   "count": 105,
-   "total": 105
+   "count": 157,
+   "total": 157
   },
   {
    "slug": "volvo",
@@ -438,8 +438,8 @@
    "slug": "zotye",
    "name": "Zotye",
    "country": "Китай",
-   "count": 1,
-   "total": 1
+   "count": 5,
+   "total": 5
   }
  ],
  "parts": [

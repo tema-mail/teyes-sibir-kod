@@ -34,6 +34,18 @@ jobs:
       - run: npm ci --no-audit --no-fund && npm run build
         working-directory: site
       - run: python3 scripts/overlay.py
+      # Каталог сигнализаций StarLine (решение владельца 16.10: «вложи на этот же сайт») – из своего репозитория
+      # tema-mail/starline-catalog, собирается под адрес /starline/ этого сайта; правится там, а не здесь.
+      - uses: actions/checkout@v4
+        with:
+          repository: tema-mail/starline-catalog
+          path: starline-src
+      - run: npm ci --no-audit --no-fund && npm run build && rm -rf ../public/starline && cp -R dist ../public/starline
+        working-directory: starline-src
+        env:
+          PUBLIC_BASE: /teyes-sibir-kod/starline
+          PUBLIC_SITE_URL: https://tema-mail.github.io/teyes-sibir-kod/starline
+          PUBLIC_NOINDEX: '1'
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
