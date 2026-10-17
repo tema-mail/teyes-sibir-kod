@@ -4,7 +4,7 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
 
 const API = 'https://admin.teyes-sibir.ru/api/positions';
-type Row = { query: string; impressions: number; clicks: number; position: number | null; position_long: number | null; direction: string };
+type Row = { query: string; impressions: number | null; clicks: number | null; position: number | null; position_long: number | null; direction: string };
 type Engine = { origin: string; date_from: string; date_to: string; collected_at: string; rows: Row[] } | null;
 type Answer = { mentioned?: boolean; linked?: boolean; snippet?: string; sources?: string[]; error?: string };
 type Ai = { saved_at: string; date: string; models: string[]; cost_usd?: number; questions?: number; summary: Record<string, number>;
@@ -16,22 +16,55 @@ const auth = () => { try { const a = JSON.parse(sessionStorage.getItem('tx_admin
 const dm = (iso: string) => `${iso.slice(8, 10)}.${iso.slice(5, 7)}.${iso.slice(2, 4)}`;
 const num = (n: number) => n.toLocaleString('ru-RU');
 const pos = (p: number | null) => (p == null ? '–' : p.toFixed(1).replace('.', ','));
-const cls = (p: number | null) => (p == null ? 'out' : p <= 3 ? 't3' : p <= 10 ? 't10' : p <= 30 ? 't30' : 'out');
+// Топ-N – как в прошлом дашборде и Вебмастере: «позиция 3» = средняя от 3,0 до 3,9, то есть топ-3 – меньше 4
+const inTop = (p: number | null, n: number) => p != null && p < n + 1;
+const cls = (p: number | null) => (p == null ? 'out' : inTop(p, 3) ? 't3' : inTop(p, 10) ? 't10' : inTop(p, 30) ? 't30' : 'out');
+/** Пять плашек раздела: запросы с показами, топ-3, топ-10, средняя позиция, клики. */
+function tiles(rows: Row[]) {
+  const top = (n: number) => rows.filter((r) => inTop(r.position, n)).length;
+  const withPos = rows.filter((r) => r.position != null);
+  return {
+    queries: rows.length, top3: top(3), top10: top(10), clicks: rows.reduce((s, r) => s + (r.clicks || 0), 0),
+    impressions: rows.reduce((s, r) => s + (r.impressions || 0), 0),
+    avg: withPos.length ? withPos.reduce((s, r) => s + r.position!, 0) / withPos.length : null,
+  };
+}
+const pct = (a: number, b: number) => `${b ? Math.round((a / b) * 100) : 0}%`;
+
+/** Яндекс + Google вместе – между вкладками «Позиции / Нейросети» и «Google / Яндекс» (владелец 17.10). */
+function Total({ g, y }: { g: Engine; y: Engine }) {
+  const a = tiles(g?.rows || []), b = tiles(y?.rows || []);
+  const sum = { queries: a.queries + b.queries, top3: a.top3 + b.top3, top10: a.top10 + b.top10, clicks: a.clicks + b.clicks };
+  const all = [...(g?.rows || []), ...(y?.rows || [])].filter((r) => r.position != null);
+  const avg = all.length ? all.reduce((s, r) => s + r.position!, 0) / all.length : null;
+  const split = (ya: string | number, go: string | number) => `Яндекс ${ya} · Google ${go}`;
+  const kpi: [string, string, string][] = [
+    ['Запросов с показами', num(sum.queries), split(num(b.queries), num(a.queries))],
+    ['В топ-3', num(sum.top3), `${pct(sum.top3, sum.queries)} · ${split(num(b.top3), num(a.top3))}`],
+    ['В топ-10', num(sum.top10), `${pct(sum.top10, sum.queries)} · ${split(num(b.top10), num(a.top10))}`],
+    ['Средняя позиция', pos(avg), split(pos(b.avg), pos(a.avg))],
+    ['Клики', num(sum.clicks), split(num(b.clicks), num(a.clicks))],
+  ];
+  return (
+    <>
+      <p class="ps-muted" style="margin:0"><b>Яндекс + Google вместе.</b> Периоды разные: Google – {g ? `${dm(g.date_from)} – ${dm(g.date_to)}` : 'нет данных'}, Яндекс – {y ? `${dm(y.date_from)} – ${dm(y.date_to)} (архив)` : 'нет данных'}.</p>
+      <section class="ps-kpis">{kpi.map(([t, v, d]) => <div class="ps-kpi"><span class="ps-muted">{t}</span><b>{v}</b><span class="ps-d">{d}</span></div>)}</section>
+    </>
+  );
+}
 
 function EngineView({ e, name }: { e: Engine; name: string }) {
   const [dir, setDir] = useState('');
   const dirs = useMemo(() => [...new Set((e?.rows || []).map((r) => r.direction))], [e]);
   if (!e) return <div class="ps-note">{name}: данных нет.</div>;
   const rows = e.rows.filter((r) => !dir || r.direction === dir);
-  const top = (n: number) => rows.filter((r) => r.position != null && r.position <= n).length;
-  const withPos = rows.filter((r) => r.position != null);
-  const avg = withPos.length ? withPos.reduce((s, r) => s + r.position!, 0) / withPos.length : null;
+  const t = tiles(rows);
   const kpi: [string, string, string][] = [
-    ['Запросов с показами', num(rows.length), `за ${dm(e.date_from)} – ${dm(e.date_to)}`],
-    ['В топ-3', num(top(3)), `${rows.length ? Math.round((top(3) / rows.length) * 100) : 0}% запросов`],
-    ['В топ-10', num(top(10)), `${rows.length ? Math.round((top(10) / rows.length) * 100) : 0}% запросов`],
-    ['Средняя позиция', pos(avg), 'по запросам с показами'],
-    ['Клики', num(rows.reduce((s, r) => s + r.clicks, 0)), `показы ${num(rows.reduce((s, r) => s + r.impressions, 0))}`],
+    ['Запросов с показами', num(t.queries), `за ${dm(e.date_from)} – ${dm(e.date_to)}`],
+    ['В топ-3', num(t.top3), `${pct(t.top3, t.queries)} запросов`],
+    ['В топ-10', num(t.top10), `${pct(t.top10, t.queries)} запросов`],
+    ['Средняя позиция', pos(t.avg), 'по запросам с показами'],
+    ['Клики', num(t.clicks), `показы ${num(t.impressions)}`],
   ];
   return (
     <>
@@ -47,7 +80,7 @@ function EngineView({ e, name }: { e: Engine; name: string }) {
             {rows.map((r) => {
               const d = r.position != null && r.position_long != null ? r.position_long - r.position : null;
               return (
-                <tr><td class="q l">{r.query}<small>{r.direction}</small></td><td>{num(r.impressions)}</td><td>{num(r.clicks)}</td>
+                <tr><td class="q l">{r.query}<small>{r.direction}</small></td><td>{r.impressions == null ? '–' : num(r.impressions)}</td><td>{r.clicks == null ? '–' : num(r.clicks)}</td>
                   <td class={`p ${cls(r.position)}`}>{pos(r.position)}</td><td class="ps-muted">{pos(r.position_long)}</td>
                   <td class={`ps-d ${d == null || Math.abs(d) < 0.5 ? '' : d > 0 ? 'up' : 'down'}`}>{d == null || Math.abs(d) < 0.5 ? '–' : `${d > 0 ? '▲' : '▼'} ${Math.abs(d).toFixed(1).replace('.', ',')}`}</td></tr>
               );
@@ -112,12 +145,13 @@ export default function Positions() {
       {d && tab === 'ai' && <AiView ai={d.ai} />}
       {d && tab === 'pos' && (
         <>
+          <Total g={d.google} y={d.yandex} />
           <nav class="ps-seg" aria-label="Поисковик">
             {(['google', 'yandex'] as const).map((x) => <a href="#" class={eng === x ? 'on' : ''} onClick={(ev) => { ev.preventDefault(); setEng(x); }}>{x === 'google' ? 'Google' : 'Яндекс'}</a>)}
           </nav>
           {eng === 'google'
             ? <div class="ps-note">Google – по данным Search Console: средняя позиция сайта по запросу за 30 дней и за 3 месяца, по всем регионам. Цвет: синий – топ-3, зелёный – топ-10, светлый – 11–30.</div>
-            : <div class="ps-note">Яндекс – последний архив Вебмастера ({e ? `${dm(e.date_from)} – ${dm(e.date_to)}` : 'нет'}): API Вебмастера сейчас не отвечает из сети. Живой съём позиций в Яндексе по Новосибирску – XMLRiver, платно: включим по смете.</div>}
+            : <div class="ps-note">Яндекс – последний архив Вебмастера ({e ? `${dm(e.date_from)} – ${dm(e.date_to)}` : 'нет'}): с 12.10 API Вебмастера не отвечает ни с сервера, ни с мака (соединение зависает), поэтому свежих данных Яндекса нет. Живой съём позиций в Яндексе по Новосибирску – XMLRiver, платно: включим по смете.</div>}
           <EngineView e={e} name={eng === 'google' ? 'Google' : 'Яндекс'} />
         </>
       )}
