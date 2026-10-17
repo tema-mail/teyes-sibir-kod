@@ -151,3 +151,20 @@ details.pcat[open] .caret{transform:rotate(90deg)}
 .seg button.on{background:#1c201f;color:#fff;font-weight:600}
 .tw{overflow-x:auto;background:#fff;border:1px solid #e2e5e3;border-radius:10px}
 .demo-note{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;margin:0 0 14px;border:1px solid #f0d9a8;background:#fffaf0;border-radius:10px;font-size:13px;color:#6b5a33}
+/* Закрытый раздел (components/admin/Locked.astro): размытый каркас и карточка с замком поверх */
+.locked{position:relative;min-height:560px;border-radius:12px;overflow:hidden;background:#fff;border:1px solid #e2e5e3}
+.locked__ghost{position:absolute;inset:0;padding:22px;display:grid;gap:18px;align-content:start;filter:blur(5px);opacity:.55;pointer-events:none}
+.locked__kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.locked__kpis div{height:74px;border-radius:10px;background:#f1f3f2;display:grid;gap:8px;padding:12px;align-content:start}
+.locked__kpis i,.locked__rows i{display:block;height:10px;border-radius:5px;background:#d9dedc;width:60%}
+.locked__kpis b{display:block;height:20px;border-radius:6px;background:#c9cfcc;width:45%}
+.locked__rows{display:grid;gap:10px}
+.locked__rows div{display:grid;grid-template-columns:minmax(0,1fr) 70px 70px 70px;gap:14px;align-items:center;height:34px;border-bottom:1px solid #eef0ef}
+.locked__rows b{display:block;height:12px;border-radius:5px;background:#e3e7e5}
+.locked__card{position:relative;max-width:560px;margin:70px auto;background:#fff;border:1px solid #e2e5e3;border-radius:16px;padding:30px 28px;box-shadow:0 20px 60px rgba(28,32,31,.12);text-align:center}
+.locked__icon{color:#1c201f;margin:0 auto 12px;display:block}
+.locked__card h1{margin:0 0 8px;font-size:22px;font-weight:600}
+.locked__lead{margin:0 0 16px;font-size:15px;color:#1e1e1e}
+.locked__about{margin:0 0 6px;font-size:13px;color:#77817e;text-align:left}
+.locked__card ul{margin:0;padding-left:18px;text-align:left;font-size:13px;line-height:1.55;color:#55605d}
+@media(max-width:700px){.locked__kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.locked__card{margin:40px 14px;padding:24px 18px}.locked{min-height:620px}}

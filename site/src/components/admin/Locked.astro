@@ -1,0 +1,24 @@
+---
+// Закрытый раздел кабинета – общий для всех ЛК (владелец 17.10.2026: «базово во все ЛК ставь; пока я не скажу,
+// что собираем, на странице – замочек и „раздел закрыт“: расширенная аналитика – только клиентам на постоянном
+// SEO-обслуживании»). За замком – размытый каркас раздела без цифр (как будет выглядеть), данных нет и не грузятся.
+interface Props { title: string; about: string; items: string[] }
+const { title, about, items } = Astro.props;
+---
+<section class="locked" aria-labelledby="locked-h">
+  <div class="locked__ghost" aria-hidden="true">
+    <div class="locked__kpis">{[1, 2, 3, 4, 5].map(() => <div><i></i><b></b></div>)}</div>
+    <div class="locked__rows">{Array.from({ length: 9 }, (_, n) => <div><i style={`width:${38 + ((n * 17) % 40)}%`}></i><b></b><b></b><b></b></div>)}</div>
+  </div>
+  <div class="locked__card">
+    <svg class="locked__icon" width="56" height="56" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4.5" y="10.5" width="15" height="10" rx="2.5"></rect>
+      <path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"></path>
+      <circle cx="12" cy="15.2" r="1.3"></circle><path d="M12 16.5v1.6"></path>
+    </svg>
+    <h1 id="locked-h">{title}: раздел закрыт</h1>
+    <p class="locked__lead">Это расширенная аналитика. Доступ – только клиентам на постоянном SEO-обслуживании.</p>
+    <p class="locked__about">{about}</p>
+    <ul>{items.map((i) => <li>{i}</li>)}</ul>
+  </div>
+</section>
