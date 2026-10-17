@@ -53,6 +53,14 @@ function AiView({ ai }: { ai: Ai }) {
   );
 }
 
+/** Доля кликов по месту в выдаче (средние данные по рунету, для оценки – не точные цифры для этого сайта). */
+const CTR = [0, 0.28, 0.15, 0.11, 0.08, 0.06, 0.05, 0.04, 0.03, 0.03, 0.02];
+const ctr = (p: number | null) => (p == null ? 0 : p <= 10 ? CTR[p] : p <= 20 ? 0.01 : 0);
+const TOP3 = (CTR[1] + CTR[2] + CTR[3]) / 3; // цель – войти в топ-3
+/** Прогноз трафика: сколько людей в месяц придёт сейчас и сколько добавит топ-3 (спрос × доля кликов). */
+const now = (r: NskRow, e: Eng) => Math.round((r.demand || 0) * ctr(r[e]?.position ?? null));
+const gain = (r: NskRow, e: Eng) => Math.max(0, Math.round((r.demand || 0) * TOP3) - now(r, e));
+
 /** Плашки по Новосибирску: только запросы, по которым есть замер. */
 function nskTiles(rows: NskRow[], e: Eng) {
   const got = rows.filter((r) => r[e]);
@@ -90,7 +98,15 @@ function NskView({ n, e }: { n: Nsk; e: Eng }) {
     const p = r[e]!.position;
     return only === 'all' || (only === 'top' ? p != null && p <= 3 : only === 'near' ? p != null && p > 3 && p <= 20 : p == null);
   });
-  const filters: [typeof only, string][] = [['all', 'Все'], ['top', 'В топ-3'], ['near', 'Места 4–20: подтянуть'], ['none', 'Нет в топ-20']];
+  const filters: [typeof only, string][] = [['all', 'Все'], ['near', 'Рядом с топом – подтянуть'], ['none', 'Спрос есть – нас нет'], ['top', 'Уже в топе – держать']];
+  const HINT: Record<typeof only, string> = {
+    all: 'Все запросы со спросом в Новосибирске, по которым есть замер.',
+    near: 'Места 4–20: страница уже в выдаче – подтянуть её до топ-3 быстрее всего. Сортировка – по прибавке людей.',
+    none: 'Нас нет в топ-20: нужна своя страница под запрос или серьёзная доработка существующей.',
+    top: 'Уже в топ-3: удерживать – не ломать страницу, обновлять цены и фото.',
+  };
+  if (only === 'near' || only === 'none') rows.sort((a, b) => gain(b, e) - gain(a, e));
+  const sumNow = rows.reduce((s, r) => s + now(r, e), 0), sumGain = rows.reduce((s, r) => s + gain(r, e), 0);
   return (
     <>
       <div class="ps-row">
@@ -100,9 +116,10 @@ function NskView({ n, e }: { n: Nsk; e: Eng }) {
           {dirs.map((d) => <a href="#" class={dir === d ? 'on' : ''} onClick={(ev) => { ev.preventDefault(); setDir(d); }}>{d}</a>)}
         </nav>
       </div>
+      <p class="ps-muted" style="margin:0">{HINT[only]} В списке {num(rows.length)} запросов: сейчас дают ≈ <b>{num(sumNow)}</b> чел. в месяц, в топ-3 добавят ≈ <b>{num(sumGain)}</b>.</p>
       <div class="ps-wrap">
         <table>
-          <thead><tr><th class="l">Запрос · страница в выдаче</th><th>Спрос в НСК, мес.</th><th>{ENG[e]}, место</th><th>Было</th></tr></thead>
+          <thead><tr><th class="l">Запрос · страница в выдаче</th><th>Спрос в НСК, мес.</th><th>{ENG[e]}, место</th><th>Было</th><th>Сейчас, чел./мес.</th><th>+ в топ-3</th></tr></thead>
           <tbody>
             {rows.map((r) => {
               const s = r[e]!;
@@ -111,10 +128,10 @@ function NskView({ n, e }: { n: Nsk; e: Eng }) {
                 <tr><td class="q l">{r.query}<small>{r.direction}{s.url ? ' · ' : ''}{s.url && <a href={s.url} target="_blank" rel="noopener">{s.url.replace(/^https?:\/\/(www\.)?/, '')}</a>}</small></td>
                   <td>{r.demand == null ? '–' : num(r.demand)}</td>
                   <td class={`p ${cls(s.position)}`}>{s.position ?? `нет в топ-${s.depth || 20}`}{d != null && Math.abs(d) >= 1 && <sup class={d > 0 ? 'ps-d up' : 'ps-d down'}>{d > 0 ? `+${d}` : d}</sup>}</td>
-                  <td class="ps-muted">{s.had_prev ? (s.prev ?? 'нет') : '–'}</td></tr>
+                  <td class="ps-muted">{s.had_prev ? (s.prev ?? 'нет') : '–'}</td><td>{num(now(r, e))}</td><td><b>{gain(r, e) ? `+${num(gain(r, e))}` : '–'}</b></td></tr>
               );
             })}
-            {!rows.length && <tr><td colSpan={4} class="ps-muted">Нет запросов</td></tr>}
+            {!rows.length && <tr><td colSpan={6} class="ps-muted">Нет запросов</td></tr>}
           </tbody>
         </table>
       </div>
@@ -147,7 +164,7 @@ export default function Positions() {
           <nav class="ps-seg" aria-label="Поисковик">
             {(['yandex', 'google'] as const).map((x) => <a href="#" class={eng === x ? 'on' : ''} onClick={(ev) => { ev.preventDefault(); setEng(x); }}>{ENG[x]}</a>)}
           </nav>
-          <div class="ps-note">Место в выдаче {ENG[eng]} для человека в Новосибирске (XMLRiver, компьютер, первые 20 результатов) по запросам со спросом в Новосибирске. Цвет: синий – топ-3, зелёный – топ-10, светлый – 11–20. «Было» – прошлый замер (август – пилот по главным запросам). Маленькая цифра – сколько мест прибавили.</div>
+          <div class="ps-note">Место в выдаче {ENG[eng]} для человека в Новосибирске (XMLRiver, компьютер, первые 20 результатов) по запросам со спросом в Новосибирске. Цвет: синий – топ-3, зелёный – топ-10, светлый – 11–20. «Было» – прошлый замер (август – пилот по главным запросам). Маленькая цифра – сколько мест прибавили. Прогноз: спрос × доля кликов места (1-е – 28%, 3-е – 11%, 10-е – 2%, средние данные по рунету) – оценка, а не обещание.</div>
           <NskView n={d.nsk} e={eng} />
         </>
       )}
