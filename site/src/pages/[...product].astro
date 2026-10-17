@@ -4,7 +4,7 @@
 import Base from '../layouts/Base.astro';
 import ProductBuy from '../islands/ProductBuy';
 import ProductCard from '../islands/ProductCard';
-import { PRODUCTS, img, sectionHref, sectionName, similar, minPrice, type Product } from '../lib/catalog';
+import { PRODUCTS, videoList, img, sectionHref, sectionName, similar, minPrice, type Product } from '../lib/catalog';
 import { u, LIVE, BASE, SITE } from '../lib/site';
 import '../styles/shop.css';
 
@@ -20,10 +20,10 @@ const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
 const text = esc(p.text.replace(/&(quot|nbsp|amp|lt|gt|apos|#39);/g, (_, k) => ENT[k]))
   .replace(/&lt;(\/?)(p|strong|h3|ul|li|br)\s*\/?&gt;/gi, (_, sl, tag) => `<${sl}${tag.toLowerCase()}>`).replace(/\n/g, '<br>');
 const lowest = minPrice(p);
-const videos = p.videos || [];
+const videos = videoList(p);
 // Видео – сразу после обложки: последним слайдом его не замечают (владелец 17.10)
-const slides = [...p.images.slice(0, 1).map((name) => ({ name, video: false })), ...videos.map((name) => ({ name, video: true })),
-  ...p.images.slice(1).map((name) => ({ name, video: false }))];
+const slides: { name: string; video: false | { file: string; poster: string; sound: boolean } }[] = [...p.images.slice(0, 1).map((name) => ({ name, video: false as const })), ...videos.map((v) => ({ name: v.file, video: v })),
+  ...p.images.slice(1).map((name) => ({ name, video: false as const }))];
 // Фото – полные адреса там, где они реально лежат: на копии (GitHub Pages) или на своём домене
 const origin = BASE ? 'https://tema-mail.github.io' : LIVE;
 const ld = {
@@ -44,7 +44,9 @@ const ld = {
       <div class="gallery">
         <div class="gallery__track" id="gallery">
           {slides.map((sl, i) => sl.video
-            ? <video src={u(`/video/p/${sl.name}`)} controls playsinline muted preload="metadata" poster={p.images[0] ? img(p.images[0]) : undefined} />
+            ? <div class="gallery__video"><video src={u(`/video/p/${sl.name}`)} autoplay muted loop playsinline preload="metadata"
+                poster={sl.video.poster ? img(sl.video.poster) : undefined} data-sound={sl.video.sound ? '1' : undefined} />
+                {sl.video.sound && <button type="button" class="gallery__sound" data-unmute aria-label="Включить звук">🔇 Включить звук</button>}</div>
             : <img src={img(sl.name)} alt={i ? `${p.title}, фото ${i + 1}` : p.title} width="720" height="720"
                 loading={i ? 'lazy' : 'eager'} fetchpriority={i ? undefined : 'high'} decoding="async" />)}
         </div>
@@ -52,7 +54,7 @@ const ld = {
         {slides.length > 1 && (
           <div class="gallery__thumbs">
             {slides.map((sl, i) => sl.video
-              ? <button type="button" data-go={i} aria-label="Видео" class="gallery__vthumb">▶</button>
+              ? <button type="button" data-go={i} aria-label="Видео" class="gallery__vthumb">{sl.video.poster ? <img src={img(sl.video.poster)} alt="" loading="lazy" width="80" height="80" /> : <video src={`${u(`/video/p/${sl.name}`)}#t=0.1`} muted playsinline preload="metadata" />}<span>▶</span></button>
               : <button type="button" data-go={i} aria-label={`Фото ${i + 1}`}><img src={img(sl.name)} alt="" loading="lazy" width="80" height="80" /></button>)}
           </div>
         )}
@@ -91,6 +93,13 @@ const ld = {
   </div>
   <script type="application/ld+json" set:html={JSON.stringify(ld).replace(/</g, '\\u003c')} />
   <script>
+    // Звук видео – только по кнопке: браузеры не дают запускать видео со звуком сами
+    document.querySelectorAll<HTMLButtonElement>('[data-unmute]').forEach((b) => b.addEventListener('click', () => {
+      const v = b.parentElement?.querySelector('video');
+      if (!v) return;
+      v.muted = !v.muted; if (!v.muted) v.play();
+      b.textContent = v.muted ? '🔇 Включить звук' : '🔊 Выключить звук';
+    }));
     // Миниатюры листают ленту фото
     const track = document.getElementById('gallery');
     document.querySelectorAll<HTMLButtonElement>('[data-go]').forEach((b) =>
