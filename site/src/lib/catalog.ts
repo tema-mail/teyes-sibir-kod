@@ -13,6 +13,7 @@ export type Product = {
   options: { title: string; values: string[] }[]; editions: Edition[]; addons: Addon[];
   characteristics: { title: string; value: string }[]; images: string[]; parts: string[];
   hidden?: boolean; // скрыт в админке – нет на сайте (ни страницы, ни в каталогах)
+  videos?: string[]; // видео из админки: site/public/video/p/<имя>, в галерее после фото
 };
 export type Part = { uid: string; path: string; title: string; count: number };
 export type Section = { slug: string; name: string; country: string; count: number; total: number };

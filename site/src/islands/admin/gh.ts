@@ -5,6 +5,7 @@ export const REPO = 'tema-mail/teyes-sibir-kod';
 export const BRANCH = 'main';
 export const PRODUCTS_PATH = 'site/src/data/products.json';
 export const IMG_DIR = 'site/public/img/p';
+export const VIDEO_DIR = 'site/public/video/p';
 const KEY = 'tx_admin_gh_token';
 
 export const getToken = () => { try { return localStorage.getItem(KEY) || ''; } catch { return ''; } };

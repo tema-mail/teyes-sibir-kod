@@ -168,3 +168,13 @@ details.pcat[open] .caret{transform:rotate(90deg)}
 .locked__about{margin:0 0 6px;font-size:13px;color:#77817e;text-align:left}
 .locked__card ul{margin:0;padding-left:18px;text-align:left;font-size:13px;line-height:1.55;color:#55605d}
 @media(max-width:700px){.locked__kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.locked__card{margin:40px 14px;padding:24px 18px}.locked{min-height:620px}}
+.gal__item video{width:100%;height:100%;object-fit:cover;background:#000;display:block}
+.gal__item.is-drag{opacity:.4}
+.gal__item[draggable]{cursor:grab}
+.gal__arrows{position:absolute;left:8px;top:8px;display:flex;gap:4px}
+.gal__arrows button{width:32px;height:32px;border:0;border-radius:8px;background:rgba(255,255,255,.92);font:inherit;font-size:15px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.gal__arrows button:disabled{opacity:.35;cursor:default}
+.gal__item:first-child:not(.gal__item--video) .gal__arrows{top:44px}
+.gal__add.is-busy{opacity:.5;pointer-events:none}
+.gal__err{margin:12px 0 0;padding:10px 14px;border:1px solid #f1c2c2;background:#fff5f5;border-radius:10px;color:#8a1f1f;font-size:13px}
+.gal__err ul{margin:6px 0 0;padding-left:18px}

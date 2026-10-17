@@ -3,7 +3,7 @@
 // (галочки с доплатой), «Характеристики», «Фото». Всё сохраняется; новые фото сжимаются в браузере в WebP 720 px.
 import { useEffect, useState } from 'preact/hooks';
 import type { Product, Edition } from '../../lib/catalog';
-import { toWebp } from './gh';
+import { PHOTO, VIDEO, RULES, preparePhoto, prepareVideo, moveItem, type Ready } from './media';
 
 const TABS = ['Основное', 'Цены и версии', 'Доп. опции', 'Характеристики', 'Фото'] as const;
 const MARKS = [['', 'Нет'], ['NEW', 'Новинка'], ['SALE', 'Скидка']];
@@ -34,18 +34,22 @@ function toHtml(t: string) {
 }
 const int = (v: string) => Number(v.replace(/\D/g, '')) || 0;
 
-type Photo = { name: string; base64: string; url: string };
+/** Фото или видео в ленте редактора: уже на сайте (src – адрес) или новое (base64 – загрузится при сохранении). */
+type Media = { name: string; src: string; base64?: string };
 
 export default function ProductEditor({ product, sections, base, busy, onClose, onSave, onDelete }: {
   product: Product; sections: { slug: string; name: string }[]; base: string; busy: boolean;
-  onClose: () => void; onSave: (p: Product, photos: { name: string; base64: string }[]) => void; onDelete: (p: Product) => void;
+  onClose: () => void; onSave: (p: Product, uploads: { photos: Ready[]; videos: Ready[] }) => void; onDelete: (p: Product) => void;
 }) {
   const [p, setP] = useState<Product>(product);
   const [text, setText] = useState(toText(product.text));
   const [titles, setTitles] = useState<string[]>(product.options.map((o) => o.title));
   const [newTitle, setNewTitle] = useState('');
-  const [photos, setPhotos] = useState<Photo[]>([]);
+  const [gallery, setGallery] = useState<Media[]>(product.images.map((n) => ({ name: n, src: `${base}/img/p/${n}` })));
+  const [videos, setVideos] = useState<Media[]>((product.videos || []).map((n) => ({ name: n, src: `${base}/video/p/${n}` })));
+  const [drag, setDrag] = useState<{ list: 'img' | 'vid'; i: number } | null>(null);
   const [note, setNote] = useState('');
+  const [errors, setErrors] = useState<string[]>([]);
   const [tab, setTab] = useState<(typeof TABS)[number]>('Основное');
   const isNew = !product.id;
   useEffect(() => {
@@ -60,18 +64,44 @@ export default function ProductEditor({ product, sections, base, busy, onClose, 
     // Параметры версий: названия – из списка, значения – из самих версий, по порядку появления
     const options = titles.map((t) => ({ title: t, values: [...new Set(p.editions.map((e) => e.options[t]).filter(Boolean))] }));
     const changed = text !== toText(product.text);
-    onSave({ ...p, options, text: changed ? toHtml(text.trim()) : product.text,
-      images: [...p.images, ...photos.map((f) => f.name)] }, photos.map(({ name, base64 }) => ({ name, base64 })));
+    const fresh = (l: Media[]) => l.filter((m) => m.base64).map((m) => ({ name: m.name, base64: m.base64!, url: m.src }));
+    onSave({ ...p, options, text: changed ? toHtml(text.trim()) : product.text, images: gallery.map((m) => m.name),
+      ...(videos.length || product.videos ? { videos: videos.map((m) => m.name) } : {}) }, { photos: fresh(gallery), videos: fresh(videos) });
   };
-  const addPhotos = async (files: File[]) => {
-    setNote('Сжимаю фото…');
-    try {
-      const out: Photo[] = [];
-      for (const f of files) { const w = await toWebp(f); out.push({ ...w, url: URL.createObjectURL(f) }); }
-      setPhotos([...photos, ...out]);
-      setNote('');
-    } catch (e: any) { setNote(`Фото не добавлено: ${e.message}`); }
+  /** Загрузка: каждый файл проверяется отдельно; что не подошло – в списке ошибок с причиной, остальное добавляется. */
+  const add = async (kind: 'img' | 'vid', files: File[]) => {
+    if (note) return; // идёт прошлая загрузка: лента заблокирована, иначе правка откатится
+    const list = kind === 'img' ? gallery : videos, max = kind === 'img' ? PHOTO.maxCount : VIDEO.maxCount;
+    const errs: string[] = [], out: Media[] = [];
+    setNote(kind === 'img' ? 'Проверяю и сжимаю фото…' : 'Проверяю видео…');
+    for (const f of files) {
+      if (list.length + out.length >= max) { errs.push(`«${f.name}»: у товара уже ${max} ${kind === 'img' ? 'фото' : 'видео'} – больше нельзя`); continue; }
+      try {
+        const r = await (kind === 'img' ? preparePhoto(f) : prepareVideo(f));
+        if ([...list, ...out].some((m) => m.name === r.name)) { errs.push(`«${f.name}»: такой файл уже есть у товара`); continue; }
+        out.push({ name: r.name, src: r.url, base64: r.base64 });
+      } catch (e: any) { errs.push(e.message); }
+    }
+    (kind === 'img' ? setGallery : setVideos)([...list, ...out]);
+    setErrors(errs); setNote('');
   };
+  const move = (kind: 'img' | 'vid', from: number, to: number) => {
+    if (note) return;
+    (kind === 'img' ? setGallery(moveItem(gallery, from, to)) : setVideos(moveItem(videos, from, to)));
+  };
+  const drop = (kind: 'img' | 'vid', i: number) => {
+    if (note) return;
+    const list = kind === 'img' ? gallery : videos;
+    if (list[i].base64) URL.revokeObjectURL(list[i].src);
+    (kind === 'img' ? setGallery : setVideos)(list.filter((_, n) => n !== i));
+  };
+  const dnd = (kind: 'img' | 'vid', i: number) => ({
+    draggable: true,
+    onDragStart: (e: DragEvent) => { e.dataTransfer?.setData('text/plain', String(i)); setDrag({ list: kind, i }); },
+    onDragOver: (e: DragEvent) => { if (drag?.list === kind) e.preventDefault(); },
+    onDrop: (e: DragEvent) => { e.preventDefault(); if (drag?.list === kind) move(kind, drag.i, i); setDrag(null); },
+    onDragEnd: () => setDrag(null),
+  });
 
   return (
     <div class="ed" role="dialog" aria-modal="true" aria-label={isNew ? 'Новый товар' : `Товар «${p.title}»`}>
@@ -87,7 +117,7 @@ export default function ProductEditor({ product, sections, base, busy, onClose, 
             <span />{p.hidden ? 'Скрыт' : 'На сайте'}
           </label>
           <button class="btn" onClick={onClose}>Закрыть</button>
-          <button class="btn primary" onClick={save} disabled={busy || note.startsWith('Сжимаю')}>{busy ? 'Идёт прошлое сохранение…' : 'Сохранить'}</button>
+          <button class="btn primary" onClick={save} disabled={busy || !!note}>{busy ? 'Идёт прошлое сохранение…' : 'Сохранить'}</button>
         </header>
         <nav class="ed__tabs">{TABS.map((t) => <button class={t === tab ? 'on' : ''} onClick={() => setTab(t)}>{t}</button>)}</nav>
 
@@ -175,30 +205,46 @@ export default function ProductEditor({ product, sections, base, busy, onClose, 
 
           {tab === 'Фото' && (
             <div>
-              <p class="muted" style="margin:0 0 12px">Первое фото – обложка в каталоге. Новые фото сжимаются до 720 px и загружаются при сохранении.</p>
+              <p class="muted" style="margin:0 0 12px">Первое фото – обложка в каталоге. Порядок – перетаскиванием или стрелками ← →. Новые файлы загрузятся при сохранении.</p>
               <div class="gal">
-                {p.images.map((im, i) => (
-                  <figure class="gal__item">
-                    <img src={`${base}/img/p/${im}`} alt="" />
-                    {i === 0 && <span class="gal__cover">Обложка</span>}
-                    {i > 0 && <button class="gal__badge" title="Сделать обложкой" onClick={() => setP({ ...p, images: [im, ...p.images.filter((_, n) => n !== i)] })}>сделать обложкой</button>}
-                    <button class="gal__del" title="Убрать фото" onClick={() => setP({ ...p, images: p.images.filter((_, n) => n !== i) })}>×</button>
+                {gallery.map((m, i) => (
+                  <figure class={`gal__item${m.base64 ? ' gal__item--new' : ''}${drag?.list === 'img' && drag.i === i ? ' is-drag' : ''}`} {...dnd('img', i)}>
+                    <img src={m.src} alt="" draggable={false} />
+                    {i === 0 ? <span class="gal__cover">Обложка</span> : <button class="gal__badge" title="Сделать обложкой" onClick={() => move('img', i, 0)}>сделать обложкой</button>}
+                    <span class="gal__arrows">
+                      <button type="button" title="Левее" aria-label="Передвинуть левее" disabled={i === 0} onClick={() => move('img', i, i - 1)}>←</button>
+                      <button type="button" title="Правее" aria-label="Передвинуть правее" disabled={i === gallery.length - 1} onClick={() => move('img', i, i + 1)}>→</button>
+                    </span>
+                    <button class="gal__del" title="Убрать фото" aria-label="Убрать фото" onClick={() => drop('img', i)}>×</button>
                   </figure>
                 ))}
-                {photos.map((f, i) => (
-                  <figure class="gal__item gal__item--new">
-                    <img src={f.url} alt="" />
-                    {p.images.length === 0 && i === 0 && <span class="gal__cover">Обложка</span>}
-                    <span class="gal__badge">загрузится при сохранении</span>
-                    <button class="gal__del" title="Убрать фото" onClick={() => setPhotos(photos.filter((_, n) => n !== i))}>×</button>
-                  </figure>
-                ))}
-                <label class="gal__add">
-                  <input type="file" accept="image/jpeg,image/png,image/webp" multiple hidden onChange={(e) => { const fl = [...((e.target as HTMLInputElement).files || [])]; (e.target as HTMLInputElement).value = ''; addPhotos(fl); }} />
+                <label class={`gal__add${note ? ' is-busy' : ''}`}>
+                  <input type="file" disabled={!!note} accept="image/jpeg,image/png,image/webp,.heic" multiple hidden onChange={(e) => { const fl = [...((e.target as HTMLInputElement).files || [])]; (e.target as HTMLInputElement).value = ''; add('img', fl); }} />
                   <b>+</b><span>Загрузить фото</span>
                 </label>
               </div>
+              <p class="muted" style="margin:8px 0 0;font-size:12px">{RULES.photo}</p>
+
+              <h3 class="ed__h3">Видео</h3>
+              <div class="gal">
+                {videos.map((m, i) => (
+                  <figure class={`gal__item gal__item--video${m.base64 ? ' gal__item--new' : ''}`} {...dnd('vid', i)}>
+                    <video src={m.src} muted playsInline preload="metadata" controls />
+                    <span class="gal__arrows">
+                      <button type="button" aria-label="Передвинуть левее" disabled={i === 0} onClick={() => move('vid', i, i - 1)}>←</button>
+                      <button type="button" aria-label="Передвинуть правее" disabled={i === videos.length - 1} onClick={() => move('vid', i, i + 1)}>→</button>
+                    </span>
+                    <button class="gal__del" title="Убрать видео" aria-label="Убрать видео" onClick={() => drop('vid', i)}>×</button>
+                  </figure>
+                ))}
+                <label class={`gal__add${note ? ' is-busy' : ''}`}>
+                  <input type="file" disabled={!!note} accept="video/mp4,video/webm,.mov" hidden onChange={(e) => { const fl = [...((e.target as HTMLInputElement).files || [])]; (e.target as HTMLInputElement).value = ''; add('vid', fl); }} />
+                  <b>+</b><span>Загрузить видео</span>
+                </label>
+              </div>
+              <p class="muted" style="margin:8px 0 0;font-size:12px">{RULES.video}</p>
               {note && <p class="muted" style="margin:10px 0 0">{note}</p>}
+              {errors.length > 0 && <div class="gal__err" role="alert"><b>Не загружено:</b><ul>{errors.map((x) => <li>{x}</li>)}</ul></div>}
             </div>
           )}
         </div>

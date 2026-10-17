@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { Product } from '../../lib/catalog';
 import ProductEditor from './ProductEditor';
 import GhConnect from './GhConnect';
-import { PRODUCTS_PATH, IMG_DIR, buildOf, commit, humanError, getToken, readJson, productsText, slugify, type FileChange } from './gh';
+import { PRODUCTS_PATH, IMG_DIR, VIDEO_DIR, buildOf, commit, humanError, getToken, readJson, productsText, slugify, type FileChange } from './gh';
 
 type Sec = { slug: string; name: string };
 const RAW = `https://raw.githubusercontent.com/tema-mail/teyes-sibir-kod/main/${PRODUCTS_PATH}`;
@@ -120,7 +120,7 @@ export default function ProductsAdmin({ sections, base }: { sections: Sec[]; bas
     }
   };
 
-  const save = async (p: Product, photos: { name: string; base64: string }[]) => {
+  const save = async (p: Product, up: { photos: { name: string; base64: string }[]; videos: { name: string; base64: string }[] }) => {
     if (!p.title.trim()) return setStatus({ kind: 'error', text: 'Укажите название товара' });
     if (wait()) return; // редактор остаётся открытым с правкой
     const isNew = !p.id;
@@ -129,7 +129,8 @@ export default function ProductsAdmin({ sections, base }: { sections: Sec[]; bas
       path: p.path || pathFor(p.section, id, p.title) };
     setEdit(null); history.replaceState(null, '', location.pathname);
     await persist((list) => (list.some((x) => x.id === id) ? list.map((x) => (x.id === id ? next : x)) : [next, ...list]),
-      `${isNew ? 'новый товар' : 'товар'} «${next.title}»`, photos.map((f) => ({ path: `${IMG_DIR}/${f.name}`, base64: f.base64 })));
+      `${isNew ? 'новый товар' : 'товар'} «${next.title}»`, [...up.photos.map((f) => ({ path: `${IMG_DIR}/${f.name}`, base64: f.base64 })),
+        ...up.videos.map((f) => ({ path: `${VIDEO_DIR}/${f.name}`, base64: f.base64 }))]);
   };
   const remove = async (p: Product) => {
     if (wait() || !confirm(`Удалить товар «${p.title}» с сайта насовсем? Скрыть его можно переключателем «На сайте».`)) return;
