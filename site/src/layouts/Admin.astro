@@ -32,7 +32,7 @@ const tabs = [
       ))}
       <span class="site">Сайт: <a href={site} target="_blank" rel="noopener">{site.replace(/^https?:\/\//, '')}</a></span>
       {/* выход из кабинета (вход – scripts/lock-admin.mjs, помнится до закрытия вкладки), как «Выйти» у EV */}
-      <button type="button" class="logout" onclick="try{sessionStorage.removeItem('tx_admin_auth')}catch(e){};location.reload()">Выйти</button>
+      <button type="button" class="logout" onclick="try{sessionStorage.removeItem('tx_admin_auth');localStorage.removeItem('tx_admin_keep')}catch(e){};location.reload()">Выйти</button>
     </nav>
     <main><slot /></main>
   </body>
