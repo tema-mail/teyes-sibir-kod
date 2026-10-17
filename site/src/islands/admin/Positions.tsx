@@ -1,20 +1,21 @@
 // «Позиции» кабинета – вид перенесён из EV SIBIR (server/positions_view.py: плитки, сегменты, таблица с цветом
 // топ-3 / топ-10 / 11–30, вкладка «Нейросети»). Данные – с admin.teyes-sibir.ru/api/positions по логину кабинета:
-// Яндекс – Вебмастер по Новосибирску за месяц (WmMonth.tsx), Яндекс и Google – снимок выдачи XMLRiver,
+// за месяц (WmMonth.tsx) – Яндекс Вебмастер по Новосибирску и всем регионам, Google – Search Console;
+// Яндекс и Google в Новосибирске – снимок выдачи XMLRiver,
 // нейросети – последний прогон (scripts/llm_visibility.py).
 import { useEffect, useMemo, useState } from 'preact/hooks';
-import WmMonth, { type Wm } from './WmMonth';
-import { cls, dm, num, pos } from './posUtil';
+import WmMonth, { RARE, type View, type Wm } from './WmMonth';
+import { cls, dm, inTop, num, pos } from './posUtil';
 
 const API = 'https://admin.teyes-sibir.ru/api/positions';
-type Engine = unknown; // Search Console и архив Вебмастера – по всем регионам; в кабинете не показываются (нужен только Новосибирск)
+type Engine = unknown; // поля google / yandex ответа (окна Search Console и архив Вебмастера) кабинет не читает – Google берётся из gsc_month
 type Answer = { mentioned?: boolean; linked?: boolean; snippet?: string; sources?: string[]; error?: string };
 type Ai = { saved_at: string; date: string; models: string[]; cost_usd?: number; questions?: number; summary: Record<string, number>;
   rows: { question: string; answers: Record<string, Answer> }[] } | null;
 type Spot = { position: number | null; depth: number | null; url: string | null; at: string; prev: number | null; had_prev: boolean } | null;
 type NskRow = { query: string; demand: number | null; direction: string; yandex: Spot; google: Spot };
 type Nsk = { rows: NskRow[]; measured_from: string | null; measured_to: string | null };
-type Data = { nsk: Nsk; wm_nsk: Wm; google: Engine; yandex: Engine; ai: Ai };
+type Data = { nsk: Nsk; wm_nsk: Wm; wm_all: Wm; gsc_month: Wm; google: Engine; yandex: Engine; ai: Ai };
 type Eng = 'yandex' | 'google';
 const ENG: Record<Eng, string> = { yandex: 'Яндекс', google: 'Google' };
 
@@ -87,6 +88,32 @@ function NskTotal({ n }: { n: Nsk }) {
   );
 }
 
+/** Всего за месяц по всем регионам, Яндекс + Google (владелец 18.10: «цифра, какая она действительно есть»). */
+function MonthTotal({ y, g }: { y: Wm; g: Wm }) {
+  if (!y && !g) return null;
+  const rows = (w: Wm) => w?.rows ?? [];
+  const n = (w: Wm, f: (r: NonNullable<Wm>['rows'][number]) => boolean) => rows(w).filter(f).length;
+  const both = (f: (r: NonNullable<Wm>['rows'][number]) => boolean): [string, string] =>
+    [num(n(y, f) + n(g, f)), `Яндекс ${num(n(y, f))} · Google ${num(n(g, f))}`];
+  const clicks = (w: Wm) => rows(w).reduce((s, r) => s + r.clicks, 0);
+  const kpi: [string, [string, string]][] = [
+    ['Запросов с показами', both(() => true)],
+    ['Брендовые', both((r) => r.brand)],
+    ['Редкие', both((r) => !r.brand && r.impressions < RARE)],
+    ['В топ-3', both((r) => inTop(r.position, 3))],
+    ['В топ-10', both((r) => inTop(r.position, 10))],
+    ['Кликов', [num(clicks(y) + clicks(g)), `Яндекс ${num(clicks(y))} · Google ${num(clicks(g))}`]],
+  ];
+  return (
+    <>
+      <p class="ps-muted" style="margin:0"><b>Всего за месяц, Яндекс + Google, все регионы.</b>
+        {y && ` Яндекс – Вебмастер ${dm(y.date_from)} – ${dm(y.date_to)}.`}{g && ` Google – Search Console ${dm(g.date_from)} – ${dm(g.date_to)}.`}
+        {' '}Один запрос в двух поисковиках считается дважды. Редкие – меньше {RARE} показов за месяц.</p>
+      <section class="ps-kpis">{kpi.map(([t, [v, x]]) => <div class="ps-kpi"><span class="ps-muted">{t}</span><b>{v}</b><span class="ps-d">{x}</span></div>)}</section>
+    </>
+  );
+}
+
 function NskView({ n, e }: { n: Nsk; e: Eng }) {
   const [dir, setDir] = useState('');
   const [only, setOnly] = useState<'all' | 'top' | 'near' | 'none'>('all');
@@ -136,6 +163,11 @@ function NskView({ n, e }: { n: Nsk; e: Eng }) {
   );
 }
 
+const yandexViews = (d: Data): View[] => [
+  { key: 'nsk', label: 'Новосибирск', title: 'Яндекс Вебмастер, город Новосибирск', wm: d.wm_nsk },
+  { key: 'all', label: 'Вся Россия', title: 'Яндекс Вебмастер, все регионы', wm: d.wm_all },
+];
+
 export default function Positions() {
   const [d, setD] = useState<Data | null>(null);
   const [err, setErr] = useState('');
@@ -157,11 +189,13 @@ export default function Positions() {
       {d && tab === 'ai' && <AiView ai={d.ai} />}
       {d && tab === 'pos' && (
         <>
+          <MonthTotal y={d.wm_all} g={d.gsc_month} />
           <NskTotal n={d.nsk} />
           <nav class="ps-seg" aria-label="Поисковик">
             {(['yandex', 'google'] as const).map((x) => <a href="#" class={eng === x ? 'on' : ''} onClick={(ev) => { ev.preventDefault(); setEng(x); }}>{ENG[x]}</a>)}
           </nav>
-          {eng === 'yandex' && <WmMonth wm={d.wm_nsk} />}
+          <WmMonth key={eng} views={eng === 'yandex' ? yandexViews(d) : [{ key: 'all', label: 'Все регионы', wm: d.gsc_month,
+            title: 'Google Search Console, все регионы (город Search Console не отдаёт)' }]} />
           <div class="ps-note">Снимок выдачи XMLRiver – в моменте, не за месяц. Место в выдаче {ENG[eng]} для человека в Новосибирске (XMLRiver, компьютер, первые 20 результатов) по запросам со спросом в Новосибирске. Цвет: синий – топ-3, зелёный – топ-10, светлый – 11–20. «Было» – замер не ближе месяца назад (август – пилот по главным запросам), недельные замеры не сравниваем. Маленькая цифра – сколько мест прибавили. Прогноз: спрос × доля кликов места (1-е – 28%, 3-е – 11%, 10-е – 2%, средние данные по рунету) – оценка, а не обещание.</div>
           <NskView n={d.nsk} e={eng} />
         </>

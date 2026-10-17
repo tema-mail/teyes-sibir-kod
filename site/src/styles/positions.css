@@ -28,6 +28,8 @@
 .ps .err{color:#c4302b;font-weight:400}
 .ps .mark{display:inline-block;font-size:10px;font-weight:700;border-radius:4px;padding:0 4px;margin-left:3px;vertical-align:1px}
 .ps .mark.ai{background:#0b4442;color:#fff}.ps .mark.other{background:#fde2b8;color:#6e4a00}
+.ps .mark.brand{background:#1c201f;color:#fff}.ps .mark.rare{background:#e6ebe9;color:var(--muted)}
+.ps tr.ps-rare td{color:var(--muted)}.ps tr.ps-rare td.p{font-weight:400}
 .ps-note{background:#fffaf0;border:1px solid #f0d9a8;border-radius:10px;padding:12px 16px;font-size:13px;line-height:1.5}
 .ps-err{background:#fdecea;border:1px solid #f3c1bd;border-radius:10px;padding:12px 16px;font-size:13px}
 .ps .panel{margin:0}
