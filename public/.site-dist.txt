@@ -1,5 +1,5 @@
-_astro/Admin.THKBzy_Q.css
-_astro/Base.weDh7CYP.css
+_astro/Admin.DpyxPHWr.css
+_astro/Base.B1YTPX8g.css
 _astro/Cart.35uMlxhW.js
 _astro/Catalog.EVdTSPOb.js
 _astro/FavPage.nOvB2iQZ.js
@@ -9,7 +9,7 @@ _astro/Metrika.CgfbPvM8.js
 _astro/Order.B65W5L8r.js
 _astro/ProductBuy.DdppaEbM.js
 _astro/ProductCard.CprayCSc.js
-_astro/ProductsAdmin.Cz0AUWMA.js
+_astro/ProductsAdmin.DH84sY5o.js
 _astro/client.C_cmRlMZ.js
 _astro/forms.DAIVbOwV.js
 _astro/hooks.module.N036g3NG.js
