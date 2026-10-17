@@ -1,5 +1,5 @@
-// Месяц к прошлому месяцу по реальным запросам с показами: Яндекс – «Статистика запросов» Вебмастера (Новосибирск,
-// регион 65, и все регионы), Google – Search Console (все регионы, прошлого месяца нет).
+// Месяц к прошлому месяцу по реальным запросам с показами: Яндекс – «Статистика запросов» Вебмастера (вся Россия
+// и выбранные владельцем регионы), Google – Search Console по стране (города Google не отдаёт).
 // Владелец 17.10: «нужны наши цифры с Вебмастера», «замеры за месяц собираются»; 18.10: «редкие запросы тоже…
 // подтяни их как редкие», «брендовые отдельно», «цифра, какая она действительно есть».
 // Данные Яндекса – POST /api/positions/webmaster (снимает мак из кабинета владельца: API Вебмастера из сети не отвечает).
@@ -9,7 +9,7 @@ import { cls, dm, inTop, num, pos } from './posUtil';
 type Row = { query: string; position: number; impressions: number; clicks: number; prev_position: number | null;
   prev_impressions: number | null; prev_clicks: number | null; direction: string; brand: boolean };
 type Period = { date_from: string; date_to: string; collected_at: string };
-export type Wm = (Period & { region: number; prev: Period | null; rows: Row[];
+export type Wm = (Period & { engine: 'yandex' | 'google'; region: number; name: string; prev: Period | null; rows: Row[];
   gone: { query: string; position: number; impressions: number; clicks: number; brand: boolean }[] }) | null;
 export type View = { key: string; label: string; title: string; wm: Wm };
 type Only = 'all' | 'near' | 'top' | 'up' | 'down' | 'new' | 'gone';
