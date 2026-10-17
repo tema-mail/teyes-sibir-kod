@@ -4,7 +4,7 @@
 import '../styles/admin.css';
 import { u, NOINDEX, ASSET } from '../lib/site';
 import { ALL_PRODUCTS } from '../lib/catalog';
-interface Props { title: string; active: 'pages' | 'products' | 'leads' }
+interface Props { title: string; active: 'pages' | 'products' | 'leads' | 'metrika' | 'positions' }
 const { title, active } = Astro.props;
 const site = new URL(u('/'), 'https://tema-mail.github.io').href;
 const tabs = [
@@ -12,6 +12,7 @@ const tabs = [
   ['products', '/admin/products/', 'Товары', String(ALL_PRODUCTS.length)],
   ['leads', '/admin/leads/', 'Заявки', ''],
   ['metrika', '/admin/metrika/', 'Метрика и каналы', ''],
+  ['positions', '/admin/positions/', 'Позиции', ''],
 ] as const;
 ---
 <!doctype html>

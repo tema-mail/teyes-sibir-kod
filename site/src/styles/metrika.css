@@ -1,5 +1,5 @@
 /* «Метрика и каналы» (/admin/metrika/): цвета и вёрстка по утверждённому макету, как у SEO-админки –
-   серый фон, синий акцент, зелёный – цели. Отдельная страница: стили магазина сюда не подключаются. */
+   серый фон, синий акцент, зелёный – цели. Внутри кабинета: всё привязано к обёртке .mx. */
 .mx {
   --page: #f4f6f8; --panel: #ffffff; --ink: #17212b; --muted: #5d6b78; --line: #dce2e7; --head: #f7f9fb;
   --brand: #111b27; --brand-ink: #ffffff; --action: #276fe8; --action-ink: #ffffff;
@@ -20,12 +20,9 @@
     --heat: 60, 194, 159; color-scheme: dark;
   }
 }
-.mx { margin: 0; background: var(--page); color: var(--ink); font-family: var(--font); font-size: 14px; line-height: 1.4;
+.mx { margin: -18px -20px 0; min-height: 70vh; background: var(--page); color: var(--ink); font-family: var(--font); font-size: 14px; line-height: 1.4;
   -webkit-text-size-adjust: 100%; }
 .mx *, .mx *::before, .mx *::after { box-sizing: border-box; }
-.mx-top { background: var(--brand); color: var(--brand-ink); padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; }
-.mx-top a { color: inherit; font-weight: 600; letter-spacing: .02em; text-decoration: none; min-height: 44px; display: inline-flex; align-items: center; }
-.mx-top span { opacity: .75; }
 .mx-main { max-width: 1160px; margin: 0 auto; padding: 20px 16px 60px; display: grid; gap: 14px; }
 .mx-main > * { min-width: 0; }
 .mx h1, .mx h2 { text-wrap: balance; }

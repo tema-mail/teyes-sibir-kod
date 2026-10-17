@@ -1,23 +1,11 @@
 ---
-// «Метрика и каналы» на сайте (решение владельца 14.10.2026: «на сайте, но по паролю»). Цифр в сборке и в
-// репозитории нет: островок берёт отчёт из SEO-админки по логину и паролю админки. Страница всегда закрыта от
-// поиска (не только пока вся копия под noindex), ссылки на неё в меню нет; без шапки магазина и его скриптов.
+// «Метрика и каналы» – вкладка кабинета (общая шапка Admin.astro, вход – замок кабинета). Цифр в сборке и в
+// репозитории нет: островок берёт отчёт из SEO-админки (admin.teyes-sibir.ru) тем же логином и паролем.
+// Стили отчёта привязаны к обёртке .mx, а не к <body>: замок после входа подменяет содержимое body и его класс.
+import Admin from '../../layouts/Admin.astro';
 import Metrika from '../../islands/Metrika';
-import { u, ASSET, NOINDEX } from '../../lib/site';
 import '../../styles/metrika.css';
 ---
-<!doctype html>
-<html lang="ru">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <Fragment set:html={NOINDEX} />{/* та же строка, что у всех страниц копии: её ищет verify.py */}
-    <meta name="referrer" content="no-referrer" />
-    <title>Метрика и каналы – TEYES SIBIR</title>
-    <link rel="icon" type="image/svg+xml" href={u(ASSET.icon)} />
-  </head>
-  <body class="mx">
-    <header class="mx-top"><a href={u('/')}>TEYES SIBIR</a><span>Метрика и каналы</span></header>
-    <main class="mx-main"><Metrika client:load /></main>
-  </body>
-</html>
+<Admin title="Метрика и каналы" active="metrika">
+  <div class="mx"><div class="mx-main"><Metrika client:load /></div></div>
+</Admin>
