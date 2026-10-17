@@ -9,7 +9,7 @@ _astro/Metrika.CgfbPvM8.js
 _astro/Order.B65W5L8r.js
 _astro/ProductBuy.DdppaEbM.js
 _astro/ProductCard.CprayCSc.js
-_astro/ProductsAdmin.DH84sY5o.js
+_astro/ProductsAdmin.D-T5Wiz8.js
 _astro/client.C_cmRlMZ.js
 _astro/forms.DAIVbOwV.js
 _astro/hooks.module.N036g3NG.js
@@ -3243,6 +3243,7 @@ img/p/fb9a9558eabcc235.webp
 img/p/fba002ceedeb9246.webp
 img/p/fba63f4ecad4c3da.webp
 img/p/fbe06c0907463a34.webp
+img/p/fbe3b150e98e423e.webp
 img/p/fbe81a8516e3efd2.webp
 img/p/fbe82e40ea42a82c.webp
 img/p/fc1bc73a81e080b4.webp
