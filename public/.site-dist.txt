@@ -7,7 +7,7 @@ _astro/Lead.D81_9qJM.js
 _astro/Leads.ChDssS09.js
 _astro/Metrika.CgfbPvM8.js
 _astro/Order.B65W5L8r.js
-_astro/Positions.B8aO79et.js
+_astro/Positions.Dl1zf2Ih.js
 _astro/ProductBuy.DdppaEbM.js
 _astro/ProductCard.CprayCSc.js
 _astro/ProductsAdmin.DrR3Y3_0.js
