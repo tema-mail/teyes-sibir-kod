@@ -20,6 +20,7 @@ const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
 const text = esc(p.text.replace(/&(quot|nbsp|amp|lt|gt|apos|#39);/g, (_, k) => ENT[k]))
   .replace(/&lt;(\/?)(p|strong|h3|ul|li|br)\s*\/?&gt;/gi, (_, sl, tag) => `<${sl}${tag.toLowerCase()}>`).replace(/\n/g, '<br>');
 const lowest = minPrice(p);
+const videos = p.videos || [];
 // Фото – полные адреса там, где они реально лежат: на копии (GitHub Pages) или на своём домене
 const origin = BASE ? 'https://tema-mail.github.io' : LIVE;
 const ld = {
@@ -43,11 +44,15 @@ const ld = {
             <img src={img(name)} alt={i ? `${p.title}, фото ${i + 1}` : p.title} width="720" height="720"
               loading={i ? 'lazy' : 'eager'} fetchpriority={i ? undefined : 'high'} decoding="async" />
           ))}
+          {videos.map((v) => <video src={u(`/video/p/${v}`)} controls playsinline muted preload="metadata" poster={p.images[0] ? img(p.images[0]) : undefined} />)}
         </div>
-        {p.images.length > 1 && (
+        {p.images.length + videos.length > 1 && (
           <div class="gallery__thumbs">
             {p.images.map((name, i) => (
               <button type="button" data-go={i} aria-label={`Фото ${i + 1}`}><img src={img(name)} alt="" loading="lazy" width="80" height="80" /></button>
+            ))}
+            {videos.map((_, n) => (
+              <button type="button" data-go={p.images.length + n} aria-label={`Видео ${n + 1}`} class="gallery__vthumb">▶</button>
             ))}
           </div>
         )}
