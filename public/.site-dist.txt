@@ -1,5 +1,5 @@
-_astro/Admin.DpyxPHWr.css
-_astro/Base.bXrDSr6F.css
+_astro/Admin.D5lVW3uo.css
+_astro/Base.CXDrsWpJ.css
 _astro/Cart.35uMlxhW.js
 _astro/Catalog.EVdTSPOb.js
 _astro/FavPage.nOvB2iQZ.js
@@ -9,7 +9,7 @@ _astro/Metrika.CgfbPvM8.js
 _astro/Order.B65W5L8r.js
 _astro/ProductBuy.DdppaEbM.js
 _astro/ProductCard.CprayCSc.js
-_astro/ProductsAdmin.D-T5Wiz8.js
+_astro/ProductsAdmin.DrR3Y3_0.js
 _astro/client.C_cmRlMZ.js
 _astro/forms.DAIVbOwV.js
 _astro/hooks.module.N036g3NG.js
@@ -1798,6 +1798,7 @@ img/p/89ab25fac042e287.webp
 img/p/89c79d0983e0fda5.webp
 img/p/89da0b540d7c25d6.webp
 img/p/89f9ddc601ce1132.webp
+img/p/8a0ae4ef90a16fd2.webp
 img/p/8a0c2074cec6b3d8.webp
 img/p/8a0df76328d51a15.webp
 img/p/8a1485fd76e27ae7.webp
