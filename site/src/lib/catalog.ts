@@ -13,9 +13,14 @@ export type Product = {
   options: { title: string; values: string[] }[]; editions: Edition[]; addons: Addon[];
   characteristics: { title: string; value: string }[]; images: string[]; parts: string[];
   hidden?: boolean; // скрыт в админке – нет на сайте (ни страницы, ни в каталогах)
-  videos?: string[]; // видео из админки: site/public/video/p/<имя>, в галерее после фото
+  videos?: (string | Video)[]; // видео из админки: site/public/video/p/<file>, в галерее сразу после обложки
 };
 export type Part = { uid: string; path: string; title: string; count: number };
+/** Видео товара: файл, обложка-превью (site/public/img/p; если не загрузили – первый кадр) и звук.
+ *  На сайте видео всегда запускается само и без звука (иначе браузер не даст автозапуск); sound – показать кнопку звука. */
+export type Video = { file: string; poster: string; sound: boolean };
+export const videoList = (p: { videos?: (string | Video)[] }): Video[] =>
+  (p.videos || []).map((v) => (typeof v === 'string' ? { file: v, poster: '', sound: false } : v));
 export type Section = { slug: string; name: string; country: string; count: number; total: number };
 /** То, что нужно сетке каталога и корзине, без описаний. */
 export type Card = { id: string; path: string; title: string; price: number; priceOld: number; from: boolean; mark: string; model: string; image: string; brand: string };

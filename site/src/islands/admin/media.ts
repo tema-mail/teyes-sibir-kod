@@ -8,7 +8,7 @@ export const VIDEO = { types: ['video/mp4', 'video/webm'], maxMb: 20, maxSec: 90
 /** Подсказка под кнопками загрузки – те же цифры, что в проверке. */
 export const RULES = {
   photo: `Фото: JPG, PNG или WebP, до ${PHOTO.maxMb} МБ, не меньше ${PHOTO.minSide} px по короткой стороне, до ${PHOTO.maxCount} шт. Сжимаются до 720 px.`,
-  video: `Видео: MP4 (H.264) или WebM, до ${VIDEO.maxMb} МБ и ${VIDEO.maxSec} секунд, до ${VIDEO.maxCount} шт. Длиннее или тяжелее – сожмите или загрузите на YouTube.`,
+  video: `Видео: MP4 (H.264) или WebM, до ${VIDEO.maxMb} МБ и ${VIDEO.maxSec} секунд, до ${VIDEO.maxCount} шт. На сайте запускается само и без звука; «Со звуком» – покупатель может включить звук. Превью – первый кадр или своё фото.`,
 };
 
 export type Ready = { name: string; base64: string; url: string };
@@ -52,6 +52,21 @@ export async function prepareVideo(f: File): Promise<Ready> {
   let bin = '';
   for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
   return { name: `${hash}.${f.type === 'video/webm' ? 'webm' : 'mp4'}`, base64: btoa(bin), url };
+}
+
+/** Превью видео – первый кадр (0,1 с, чтобы не взять чёрный), сжатый как фото товара. */
+export async function firstFrame(url: string): Promise<Ready> {
+  const v = document.createElement('video');
+  v.muted = true; v.playsInline = true; v.preload = 'auto'; v.src = url;
+  await new Promise<void>((ok, fail) => { v.onloadeddata = () => ok(); v.onerror = () => fail(new Error('не удалось взять кадр из видео')); });
+  v.currentTime = Math.min(0.1, (v.duration || 1) / 2);
+  await new Promise<void>((ok) => { v.onseeked = () => ok(); });
+  const c = document.createElement('canvas');
+  c.width = v.videoWidth; c.height = v.videoHeight;
+  c.getContext('2d')!.drawImage(v, 0, 0);
+  const blob: Blob = await new Promise((ok, fail) => c.toBlob((b) => (b ? ok(b) : fail(new Error('не удалось сохранить кадр'))), 'image/jpeg', 0.92));
+  const w = await toWebp(new File([blob], 'frame.jpg', { type: 'image/jpeg' }));
+  return { ...w, url: URL.createObjectURL(blob) };
 }
 
 /** Переставить элемент списка: from → to (перетаскивание и стрелки). */

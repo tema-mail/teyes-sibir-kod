@@ -3,7 +3,8 @@
 // (галочки с доплатой), «Характеристики», «Фото». Всё сохраняется; новые фото сжимаются в браузере в WebP 720 px.
 import { useEffect, useState } from 'preact/hooks';
 import type { Product, Edition } from '../../lib/catalog';
-import { PHOTO, VIDEO, RULES, preparePhoto, prepareVideo, moveItem, type Ready } from './media';
+import { PHOTO, VIDEO, RULES, preparePhoto, prepareVideo, firstFrame, moveItem, type Ready } from './media';
+import { videoList } from '../../lib/catalog';
 
 const TABS = ['Основное', 'Цены и версии', 'Доп. опции', 'Характеристики', 'Фото'] as const;
 const MARKS = [['', 'Нет'], ['NEW', 'Новинка'], ['SALE', 'Скидка']];
@@ -35,7 +36,7 @@ function toHtml(t: string) {
 const int = (v: string) => Number(v.replace(/\D/g, '')) || 0;
 
 /** Фото или видео в ленте редактора: уже на сайте (src – адрес) или новое (base64 – загрузится при сохранении). */
-type Media = { name: string; src: string; base64?: string };
+type Media = { name: string; src: string; base64?: string; poster?: Media; sound?: boolean };
 
 export default function ProductEditor({ product, sections, base, busy, onClose, onSave, onDelete }: {
   product: Product; sections: { slug: string; name: string }[]; base: string; busy: boolean;
@@ -46,7 +47,8 @@ export default function ProductEditor({ product, sections, base, busy, onClose, 
   const [titles, setTitles] = useState<string[]>(product.options.map((o) => o.title));
   const [newTitle, setNewTitle] = useState('');
   const [gallery, setGallery] = useState<Media[]>(product.images.map((n) => ({ name: n, src: `${base}/img/p/${n}` })));
-  const [videos, setVideos] = useState<Media[]>((product.videos || []).map((n) => ({ name: n, src: `${base}/video/p/${n}` })));
+  const [videos, setVideos] = useState<Media[]>(videoList(product).map((v) => ({ name: v.file, src: `${base}/video/p/${v.file}`, sound: v.sound,
+    poster: v.poster ? { name: v.poster, src: `${base}/img/p/${v.poster}` } : undefined })));
   const [drag, setDrag] = useState<{ list: 'img' | 'vid'; i: number } | null>(null);
   const [note, setNote] = useState('');
   const [errors, setErrors] = useState<string[]>([]);
@@ -66,7 +68,8 @@ export default function ProductEditor({ product, sections, base, busy, onClose, 
     const changed = text !== toText(product.text);
     const fresh = (l: Media[]) => l.filter((m) => m.base64).map((m) => ({ name: m.name, base64: m.base64!, url: m.src }));
     onSave({ ...p, options, text: changed ? toHtml(text.trim()) : product.text, images: gallery.map((m) => m.name),
-      ...(videos.length || product.videos ? { videos: videos.map((m) => m.name) } : {}) }, { photos: fresh(gallery), videos: fresh(videos) });
+      ...(videos.length || product.videos ? { videos: videos.map((m) => ({ file: m.name, poster: m.poster?.name || '', sound: !!m.sound })) } : {}) },
+      { photos: [...fresh(gallery), ...fresh(videos.flatMap((m) => (m.poster ? [m.poster] : [])))], videos: fresh(videos) });
   };
   /** Загрузка: каждый файл проверяется отдельно; что не подошло – в списке ошибок с причиной, остальное добавляется. */
   const add = async (kind: 'img' | 'vid', files: File[]) => {
@@ -79,7 +82,10 @@ export default function ProductEditor({ product, sections, base, busy, onClose, 
       try {
         const r = await (kind === 'img' ? preparePhoto(f) : prepareVideo(f));
         if ([...list, ...out].some((m) => m.name === r.name)) { errs.push(`«${f.name}»: такой файл уже есть у товара`); continue; }
-        out.push({ name: r.name, src: r.url, base64: r.base64 });
+        // у видео сразу превью – первый кадр; своё превью можно загрузить кнопкой на карточке видео
+        let poster: Media | undefined;
+        if (kind === 'vid') { try { const fr = await firstFrame(r.url); poster = { name: fr.name, src: fr.url, base64: fr.base64 }; } catch { /* без превью – браузер покажет кадр сам */ } }
+        out.push({ name: r.name, src: r.url, base64: r.base64, ...(kind === 'vid' ? { poster, sound: false } : {}) });
       } catch (e: any) { errs.push(e.message); }
     }
     (kind === 'img' ? setGallery : setVideos)([...list, ...out]);
@@ -229,12 +235,21 @@ export default function ProductEditor({ product, sections, base, busy, onClose, 
               <div class="gal">
                 {videos.map((m, i) => (
                   <figure class={`gal__item gal__item--video${m.base64 ? ' gal__item--new' : ''}`} {...dnd('vid', i)}>
-                    <video src={m.src} muted playsInline preload="metadata" controls />
+                    <video src={m.src} poster={m.poster?.src} muted autoplay loop playsInline preload="metadata" />
                     <span class="gal__arrows">
                       <button type="button" aria-label="Передвинуть левее" disabled={i === 0} onClick={() => move('vid', i, i - 1)}>←</button>
                       <button type="button" aria-label="Передвинуть правее" disabled={i === videos.length - 1} onClick={() => move('vid', i, i + 1)}>→</button>
                     </span>
                     <button class="gal__del" title="Убрать видео" aria-label="Убрать видео" onClick={() => drop('vid', i)}>×</button>
+                    <div class="gal__vopts">
+                      <label><input type="checkbox" checked={!!m.sound} onChange={(e) => setVideos(videos.map((x, n) => (n === i ? { ...x, sound: (e.target as HTMLInputElement).checked } : x)))} /> Со звуком</label>
+                      <label class="gal__poster">{m.poster ? <img src={m.poster.src} alt="" /> : null}<span>{m.poster ? 'Превью: заменить' : 'Загрузить превью'}</span>
+                        <input type="file" hidden accept="image/jpeg,image/png,image/webp" onChange={async (e) => {
+                          const f = (e.target as HTMLInputElement).files?.[0]; (e.target as HTMLInputElement).value = ''; if (!f) return;
+                          try { const r = await preparePhoto(f); setVideos(videos.map((x, n) => (n === i ? { ...x, poster: { name: r.name, src: r.url, base64: r.base64 } } : x))); setErrors([]); }
+                          catch (er: any) { setErrors([er.message]); }
+                        }} /></label>
+                    </div>
                   </figure>
                 ))}
                 <label class={`gal__add${note ? ' is-busy' : ''}`}>
