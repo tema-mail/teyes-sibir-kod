@@ -1,18 +1,11 @@
 ---
-// «Позиции» – как раздел кабинета EV SIBIR (evolutioncarservice.ru/admin/positions: позиции в Яндексе и Google,
-// вкладка «Нейросети»). Пока владелец не утвердил, что собираем, – закрытый раздел (components/admin/Locked.astro).
+// «Позиции» – раздел кабинета EV SIBIR (evolutioncarservice.ru/admin/positions: позиции и «Нейросети»), открыт
+// владельцем 17.10.2026 («открой раздел позиции, собери»). Данные – живые с admin.teyes-sibir.ru (островок Positions).
+// Закрытый вариант для других кабинетов – components/admin/Locked.astro.
 import Admin from '../../layouts/Admin.astro';
-import Locked from '../../components/admin/Locked.astro';
+import Positions from '../../islands/admin/Positions';
+import '../../styles/positions.css';
 ---
 <Admin title="Позиции" active="positions">
-  <Locked
-    title="Позиции"
-    about="Что откроется в разделе:"
-    items={[
-      'Позиции сайта в Яндексе и Google по ключевым запросам Новосибирска – по каждой странице, раз в месяц',
-      'Видимость по разделам: установка Teyes, магнитолы на Android, сигнализации, камеры, шумоизоляция',
-      'Нейросети: называют ли TEYES Sibir ChatGPT, Perplexity, Gemini и Claude на вопросы вроде «где установить Teyes в Новосибирске»',
-      'Рост и падение позиций с прошлого среза и страницы, которые теряют поиск',
-    ]}
-  />
+  <Positions client:load />
 </Admin>
