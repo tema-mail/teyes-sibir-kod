@@ -1,5 +1,5 @@
 _astro/Admin.DpyxPHWr.css
-_astro/Base.B1YTPX8g.css
+_astro/Base.bXrDSr6F.css
 _astro/Cart.35uMlxhW.js
 _astro/Catalog.EVdTSPOb.js
 _astro/FavPage.nOvB2iQZ.js
@@ -6494,3 +6494,4 @@ store/catalog_teyes/tproduct/916525068012-teyes-cc3l/index.html
 store/closers/index.html
 store/index.html
 store/signaling/index.html
+video/p/fe211a5bcaf75c01.mp4
