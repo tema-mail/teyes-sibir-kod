@@ -24,6 +24,7 @@ admin/leads/index.html
 admin/metrika/index.html
 admin/positions/index.html
 admin/products/index.html
+admin/recommendations/index.html
 favorites/index.html
 img/p/000b1e68c5142cf4.webp
 img/p/001e0de0e308b2f5.webp
