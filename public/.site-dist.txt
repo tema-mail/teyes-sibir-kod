@@ -1,4 +1,4 @@
-_astro/Admin.Bm2jxLRo.css
+_astro/Admin.THKBzy_Q.css
 _astro/Base.weDh7CYP.css
 _astro/Cart.35uMlxhW.js
 _astro/Catalog.EVdTSPOb.js
@@ -14,13 +14,14 @@ _astro/client.C_cmRlMZ.js
 _astro/forms.DAIVbOwV.js
 _astro/hooks.module.N036g3NG.js
 _astro/jsxRuntime.module.BzWfOhxj.js
-_astro/metrika.BNQfHWVU.css
+_astro/metrika.D9i8Sa2-.css
 _astro/preact.module.D350Wmh6.js
 _astro/signals.module.s8FPoujT.js
 _astro/store.DoQr35Wl.js
 admin/index.html
 admin/leads/index.html
 admin/metrika/index.html
+admin/positions/index.html
 admin/products/index.html
 favorites/index.html
 img/p/000b1e68c5142cf4.webp
