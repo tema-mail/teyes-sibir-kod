@@ -21,6 +21,9 @@ const text = esc(p.text.replace(/&(quot|nbsp|amp|lt|gt|apos|#39);/g, (_, k) => E
   .replace(/&lt;(\/?)(p|strong|h3|ul|li|br)\s*\/?&gt;/gi, (_, sl, tag) => `<${sl}${tag.toLowerCase()}>`).replace(/\n/g, '<br>');
 const lowest = minPrice(p);
 const videos = p.videos || [];
+// Видео – сразу после обложки: последним слайдом его не замечают (владелец 17.10)
+const slides = [...p.images.slice(0, 1).map((name) => ({ name, video: false })), ...videos.map((name) => ({ name, video: true })),
+  ...p.images.slice(1).map((name) => ({ name, video: false }))];
 // Фото – полные адреса там, где они реально лежат: на копии (GitHub Pages) или на своём домене
 const origin = BASE ? 'https://tema-mail.github.io' : LIVE;
 const ld = {
@@ -40,20 +43,17 @@ const ld = {
     <div class="product__main">
       <div class="gallery">
         <div class="gallery__track" id="gallery">
-          {p.images.map((name, i) => (
-            <img src={img(name)} alt={i ? `${p.title}, фото ${i + 1}` : p.title} width="720" height="720"
-              loading={i ? 'lazy' : 'eager'} fetchpriority={i ? undefined : 'high'} decoding="async" />
-          ))}
-          {videos.map((v) => <video src={u(`/video/p/${v}`)} controls playsinline muted preload="metadata" poster={p.images[0] ? img(p.images[0]) : undefined} />)}
+          {slides.map((sl, i) => sl.video
+            ? <video src={u(`/video/p/${sl.name}`)} controls playsinline muted preload="metadata" poster={p.images[0] ? img(p.images[0]) : undefined} />
+            : <img src={img(sl.name)} alt={i ? `${p.title}, фото ${i + 1}` : p.title} width="720" height="720"
+                loading={i ? 'lazy' : 'eager'} fetchpriority={i ? undefined : 'high'} decoding="async" />)}
         </div>
-        {p.images.length + videos.length > 1 && (
+        {videos.length > 0 && <button type="button" class="gallery__play" data-go={slides.findIndex((sl) => sl.video)}>▶ Видео</button>}
+        {slides.length > 1 && (
           <div class="gallery__thumbs">
-            {p.images.map((name, i) => (
-              <button type="button" data-go={i} aria-label={`Фото ${i + 1}`}><img src={img(name)} alt="" loading="lazy" width="80" height="80" /></button>
-            ))}
-            {videos.map((_, n) => (
-              <button type="button" data-go={p.images.length + n} aria-label={`Видео ${n + 1}`} class="gallery__vthumb">▶</button>
-            ))}
+            {slides.map((sl, i) => sl.video
+              ? <button type="button" data-go={i} aria-label="Видео" class="gallery__vthumb">▶</button>
+              : <button type="button" data-go={i} aria-label={`Фото ${i + 1}`}><img src={img(sl.name)} alt="" loading="lazy" width="80" height="80" /></button>)}
           </div>
         )}
       </div>
