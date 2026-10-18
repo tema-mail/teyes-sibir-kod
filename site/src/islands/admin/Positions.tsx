@@ -1,6 +1,6 @@
 // «Позиции» кабинета – вид перенесён из EV SIBIR (server/positions_view.py: плитки, сегменты, таблица с цветом
 // топ-3 / топ-10 / 11–30, вкладка «Нейросети»). Данные – с admin.teyes-sibir.ru/api/positions по логину кабинета:
-// за месяц (WmMonth.tsx) – Яндекс Вебмастер и Google Search Console: вся Россия и выбранные регионы (months);
+// за месяц (WmMonth.tsx) – Яндекс Вебмастер и Google Search Console: «Все» и выбранные регионы (months);
 // Яндекс и Google в Новосибирске – снимок выдачи XMLRiver,
 // нейросети – последний прогон (scripts/llm_visibility.py).
 import { useEffect, useMemo, useState } from 'preact/hooks';
@@ -89,8 +89,8 @@ function NskTotal({ n }: { n: Nsk }) {
   );
 }
 
-/** Главный счётчик: Яндекс + Google за месяц по региону; «Вся Россия» – первая (владелец 18.10: «цифра, какая она
- *  действительно есть», «сначала вся Россия идёт… это для основного счётчика… и регионы, которые я хочу»). */
+/** Главный счётчик: Яндекс + Google за месяц по региону; «Все» – первым, все запросы без фильтра по месту
+ *  (владелец 18.10: «не вся Россия, просто все… Новосибирск будет считать их Новосибирск»). */
 function MonthTotal({ months }: { months: Month[] }) {
   const regions = [...new Map(months.map((m) => [m.region, m.name])).entries()];
   const [region, setRegion] = useState(regions[0]?.[0]);
@@ -104,8 +104,8 @@ function MonthTotal({ months }: { months: Month[] }) {
   const both = (f: (r: NonNullable<Wm>['rows'][number]) => boolean): [string, string] =>
     [num(n(y, f) + n(g, f)), `${part('Яндекс', y, n(y, f))} · ${part('Google', g, n(g, f))}`];
   const clicks = (w: Wm) => rows(w).reduce((s, r) => s + r.clicks, 0);
-  const COUNTRY = 225; // у Google есть только страна – Search Console городов и областей не отдаёт
-  const missing = (name: string, w: Wm) => (w ? '' : name === 'Google' && region !== COUNTRY
+  const GOOGLE = [0, 225]; // у Google есть только «Все» и страна – Search Console городов и областей не отдаёт
+  const missing = (name: string, w: Wm) => (w ? '' : name === 'Google' && !GOOGLE.includes(region!)
     ? ' Google городов и областей не отдаёт – здесь только Яндекс.' : ` ${name}: замер за этот месяц ещё не загружен.`);
   const kpi: [string, [string, string]][] = [
     ['Запросов с показами', both(() => true)],
