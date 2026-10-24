@@ -7,8 +7,10 @@ import Cart from '../islands/Cart';
 import Lead from '../islands/Lead';
 import '../styles/shop.css';
 import { u, LIVE, NOINDEX, SITE, ASSET, FOOTER } from '../lib/site';
-interface Props { title: string; description?: string; current?: string }
-const { title, description = '', current = '' } = Astro.props;
+// theme='dark' – тёмные страницы сайта (всё, кроме магазина: сайт тёмный, магазин белый – владелец 25.10).
+interface Props { title: string; description?: string; current?: string; theme?: 'light' | 'dark' }
+const { title, description = '', current = '', theme = 'light' } = Astro.props;
+const dark = theme === 'dark';
 const path = Astro.url.pathname.replace(import.meta.env.BASE_URL.replace(/\/$/, ''), '') || '/';
 // Шрифты сайта – файлы копии; адреса зависят от BASE, поэтому @font-face собирается здесь
 const face = (family: string, file: string, format: string, weight: number) =>
@@ -18,7 +20,7 @@ const fonts = '<style>' + face('CenturyGothic', ASSET.century, 'woff', 400) +
   face('TildaSans', ASSET.tildaSans + 'TildaSans-Bold.woff2', 'woff2', 700) + '</style>';
 ---
 <!doctype html>
-<html lang="ru">
+<html lang="ru" data-theme={theme}>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -34,7 +36,7 @@ const fonts = '<style>' + face('CenturyGothic', ASSET.century, 'woff', 400) +
   <slot name="head" />
 </head>
 <body>
-  <Header current={current}>
+  <Header current={current} dark={dark}>
     <Cart slot="actions" client:idle orderHref={u('/order/')} favHref={u('/favorites/')} />
     <Cart slot="actions-wide" client:idle drawer orderHref={u('/order/')} favHref={u('/favorites/')} />
   </Header>
@@ -42,7 +44,7 @@ const fonts = '<style>' + face('CenturyGothic', ASSET.century, 'woff', 400) +
   <footer class="ftr">
     <div class="wrap ftr__grid">
       <div class="ftr__col">
-        <img src={u(ASSET.logo)} alt="TEYES SIBIR" width="186" height="25" loading="lazy" />
+        <img src={u(dark ? ASSET.logoDark : ASSET.logo)} alt="TEYES SIBIR" width="186" height="25" loading="lazy" />
         <p>{SITE.slogan}</p>
       </div>
       <div class="ftr__col">
@@ -79,6 +81,14 @@ const fonts = '<style>' + face('CenturyGothic', ASSET.century, 'woff', 400) +
     --tx-r: 16px; --tx-gutter: 16px; --tx-max: 1200px;
     color-scheme: light;
   }
+  /* Тёмные страницы сайта – цвета живого teyes-sibir.ru (фон #02050c, панели статей работ, градиент кнопок) */
+  :root[data-theme='dark'] {
+    --tx-bg: #02050c; --tx-surface: #0d111b; --tx-ink: #f5f7fb; --tx-muted: #a7b0c0; --tx-line: rgba(255, 255, 255, 0.12);
+    --tx-accent: #4aa8ff; --tx-accent-2: #43e3b5; --tx-grad: linear-gradient(90deg, #4aa8ff 0%, #43e3b5 100%);
+    color-scheme: dark;
+  }
+  :root[data-theme='dark'] .btn--accent { color: #041018; }
+  :root[data-theme='dark'] .hdr { box-shadow: none; }
   @media (min-width: 768px) { :root { --tx-gutter: 24px; } }
   *, *::before, *::after { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }

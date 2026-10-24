@@ -3,13 +3,13 @@
 // «Запись на установку»; ниже – пункты меню. «Услуги» и «Магазин» – триггеры мега-меню (#submenu:*),
 // на телефоне бургер открывает экран меню (window.tsbmOpen из src/menu/megamenu.js).
 import { NAV, SITE, ASSET, u } from '../lib/site';
-interface Props { current?: string }
-const { current = '' } = Astro.props;
+interface Props { current?: string; dark?: boolean }
+const { current = '', dark = false } = Astro.props;
 ---
 <header class="hdr">
   <div class="hdr__top wrap">
     <a class="hdr__logo" href={u('/')} aria-label="TEYES SIBIR – на главную">
-      <img src={u(ASSET.logo)} alt="TEYES SIBIR" width="186" height="25" />
+      <img src={u(dark ? ASSET.logoDark : ASSET.logo)} alt="TEYES SIBIR" width="186" height="25" />
     </a>
     <p class="hdr__addr">{SITE.address}</p>
     <div class="hdr__msg">

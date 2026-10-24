@@ -26,6 +26,7 @@ export const SITE = {
 /** Картинки и шрифт берутся из уже скачанных файлов копии (public/assets). */
 export const ASSET = {
   logo: '/assets/tild3935-3364-4936-b736-333661316232/Group_1171274900_1.webp',
+  logoDark: '/assets/tild3734-3033-4035-b966-656162633730/IMG_5765_1_layerstyl.svg', // шапка тёмных страниц сайта
   telegram: '/assets/tild3434-6632-4061-b664-656138396261/div_5.png',
   max: '/assets/tild6634-3635-4533-a639-663732316638/div222.webp',
   phone: '/assets/tild6235-3234-4565-a365-313434306133/div_3.png',
