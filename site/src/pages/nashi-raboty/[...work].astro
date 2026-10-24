@@ -1,0 +1,123 @@
+---
+// «Наши работы»: хаб (/nashi-raboty/), раздел марки (/nashi-raboty/<марка>/) и страница работы
+// (/nashi-raboty/<марка>/<alias>/). Статьи пишет Case Studio (src/lib/works.ts). SEO страницы работы:
+// H1 = заголовок, описание, крошки и BreadcrumbList, BlogPosting с фото и датой, Open Graph,
+// FAQ – микроразметкой внутри статьи, перелинковка на работы той же марки.
+import Base from '../../layouts/Base.astro';
+import { WORKS, makes, fix, workPath, makePath, absolute, date, type Work } from '../../lib/works';
+import { u, LIVE, SITE } from '../../lib/site';
+
+export function getStaticPaths() {
+  const brands = makes();
+  return [
+    { params: { work: undefined }, props: { kind: 'hub' } },
+    ...brands.map(([slug, name]) => ({ params: { work: slug }, props: { kind: 'make', slug, name } })),
+    ...WORKS.map((w) => ({ params: { work: `${w.make_slug}/${w.alias}` }, props: { kind: 'work', w } })),
+  ];
+}
+type Props = { kind: 'hub' } | { kind: 'make'; slug: string; name: string } | { kind: 'work'; w: Work };
+const props = Astro.props as Props;
+const brands = makes();
+const org = { '@type': 'Organization', name: SITE.name, url: LIVE, telephone: SITE.phone,
+  address: { '@type': 'PostalAddress', streetAddress: 'ул. Сухарная 35, корпус 13, пом. 110', addressLocality: 'Новосибирск', addressCountry: 'RU' } };
+const crumb = (items: [string, string][]) => ({ '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+  itemListElement: items.map(([name, path], i) => ({ '@type': 'ListItem', position: i + 1, name, item: LIVE + path })) });
+
+let title = 'Наши работы – установка Teyes, камер и сигнализаций в Новосибирске | TEYES SIBIR';
+let description = 'Фото и описания работ установочного центра TEYES SIBIR в Новосибирске: магнитолы Teyes, камеры, регистраторы, сигнализации – по маркам автомобилей.';
+let list: Work[] = WORKS;
+let heading = 'Наши работы';
+let trail: [string, string][] = [['Главная', '/'], ['Наши работы', '/nashi-raboty/']];
+let w: Work | undefined;
+let related: Work[] = [];
+let ld: object[] = [];
+if (props.kind === 'make') {
+  list = WORKS.filter((x) => x.make_slug === props.slug);
+  heading = `Наши работы на ${props.name}`;
+  title = `Работы на ${props.name}: установка Teyes и оборудования в Новосибирске | TEYES SIBIR`;
+  description = `${list.length} ${list.length === 1 ? 'работа' : 'работ'} TEYES SIBIR на автомобилях ${props.name}: что установили, фото до и после, ответы на вопросы.`;
+  trail = [...trail, [props.name, makePath(props.slug)]];
+} else if (props.kind === 'work') {
+  w = props.w;
+  title = w.title;
+  description = w.description;
+  trail = [...trail, [w.make, makePath(w.make_slug)], [w.title, workPath(w)]];
+  related = WORKS.filter((x) => x.make_slug === w!.make_slug && x.alias !== w!.alias).slice(0, 4);
+  ld = [{ '@context': 'https://schema.org', '@type': 'BlogPosting', headline: w.title, description: w.description,
+    image: [w.cover, ...w.photos].map(absolute), datePublished: w.published_at, author: org, publisher: org,
+    mainEntityOfPage: LIVE + workPath(w), inLanguage: 'ru',
+    about: { '@type': 'Car', name: `${w.make} ${w.model} ${w.year}`.trim(), brand: w.make } }];
+}
+ld = [...ld, crumb(trail)];
+const json = (o: object) => JSON.stringify(o).replace(/</g, '\\u003c');
+---
+<Base title={title} description={description}>
+  <Fragment slot="head">
+    <meta property="og:type" content={w ? 'article' : 'website'} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {w && <meta property="og:image" content={absolute(w.cover)} />}
+  </Fragment>
+  <div class="wrap works">
+    <ol class="crumbs">
+      {trail.slice(0, -1).map(([name, path]) => <li><a href={u(path)}>{name}</a></li>)}
+      <li aria-current="page">{trail[trail.length - 1][0]}</li>
+    </ol>
+    {w ? (
+      <>
+        <h1 class="works__h1">{w.title}</h1>
+        <p class="works__meta">{date(w.published_at)} · {w.make} {w.model} {w.year}</p>
+        <Fragment set:html={fix(w.html)} />
+        {related.length > 0 && (
+          <section class="works__more">
+            <h2>Ещё работы на {w.make}</h2>
+            <div class="grid">
+              {related.map((x) => (
+                <a class="works__card" href={u(workPath(x))}>
+                  <img src={fix(x.cover)} alt={x.title} loading="lazy" width="640" height="480" />
+                  <span>{x.title}</span>
+                </a>
+              ))}
+            </div>
+            <p><a href={u(makePath(w.make_slug))}>Все работы на {w.make}</a> · <a href={u('/nashi-raboty/')}>Все работы</a></p>
+          </section>
+        )}
+      </>
+    ) : (
+      <>
+        <h1 class="works__h1">{heading}</h1>
+        {props.kind === 'hub' && brands.length > 0 && (
+          <nav class="works__makes" aria-label="Марки">
+            {brands.map(([slug, name, count]) => <a href={u(makePath(slug))}>{name} <span>{count}</span></a>)}
+          </nav>
+        )}
+        {list.length === 0 ? <p>Скоро здесь появятся описания работ.</p> : (
+          <div class="grid">
+            {list.map((x) => (
+              <a class="works__card" href={u(workPath(x))}>
+                <img src={fix(x.cover)} alt={x.title} loading="lazy" width="640" height="480" />
+                <span>{x.title}</span>
+                <small>{date(x.published_at)}</small>
+              </a>
+            ))}
+          </div>
+        )}
+      </>
+    )}
+  </div>
+  {ld.map((o) => <script type="application/ld+json" set:html={json(o)} />)}
+</Base>
+
+<style>
+  .works { display: grid; gap: 20px; padding-block: 24px 48px; }
+  .works__h1 { font-size: clamp(26px, 4vw, 40px); }
+  .works__meta { margin: 0; color: var(--tx-muted); font-size: 14px; }
+  .works__makes { display: flex; flex-wrap: wrap; gap: 8px; }
+  .works__makes a { padding: 8px 14px; border: 1px solid var(--tx-line); border-radius: 999px; text-decoration: none; color: var(--tx-ink); }
+  .works__makes a span { color: var(--tx-muted); margin-left: 4px; }
+  .works__card { display: grid; gap: 8px; text-decoration: none; color: var(--tx-ink); min-width: 0; }
+  .works__card img { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--tx-r); background: var(--tx-surface); }
+  .works__card span { font-weight: 700; line-height: 1.3; }
+  .works__card small { color: var(--tx-muted); }
+  .works__more { display: grid; gap: 16px; margin-top: 24px; }
+</style>
