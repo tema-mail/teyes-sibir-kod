@@ -1,10 +1,11 @@
 ---
 // «Наши работы»: хаб (/nashi-raboty/), раздел марки (/nashi-raboty/<марка>/) и страница работы
-// (/nashi-raboty/<марка>/<alias>/). Статьи пишет Case Studio (src/lib/works.ts). SEO страницы работы:
-// H1 = заголовок, описание, крошки и BreadcrumbList, BlogPosting с фото и датой, Open Graph,
-// FAQ – микроразметкой внутри статьи, перелинковка на работы той же марки.
+// (/nashi-raboty/<марка>/<alias>/). Статьи пишет Case Studio (src/lib/works.ts). Тёмная тема сайта целиком
+// (сайт тёмный, белый только магазин – владелец 25.10). Страница верстается из разделов: фото кадрируются
+// без чёрных полей, «До/После» – подписи на фото, поставленный товар – ссылкой в магазин.
+// SEO: H1, описание, крошки + BreadcrumbList, BlogPosting, FAQPage, Open Graph, перелинковка по марке.
 import Base from '../../layouts/Base.astro';
-import { WORKS, makes, fix, workPath, makePath, absolute, date, type Work } from '../../lib/works';
+import { WORKS, makes, fix, workPath, makePath, absolute, date, type Work, type Photo } from '../../lib/works';
 import { u, LIVE, SITE } from '../../lib/site';
 
 export function getStaticPaths() {
@@ -31,93 +32,217 @@ let trail: [string, string][] = [['Главная', '/'], ['Наши работ�
 let w: Work | undefined;
 let related: Work[] = [];
 let ld: object[] = [];
+let hero: Photo | undefined;
+let car = '';
+let about = ''; // в форму заявки: что и на какую машину смотрел посетитель
 if (props.kind === 'make') {
   list = WORKS.filter((x) => x.make_slug === props.slug);
   heading = `Наши работы на ${props.name}`;
   title = `Работы на ${props.name}: установка Teyes и оборудования в Новосибирске | TEYES SIBIR`;
-  description = `${list.length} ${list.length === 1 ? 'работа' : 'работ'} TEYES SIBIR на автомобилях ${props.name}: что установили, фото до и после, ответы на вопросы.`;
+  description = `Работы TEYES SIBIR на автомобилях ${props.name}: что установили, как встало в салон, фото до и после.`;
   trail = [...trail, [props.name, makePath(props.slug)]];
 } else if (props.kind === 'work') {
   w = props.w;
   title = w.title;
   description = w.description;
+  car = `${w.make} ${w.model} ${w.year}`.trim();
+  about = w.product ? `${w.product.model} на ${car}` : car;
   trail = [...trail, [w.make, makePath(w.make_slug)], [w.title, workPath(w)]];
-  related = WORKS.filter((x) => x.make_slug === w!.make_slug && x.alias !== w!.alias).slice(0, 4);
+  related = WORKS.filter((x) => x.make_slug === w!.make_slug && x.alias !== w!.alias).slice(0, 3);
+  const all = (w.sections || []).flatMap((s) => s.photos);
+  hero = w.after || all.find((p) => p.role !== 'before') || all[0];
   ld = [{ '@context': 'https://schema.org', '@type': 'BlogPosting', headline: w.title, description: w.description,
     image: [w.cover, ...w.photos].map(absolute), datePublished: w.published_at, author: org, publisher: org,
-    mainEntityOfPage: LIVE + workPath(w), inLanguage: 'ru',
-    about: { '@type': 'Car', name: `${w.make} ${w.model} ${w.year}`.trim(), brand: w.make } }];
+    mainEntityOfPage: LIVE + workPath(w), inLanguage: 'ru', about: { '@type': 'Car', name: car, brand: w.make } }];
+  if (w.sections && w.faq.length) {
+    ld.push({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: w.faq.map((f) => ({
+      '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) });
+  }
 }
 ld = [...ld, crumb(trail)];
 const json = (o: object) => JSON.stringify(o).replace(/</g, '\\u003c');
+// Фото: кадр 4:3 без чёрных полей; вертикальные кадрируются по центру (владелец 25.10: «обрежь или не вставляй»).
+const shown = (p: Photo) => !(hero && p.src === hero.src) && !(w?.before && p.src === w.before.src);
 ---
-<Base title={title} description={description}>
+<Base title={title} description={description} theme="dark">
   <Fragment slot="head">
     <meta property="og:type" content={w ? 'article' : 'website'} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     {w && <meta property="og:image" content={absolute(w.cover)} />}
   </Fragment>
-  <div class="wrap works">
+  <div class="wrap wk">
     <ol class="crumbs">
       {trail.slice(0, -1).map(([name, path]) => <li><a href={u(path)}>{name}</a></li>)}
       <li aria-current="page">{trail[trail.length - 1][0]}</li>
     </ol>
-    {w ? (
-      <>
-        <h1 class="works__h1">{w.title}</h1>
-        <p class="works__meta">{date(w.published_at)} · {w.make} {w.model} {w.year}</p>
-        <Fragment set:html={fix(w.html)} />
-        {related.length > 0 && (
-          <section class="works__more">
-            <h2>Ещё работы на {w.make}</h2>
-            <div class="grid">
-              {related.map((x) => (
-                <a class="works__card" href={u(workPath(x))}>
-                  <img src={fix(x.cover)} alt={x.title} loading="lazy" width="640" height="480" />
-                  <span>{x.title}</span>
-                </a>
-              ))}
+    {w && w.sections ? (
+      <article class="teyes-case wk__article" data-work-id={w.id}>
+        <header class="wk__hero">
+          <div class="wk__intro">
+            <p class="wk__eyebrow">Наша работа · {date(w.published_at)}</p>
+            <h1 class="wk__h1">{w.title}</h1>
+            <p class="wk__lead">{w.lead}</p>
+            <ul class="wk__chips">
+              <li><span>Автомобиль</span>{car}</li>
+              {w.product && <li><span>Поставили</span>{w.product.model}</li>}
+            </ul>
+            <div class="wk__cta">
+              <button class="btn btn--accent" type="button" data-lead={about}>Подобрать на мою машину</button>
+              <a class="btn btn--ghost" href={SITE.tel}>Позвонить</a>
             </div>
-            <p><a href={u(makePath(w.make_slug))}>Все работы на {w.make}</a> · <a href={u('/nashi-raboty/')}>Все работы</a></p>
+          </div>
+          {hero && <a class="wk__shot wk__shot--hero" href={fix(hero.src)} target="_blank" rel="noopener">
+            <img src={fix(hero.src)} alt={hero.alt || w.title} width={hero.w} height={hero.h} />
+          </a>}
+        </header>
+
+        {w.before && w.after && (
+          <section class="wk__ba" aria-label="До и после">
+            <figure><a class="wk__shot" href={fix(w.before.src)} target="_blank" rel="noopener">
+              <img src={fix(w.before.src)} alt={w.before.alt} width={w.before.w} height={w.before.h} loading="lazy" /></a>
+              <span class="wk__tag">До</span><figcaption>{w.before.caption}</figcaption></figure>
+            <figure><a class="wk__shot" href={fix(w.after.src)} target="_blank" rel="noopener">
+              <img src={fix(w.after.src)} alt={w.after.alt} width={w.after.w} height={w.after.h} loading="lazy" /></a>
+              <span class="wk__tag wk__tag--after">После</span><figcaption>{w.after.caption}</figcaption></figure>
           </section>
         )}
+
+        {w.sections.map((s) => (
+          <section class="wk__sec">
+            <div class="wk__text">
+              {s.eyebrow && <p class="wk__eyebrow">{s.eyebrow}</p>}
+              <h2>{s.heading}</h2>
+              {s.paragraphs.map((t) => <p>{t}</p>)}
+            </div>
+            {s.photos.filter(shown).length > 0 && (
+              <div class="wk__grid">
+                {s.photos.filter(shown).map((p) => (
+                  <figure><a class="wk__shot" href={fix(p.src)} target="_blank" rel="noopener">
+                    <img src={fix(p.src)} alt={p.alt} width={p.w} height={p.h} loading="lazy" /></a>
+                    {p.role === 'before' && <span class="wk__tag">До</span>}
+                    {p.caption && <figcaption>{p.caption}</figcaption>}</figure>
+                ))}
+              </div>
+            )}
+          </section>
+        ))}
+
+        {w.product && (
+          <section class="wk__product">
+            <div>
+              <p class="wk__eyebrow">Что поставили</p>
+              <h2>{w.product.model}</h2>
+              {w.product.title && w.product.title.toLowerCase() !== w.product.model.toLowerCase() && <p>{w.product.title}</p>}
+            </div>
+            <div class="wk__cta">
+              {w.product.path && <a class="btn btn--accent" href={u(w.product.path + '/')}>Смотреть в магазине</a>}
+              <button class="btn btn--ghost" type="button" data-lead={about}>Рассчитать на мою машину</button>
+            </div>
+          </section>
+        )}
+
+        {w.faq.length > 0 && (
+          <section class="wk__faq">
+            <h2>Вопросы перед установкой</h2>
+            {w.faq.map((f) => <details><summary>{f.q}</summary><p>{f.a}</p></details>)}
+          </section>
+        )}
+
+        <section class="wk__final">
+          <h2>Хотите так же на свою машину?</h2>
+          <p>Пришлите фото штатной панели и год машины – подберём комплект и скажем, что сохранится из штатного.</p>
+          <div class="wk__cta">
+            <button class="btn btn--accent" type="button" data-lead={about}>Оставить заявку</button>
+            <a class="btn btn--ghost" href={SITE.telegram} target="_blank" rel="noopener">Написать в Telegram</a>
+          </div>
+        </section>
+      </article>
+    ) : w ? (
+      <>
+        <h1 class="wk__h1">{w.title}</h1>
+        <Fragment set:html={fix(w.html)} />
       </>
     ) : (
       <>
-        <h1 class="works__h1">{heading}</h1>
+        <h1 class="wk__h1">{heading}</h1>
         {props.kind === 'hub' && brands.length > 0 && (
-          <nav class="works__makes" aria-label="Марки">
+          <nav class="wk__makes" aria-label="Марки">
             {brands.map(([slug, name, count]) => <a href={u(makePath(slug))}>{name} <span>{count}</span></a>)}
           </nav>
         )}
         {list.length === 0 ? <p>Скоро здесь появятся описания работ.</p> : (
-          <div class="grid">
-            {list.map((x) => (
-              <a class="works__card" href={u(workPath(x))}>
-                <img src={fix(x.cover)} alt={x.title} loading="lazy" width="640" height="480" />
-                <span>{x.title}</span>
-                <small>{date(x.published_at)}</small>
-              </a>
-            ))}
+          <div class="wk__cards">
+            {list.map((x) => <a class="wk__card" href={u(workPath(x))}>
+              <img src={fix(x.cover)} alt={x.title} loading="lazy" width="640" height="480" />
+              <span>{x.title}</span><small>{date(x.published_at)}</small></a>)}
           </div>
         )}
       </>
+    )}
+    {related.length > 0 && w && (
+      <section class="wk__more">
+        <h2>Ещё работы на {w.make}</h2>
+        <div class="wk__cards">
+          {related.map((x) => <a class="wk__card" href={u(workPath(x))}>
+            <img src={fix(x.cover)} alt={x.title} loading="lazy" width="640" height="480" /><span>{x.title}</span></a>)}
+        </div>
+        <p><a href={u(makePath(w.make_slug))}>Все работы на {w.make}</a> · <a href={u('/nashi-raboty/')}>Все работы</a></p>
+      </section>
     )}
   </div>
   {ld.map((o) => <script type="application/ld+json" set:html={json(o)} />)}
 </Base>
 
 <style>
-  .works { display: grid; gap: 20px; padding-block: 24px 48px; }
-  .works__h1 { font-size: clamp(26px, 4vw, 40px); }
-  .works__meta { margin: 0; color: var(--tx-muted); font-size: 14px; }
-  .works__makes { display: flex; flex-wrap: wrap; gap: 8px; }
-  .works__makes a { padding: 8px 14px; border: 1px solid var(--tx-line); border-radius: 999px; text-decoration: none; color: var(--tx-ink); }
-  .works__makes a span { color: var(--tx-muted); margin-left: 4px; }
-  .works__card { display: grid; gap: 8px; text-decoration: none; color: var(--tx-ink); min-width: 0; }
-  .works__card img { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--tx-r); background: var(--tx-surface); }
-  .works__card span { font-weight: 700; line-height: 1.3; }
-  .works__card small { color: var(--tx-muted); }
-  .works__more { display: grid; gap: 16px; margin-top: 24px; }
+  .wk { display: grid; gap: 28px; padding-block: 24px 64px; }
+  .wk__article { display: grid; gap: 56px; }
+  .wk__eyebrow { margin: 0 0 10px; font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--tx-accent); }
+  .wk__h1 { font-size: clamp(30px, 4.4vw, 52px); letter-spacing: -0.02em; }
+  .wk__hero { display: grid; gap: 28px; align-items: center; }
+  @media (min-width: 960px) { .wk__hero { grid-template-columns: 1.05fr 1fr; gap: 48px; } }
+  .wk__intro { display: grid; gap: 18px; min-width: 0; }
+  .wk__lead { margin: 0; font-size: clamp(17px, 1.6vw, 20px); line-height: 1.55; color: var(--tx-ink); max-width: 60ch; }
+  .wk__chips { display: flex; flex-wrap: wrap; gap: 10px; margin: 0; padding: 0; list-style: none; }
+  .wk__chips li { display: grid; gap: 2px; padding: 10px 16px; border: 1px solid var(--tx-line); border-radius: 14px; background: var(--tx-surface); font-weight: 700; }
+  .wk__chips span { font-size: 12px; font-weight: 400; color: var(--tx-muted); }
+  .wk__cta { display: flex; flex-wrap: wrap; gap: 12px; }
+  .wk__shot { display: block; overflow: hidden; border-radius: 18px; background: var(--tx-surface); }
+  .wk__shot img { width: 100%; height: 100%; aspect-ratio: 4 / 3; object-fit: cover; transition: transform 0.4s ease; }
+  .wk__shot:hover img { transform: scale(1.03); }
+  .wk__shot--hero img { aspect-ratio: 4 / 3; }
+  figure { position: relative; margin: 0; display: grid; gap: 8px; min-width: 0; }
+  figcaption { font-size: 14px; color: var(--tx-muted); }
+  .wk__tag { position: absolute; top: 14px; left: 14px; padding: 6px 14px; border-radius: 999px; background: rgba(2, 5, 12, 0.78);
+    color: #fff; font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; backdrop-filter: blur(6px); }
+  .wk__tag--after { background: var(--tx-grad); color: #041018; }
+  .wk__ba { display: grid; gap: 16px; }
+  @media (min-width: 700px) { .wk__ba { grid-template-columns: 1fr 1fr; } }
+  .wk__sec { display: grid; gap: 24px; }
+  .wk__text { max-width: 760px; }
+  .wk__text h2, .wk__product h2, .wk__faq h2, .wk__final h2, .wk__more h2 { font-size: clamp(24px, 3vw, 34px); margin-bottom: 14px; }
+  .wk__text p { margin: 0 0 12px; font-size: 17px; line-height: 1.65; color: #d8dde7; }
+  .wk__grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); } /* одно фото не растягивается на всю ширину */
+  .wk__product, .wk__final { display: grid; gap: 20px; padding: clamp(22px, 4vw, 40px); border: 1px solid rgba(74, 168, 255, 0.35); border-radius: 22px;
+    background: radial-gradient(circle at 95% 50%, rgba(67, 227, 181, 0.15), transparent 40%), #111827; }
+  @media (min-width: 860px) { .wk__product { grid-template-columns: 1fr auto; align-items: center; } }
+  .wk__product p, .wk__final p { margin: 0; color: var(--tx-muted); }
+  .wk__faq { display: grid; gap: 10px; }
+  .wk__faq details { border: 1px solid var(--tx-line); border-radius: 16px; background: var(--tx-surface); }
+  .wk__faq summary { cursor: pointer; padding: 18px 22px; font-weight: 700; list-style: none; position: relative; padding-right: 52px; }
+  .wk__faq summary::-webkit-details-marker { display: none; }
+  .wk__faq summary::after { content: '+'; position: absolute; right: 22px; top: 50%; transform: translateY(-50%); font-size: 22px; color: var(--tx-accent); }
+  .wk__faq details[open] summary::after { content: '–'; }
+  .wk__faq details p { margin: 0; padding: 0 22px 20px; color: #d8dde7; line-height: 1.6; }
+  .wk__makes { display: flex; flex-wrap: wrap; gap: 8px; }
+  .wk__makes a { padding: 8px 16px; border: 1px solid var(--tx-line); border-radius: 999px; text-decoration: none; background: var(--tx-surface); }
+  .wk__makes a span { color: var(--tx-muted); margin-left: 4px; }
+  .wk__cards { display: grid; gap: 20px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (min-width: 900px) { .wk__cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .wk__card { display: grid; gap: 10px; text-decoration: none; min-width: 0; }
+  .wk__card img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 16px; background: var(--tx-surface); }
+  .wk__card span { font-weight: 700; line-height: 1.3; }
+  .wk__card small { color: var(--tx-muted); }
+  .wk__more { display: grid; gap: 16px; margin-top: 24px; }
+  .wk__more a { color: var(--tx-accent); }
 </style>

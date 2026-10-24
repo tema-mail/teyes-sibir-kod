@@ -2,10 +2,16 @@
 // (публикатор Astro, коммит в этот репо). Фото – site/public/img/w/<alias>/, в HTML адреса начинаются с __BASE__/.
 import { BASE, LIVE } from './site';
 
+export interface Photo { src: string; w: number; h: number; role: string; alt: string; caption: string }
+export interface Section { eyebrow: string; heading: string; paragraphs: string[]; photos: Photo[] }
+
 export interface Work {
   id: number; alias: string; make: string; make_slug: string; model: string; year: string;
-  service: string; extra_services: string[]; title: string; description: string;
+  service: string; extra_services: string[]; work_text?: string; title: string; description: string;
   main_phrase: string; extra_phrases: string[]; lead: string; faq: { q: string; a: string }[];
+  /** С 25.10 страница верстается из разделов; у ранних записей есть только html. */
+  sections?: Section[]; before?: Photo | null; after?: Photo | null;
+  product?: { model: string; title: string; path: string } | null;
   cover: string; photos: string[]; published_at: string; html: string;
 }
 
