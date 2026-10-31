@@ -1329,6 +1329,7 @@
 "~*^/magnitola/tproduct/735723214102\-teyes\-cc4\-pro/?$" "/store/catalog_teyes/tproduct/735723214102-teyes-cc4-pro";
 "~*^/magnitola/tproduct/916525068012\-teyes\-cc3l/?$" "/store/catalog_teyes/tproduct/916525068012-teyes-cc3l";
 "~*^/multimedia_teyes/honda/ipdo4ogb31\-ustanovka\-magnitoli\-i\-multimedia\-na\-hond/?$" "/multimedia_teyes/honda/ipdo4ogb31-zamena-magnitoli-i-rusifikatsiya-honda-n";
+"~*^/multimedia_teyes/nissan/x\-trail/?$" "/multimedia_teyes/nissan/nissan_xtrail";
 "~*^/multimedia_teyes/toyota/1lm9r7d5r1\-zamena\-magnitoli\-i\-rusifikatsiya\-toyota/?$" "/multimedia_teyes/toyota";
 "~*^/multimedia_teyes/toyota/6boavuyv31\-zamena\-magnitoli\-i\-rusifikatsiya\-toyota/?$" "/multimedia_teyes/toyota";
 "~*^/multimedia_teyes/toyota/na5ldkvvf1\-zamena\-shtatnoi\-magnitoli\-na\-toyota\-land/?$" "/multimedia_teyes/toyota/na5ldkvvf1-zamena-magnitoli-i-rusifikatsiya-toyota";
@@ -1629,7 +1630,6 @@
 "~^(?!/multimedia_teyes/nissan/terrano/?$)(?i)/multimedia_teyes/nissan/terrano/?$" "/multimedia_teyes/nissan/terrano";
 "~^(?!/multimedia_teyes/nissan/tiida/?$)(?i)/multimedia_teyes/nissan/tiida/?$" "/multimedia_teyes/nissan/tiida";
 "~^(?!/multimedia_teyes/nissan/wingroad/?$)(?i)/multimedia_teyes/nissan/wingroad/?$" "/multimedia_teyes/nissan/wingroad";
-"~^(?!/multimedia_teyes/nissan/x\-trail/?$)(?i)/multimedia_teyes/nissan/x\-trail/?$" "/multimedia_teyes/nissan/x-trail";
 "~^(?!/multimedia_teyes/opel/?$)(?i)/multimedia_teyes/opel/?$" "/multimedia_teyes/opel";
 "~^(?!/multimedia_teyes/peugeot/?$)(?i)/multimedia_teyes/peugeot/?$" "/multimedia_teyes/peugeot";
 "~^(?!/multimedia_teyes/porsche/?$)(?i)/multimedia_teyes/porsche/?$" "/multimedia_teyes/porsche";

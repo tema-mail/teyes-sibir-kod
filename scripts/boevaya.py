@@ -14,7 +14,7 @@
 - canonical есть у каждой страницы.
 HTML хранится сжатым (index.html.gz + пустой index.html для try_files): nginx gzip_static always + gunzip.
 """
-import csv, datetime, gzip, html, pathlib, re, shutil, sys, urllib.parse
+import csv, gzip, html, pathlib, re, shutil, sys, urllib.parse
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 PUB, DIST, OUT = ROOT / 'public', ROOT / 'site/dist', ROOT / 'boevoy'
@@ -84,8 +84,10 @@ def redirects():
     return {k: v for k, v in red.items() if low(v) != k}
 
 
-def rebase(text):
+def rebase(text, js=False):
     text = text.replace('https://tema-mail.github.io/teyes-sibir-kod', SITE)
+    if js:  # в скриптах – только адреса в кавычках: голый /teyes-sibir-kod бывает частью регулярки (Lead: /^\/teyes-sibir-kod/)
+        return re.sub(r'(["\'`])/teyes-sibir-kod(?=/)', r'\1', text)
     text = re.sub(r'\\/teyes-sibir-kod(?=\\/)', '', text)
     text = re.sub(r'/teyes-sibir-kod(?=/)', '', text)
     return re.sub(r'/teyes-sibir-kod(?=["\'?#)\s])', '/', text)
@@ -107,6 +109,8 @@ def fix_links(text, red):
         if path is None:
             return m.group(0)
         t = red.get(low(path))
+        if not t and len(path) > 1 and re.match(r'^/[^?#]*/(?=$|[?#])', path) and not re.search(r'\.\w+/?$', path.split('?')[0]):
+            t = re.sub(r'/(?=$|[?#])', '', path, count=1)
         tp = TPRODUCT.match(path)
         if not t and tp and not (OUT / path.split('?')[0].lstrip('/') / 'index.html').exists():
             # старые карточки до переезда магазина (/catalog_teyes/tproduct/…): та же карточка по номеру или магазин
@@ -175,10 +179,13 @@ def main():
         if not f.is_file() or f.suffix not in TEXT:
             continue
         text = f.read_text('utf-8', errors='surrogateescape')
-        new = rebase(text)
+        new = rebase(text, js=f.suffix == '.js')
         if f.name == 'index.html':
             path = page_path(f, OUT)
             new = ROBOTS.sub('', new)
+            new = re.sub(r'<html(?![^>]*\blang=)', '<html lang="ru"', new, count=1)
+            if 't-records' in new:  # поля Tilda 12–13 px: iPhone приближает страницу при касании
+                new = new.replace('</head>', '<style>input,select,textarea{font-size:16px!important}</style></head>', 1)
             if 'mc.yandex.ru/metrika' not in new:
                 new = new.replace('</body>', METRIKA + '</body>', 1)
                 stat['metrika'] += 1
@@ -196,9 +203,8 @@ def main():
         if new != text:
             f.write_text(new, 'utf-8', errors='surrogateescape')
 
-    today = datetime.date.today().isoformat()
     (OUT / 'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-                                     + ''.join(f'<url><loc>{html.escape(SITE + p)}</loc><lastmod>{today}</lastmod></url>\n' for p in pages)
+                                     + ''.join(f'<url><loc>{html.escape(SITE + p)}</loc></url>\n' for p in pages)  # lastmod не ставим: одна дата сборки у всех – поисковик перестаёт ей верить
                                      + '</urlset>\n', 'utf-8')
     (OUT / 'robots.txt').write_text('User-agent: *\nDisallow: /order\nDisallow: /favorites\nDisallow: /thankpage\n'
                                     f'Disallow: /*?\nAllow: /*.css\nAllow: /*.js\n\nSitemap: {SITE}/sitemap.xml\n', 'utf-8')
