@@ -13,12 +13,13 @@ import '../../styles/shop.css';
 type Item = { name: string; href: string; meta?: string };
 type Sec = { id: string; title: string; href: string | null; img: string; meta?: string; groups?: { name: string; items: Item[] }[] };
 const store = (menu as any).menus.store as { all: { text: string }; sections: Sec[] };
-const strip = (href: string) => href.replace(import.meta.env.BASE_URL.replace(/\/$/, ''), '').replace(/^\/|\/$/g, '');
+// адреса в data/menu.json записаны с подпапкой копии (/teyes-sibir-kod) – при сборке в корень (боевой домен) её тоже снимаем
+const strip = (href: string) => href.replace(import.meta.env.BASE_URL.replace(/\/$/, ''), '').replace(/^\/teyes-sibir-kod/, '').replace(/^\/|\/$/g, '');
 
 export function getStaticPaths() {
   const m = (menu as any).menus.store.sections as Sec[];
   const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-  const local = (h: string) => h.replace(base, '').replace(/^\/|\/$/g, '');
+  const local = (h: string) => h.replace(base, '').replace(/^\/teyes-sibir-kod/, '').replace(/^\/|\/$/g, '');
   const paths: { params: { section: string | undefined } }[] = [{ params: { section: undefined } }];
   m.forEach((s) => {
     if (s.href) paths.push({ params: { section: local(s.href).replace(/^store\/?/, '') || undefined } });
