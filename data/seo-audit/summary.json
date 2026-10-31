@@ -1,0 +1,452 @@
+{
+ "pages": 3929,
+ "dist_built": true,
+ "by_type": {
+  "Магазин": {
+   "pages": 3198,
+   "noindex": 3198,
+   "no_canonical": 0,
+   "canonical_not_teyes": 0,
+   "no_title": 0,
+   "title_long_70": 3105,
+   "no_desc": 0,
+   "desc_bad_len": 2365,
+   "h1_not_1": 0,
+   "imgs_total": 55615,
+   "imgs_no_alt": 15512,
+   "no_jsonld": 155,
+   "jsonld_error": 0,
+   "faq_text_no_faqpage": 3198,
+   "no_og_image": 3194,
+   "thin_lt_150_words": 21,
+   "with_broken_links": 0
+  },
+  "Модель": {
+   "pages": 258,
+   "noindex": 258,
+   "no_canonical": 0,
+   "canonical_not_teyes": 0,
+   "no_title": 0,
+   "title_long_70": 0,
+   "no_desc": 0,
+   "desc_bad_len": 3,
+   "h1_not_1": 217,
+   "imgs_total": 3724,
+   "imgs_no_alt": 3397,
+   "no_jsonld": 239,
+   "jsonld_error": 0,
+   "faq_text_no_faqpage": 239,
+   "no_og_image": 0,
+   "thin_lt_150_words": 0,
+   "with_broken_links": 13
+  },
+  "Работа": {
+   "pages": 191,
+   "noindex": 191,
+   "no_canonical": 0,
+   "canonical_not_teyes": 0,
+   "no_title": 0,
+   "title_long_70": 45,
+   "no_desc": 2,
+   "desc_bad_len": 19,
+   "h1_not_1": 96,
+   "imgs_total": 3396,
+   "imgs_no_alt": 2415,
+   "no_jsonld": 153,
+   "jsonld_error": 0,
+   "faq_text_no_faqpage": 153,
+   "no_og_image": 30,
+   "thin_lt_150_words": 0,
+   "with_broken_links": 6
+  },
+  "Одиночная": {
+   "pages": 175,
+   "noindex": 175,
+   "no_canonical": 0,
+   "canonical_not_teyes": 0,
+   "no_title": 0,
+   "title_long_70": 32,
+   "no_desc": 5,
+   "desc_bad_len": 25,
+   "h1_not_1": 9,
+   "imgs_total": 3672,
+   "imgs_no_alt": 3153,
+   "no_jsonld": 174,
+   "jsonld_error": 0,
+   "faq_text_no_faqpage": 175,
+   "no_og_image": 8,
+   "thin_lt_150_words": 1,
+   "with_broken_links": 163
+  },
+  "StarLine": {
+   "pages": 37,
+   "noindex": 37,
+   "no_canonical": 37,
+   "canonical_not_teyes": 0,
+   "no_title": 0,
+   "title_long_70": 0,
+   "no_desc": 0,
+   "desc_bad_len": 0,
+   "h1_not_1": 0,
+   "imgs_total": 751,
+   "imgs_no_alt": 716,
+   "no_jsonld": 37,
+   "jsonld_error": 0,
+   "faq_text_no_faqpage": 0,
+   "no_og_image": 37,
+   "thin_lt_150_words": 1,
+   "with_broken_links": 0
+  },
+  "Работы": {
+   "pages": 23,
+   "noindex": 23,
+   "no_canonical": 0,
+   "canonical_not_teyes": 0,
+   "no_title": 0,
+   "title_long_70": 0,
+   "no_desc": 0,
+   "desc_bad_len": 0,
+   "h1_not_1": 0,
+   "imgs_total": 345,
+   "imgs_no_alt": 345,
+   "no_jsonld": 23,
+   "jsonld_error": 0,
+   "faq_text_no_faqpage": 23,
+   "no_og_image": 0,
+   "thin_lt_150_words": 0,
+   "with_broken_links": 22
+  },
+  "Русификация": {
+   "pages": 16,
+   "noindex": 16,
+   "no_canonical": 0,
+   "canonical_not_teyes": 0,
+   "no_title": 0,
+   "title_long_70": 0,
+   "no_desc": 0,
+   "desc_bad_len": 16,
+   "h1_not_1": 0,
+   "imgs_total": 590,
+   "imgs_no_alt": 590,
+   "no_jsonld": 16,
+   "jsonld_error": 0,
+   "faq_text_no_faqpage": 16,
+   "no_og_image": 0,
+   "thin_lt_150_words": 0,
+   "with_broken_links": 0
+  },
+  "Услуга": {
+   "pages": 15,
+   "noindex": 15,
+   "no_canonical": 0,
+   "canonical_not_teyes": 0,
+   "no_title": 0,
+   "title_long_70": 6,
+   "no_desc": 0,
+   "desc_bad_len": 5,
+   "h1_not_1": 2,
+   "imgs_total": 873,
+   "imgs_no_alt": 842,
+   "no_jsonld": 7,
+   "jsonld_error": 0,
+   "faq_text_no_faqpage": 7,
+   "no_og_image": 8,
+   "thin_lt_150_words": 0,
+   "with_broken_links": 1
+  },
+  "Приложения": {
+   "pages": 9,
+   "noindex": 9,
+   "no_canonical": 0,
+   "canonical_not_teyes": 0,
+   "no_title": 0,
+   "title_long_70": 0,
+   "no_desc": 0,
+   "desc_bad_len": 2,
+   "h1_not_1": 1,
+   "imgs_total": 328,
+   "imgs_no_alt": 328,
+   "no_jsonld": 9,
+   "jsonld_error": 0,
+   "faq_text_no_faqpage": 9,
+   "no_og_image": 0,
+   "thin_lt_150_words": 0,
+   "with_broken_links": 0
+  },
+  "Блог": {
+   "pages": 3,
+   "noindex": 3,
+   "no_canonical": 0,
+   "canonical_not_teyes": 0,
+   "no_title": 0,
+   "title_long_70": 2,
+   "no_desc": 0,
+   "desc_bad_len": 0,
+   "h1_not_1": 0,
+   "imgs_total": 43,
+   "imgs_no_alt": 41,
+   "no_jsonld": 3,
+   "jsonld_error": 0,
+   "faq_text_no_faqpage": 3,
+   "no_og_image": 0,
+   "thin_lt_150_words": 0,
+   "with_broken_links": 1
+  },
+  "Работа (код)": {
+   "pages": 3,
+   "noindex": 3,
+   "no_canonical": 0,
+   "canonical_not_teyes": 0,
+   "no_title": 0,
+   "title_long_70": 2,
+   "no_desc": 0,
+   "desc_bad_len": 0,
+   "h1_not_1": 0,
+   "imgs_total": 26,
+   "imgs_no_alt": 12,
+   "no_jsonld": 0,
+   "jsonld_error": 0,
+   "faq_text_no_faqpage": 2,
+   "no_og_image": 2,
+   "thin_lt_150_words": 2,
+   "with_broken_links": 0
+  },
+  "Главная": {
+   "pages": 1,
+   "noindex": 1,
+   "no_canonical": 0,
+   "canonical_not_teyes": 0,
+   "no_title": 0,
+   "title_long_70": 0,
+   "no_desc": 0,
+   "desc_bad_len": 1,
+   "h1_not_1": 0,
+   "imgs_total": 41,
+   "imgs_no_alt": 41,
+   "no_jsonld": 1,
+   "jsonld_error": 0,
+   "faq_text_no_faqpage": 1,
+   "no_og_image": 0,
+   "thin_lt_150_words": 0,
+   "with_broken_links": 0
+  }
+ },
+ "site": {
+  "dup_title_values": 34,
+  "dup_title_pages": 138,
+  "dup_title_top": [
+   [
+    "Установка Teyes на Subaru в Новосибирске — наши работы Teyes Sibir",
+    47
+   ],
+   [
+    "Установка Teyes на Suzuki в Новосибирске — наши работы Teyes Sibir",
+    7
+   ],
+   [
+    "Установка Teyes на Opel в Новосибирске — наши работы Teyes Sibir",
+    7
+   ],
+   [
+    "Наши работы — установка Teyes в Новосибирске | Teyes Sibir",
+    4
+   ],
+   [
+    "Установка приложений в ГУ JETOUR",
+    4
+   ],
+   [
+    "Установка Teyes на BMW в Новосибирске — наши работы Teyes Sibir",
+    3
+   ],
+   [
+    "Установка Teyes на Ford в Новосибирске — примеры работ Teyes Sibir",
+    3
+   ],
+   [
+    "Установка Teyes на Honda в Новосибирске — наши работы Teyes Sibir",
+    3
+   ]
+  ],
+  "dup_description_values": 36,
+  "dup_description_pages": 150,
+  "dup_description_top": [
+   [
+    "Примеры установки Teyes на автомобили Subaru в Новосибирске: Forester, Outback, Legacy, XV. Фото до и после установки Android магнитолы Teyes.",
+    47
+   ],
+   [
+    "Примеры установки Teyes на автомобили Suzuki в Новосибирске: Vitara, Jimny, SX4, Swift. Фото до и после установки Android магнитолы Teyes.",
+    7
+   ],
+   [
+    "Примеры установки Teyes на автомобили Opel в Новосибирске: Astra, Insignia, Antara, Mokka. Фото до и после установки Android магнитолы Teyes.",
+    7
+   ],
+   [
+    "Надежный автомобильный охранно-телематический комплекс с интеллектуальным автозапуском с вашего смартфона, несканируемым диалоговым кодом управления, возможност",
+    6
+   ],
+   [
+    "Умный охранно-телематический комплекс включает лучшие решения в области автобезопасности и гарантирует надежную защиту от угона благодаря устойчивому к электрон",
+    5
+   ],
+   [
+    "Примеры установки Teyes в Новосибирске. Фото и кейсы установки мультимедиа Teyes на Toyota, Hyundai, Kia, BMW и другие автомобили.",
+    4
+   ],
+   [
+    "Прошивка и установка приложений в головное устройство автомобилей JETOUR",
+    4
+   ],
+   [
+    "Примеры установки Teyes на автомобили BMW в Новосибирске: X5, X3, 3 Series, 5 Series. Фото до и после установки Android магнитолы Teyes.",
+    3
+   ]
+  ],
+  "dup_h1_values": 35,
+  "dup_h1_pages": 72,
+  "dup_h1_top": [
+   [
+    "Наши работы",
+    4
+   ],
+   [
+    "Установка TEYES CC4 Pro в Toyota Land Cruiser 200 в Новосибирске в установочном центре Teyes Sibir",
+    2
+   ],
+   [
+    "Замена магнитолы и русификация Toyota Tundra | Установка магнитолы и мультимедиа на Toyota Tundra",
+    2
+   ],
+   [
+    "Infiniti QX80 — установка Teyes CC4 PRO 360 с круговым обзором в Новосибирске",
+    2
+   ],
+   [
+    "Автозвук",
+    2
+   ],
+   [
+    "Teyes CC4 Pro",
+    2
+   ],
+   [
+    "Штатная магнитола Teyes CC4 Pro Honda Civic 8 FK FN FD 2005-2012",
+    2
+   ],
+   [
+    "Штатная магнитола Teyes CC3L Nissan Navara 3 D40 2004 - 2010",
+    2
+   ]
+  ],
+  "robots_txt": false,
+  "sitemap_xml": false,
+  "llms_txt": false,
+  "page_404": false,
+  "broken_targets": 96,
+  "broken_top": [
+   [
+    "/autosound",
+    164
+   ],
+   [
+    "/teyes",
+    164
+   ],
+   [
+    "/heating_systems",
+    163
+   ],
+   [
+    "/russification",
+    163
+   ],
+   [
+    "/signaling",
+    163
+   ],
+   [
+    "/sound_insulation",
+    163
+   ],
+   [
+    "/accessories/tproduct/498706501042-kamera-zadnego-perednego-vida-teyes-sony",
+    93
+   ],
+   [
+    "/catalog_teyes/tproduct/516229718052-teyes-cc3-2k",
+    60
+   ],
+   [
+    "/works_Toyota",
+    38
+   ],
+   [
+    "/catalog_teyes/tproduct/735723214102-teyes-cc4-pro",
+    35
+   ],
+   [
+    "/accessories/tproduct/556693834772-kameri-krugovogo-obzora-teyes-3d-360-108",
+    22
+   ],
+   [
+    "/catalog_teyes/tproduct/719229089392-teyes-lux-one",
+    21
+   ],
+   [
+    "/works_Honda",
+    20
+   ],
+   [
+    "/catalog_teyes/tproduct/916525068012-teyes-cc3l",
+    16
+   ],
+   [
+    "/works_toyota",
+    13
+   ],
+   [
+    "/works_Nissan",
+    11
+   ],
+   [
+    "/works/Mercedes-Benz",
+    10
+   ],
+   [
+    "/accessories/tproduct/691076468382-videoregistrator-teyes-x5-dvr",
+    7
+   ],
+   [
+    "/works_Lexus",
+    7
+   ],
+   [
+    "/accessories/tproduct/865420052612-skritii-mikrofon-analogovii-teyes",
+    7
+   ],
+   [
+    "/catalogsignaling/tproduct/816716704052-starline-s96-v2-lte",
+    7
+   ],
+   [
+    "/works_Subaru",
+    7
+   ],
+   [
+    "/works_Hyundai",
+    6
+   ],
+   [
+    "/works_Mazda",
+    6
+   ],
+   [
+    "/works_Mercedes",
+    6
+   ]
+  ],
+  "org_schema_pages": 33
+ }
+}
