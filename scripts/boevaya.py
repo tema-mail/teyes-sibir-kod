@@ -42,7 +42,10 @@ JUNK = {
     '/work/toyota/pa4730g8h1-ustanovka-teyes-cc4-pro-v-toyota-land-cr': '/installing_teyescc4pro_toyotalandcruiser200',
     '/work/toyota/dm7u1on511-ustanovka-teyes-cc4-pro-v-toyota-highlan': '/teyes_cc4pro_toyota_highlander_novosibirsk',
     '/work': '/works',
+    # битые ссылки в текстах Tilda
+    '/work/infinity': '/works/infiniti', '/teyes_cc3_2k_honda_accordl': '/teyes_cc3_2k_honda_accord', '/portfolio': '/works',
 }
+WHOLE = {'/admin'}  # эти папки убираются целиком, у остальных мусорных адресов – только сама страница
 # разделы работ по маркам: /work/<марка> дублирует /works/<марка> (там трафик)
 WORKS_ALIAS = {'landrover': 'land_rover'}
 
@@ -144,8 +147,13 @@ def main():
         if rel and '..' not in rel.split('/'):
             (OUT / rel).unlink(missing_ok=True)
     shutil.copytree(DIST, OUT, dirs_exist_ok=True)
+    def drop(path):  # убрать только саму страницу: внутри папки могут жить другие (/work → /work/bmw/<работа>)
+        if path in WHOLE:
+            shutil.rmtree(OUT / path.lstrip('/'), ignore_errors=True)
+        else:
+            (OUT / path.lstrip('/') / 'index.html').unlink(missing_ok=True)
     for k in JUNK:
-        shutil.rmtree(OUT / k.lstrip('/'), ignore_errors=True)
+        drop(k)
     for d in OUT.glob('store/**/tproduct/*/index.html'):
         n = re.match(r'(\d+)', d.parent.name)
         if n:
@@ -153,7 +161,7 @@ def main():
     red = redirects()
     for k in red:  # страница-дубль, у которой есть 301, не выкладывается
         if k.startswith('/work/') and k.count('/') == 2:
-            shutil.rmtree(OUT / k.lstrip('/'), ignore_errors=True)
+            drop(k)
 
     pages, stat = [], {'metrika': 0, 'canonical': 0, 'links': 0, 'works': 0}
     for f in sorted(OUT.rglob('*')):
@@ -199,6 +207,11 @@ def main():
         # регулярки без учёта регистра: Tilda отдаёт /works/Audi и /works/audi одинаково, nginx $uri регистр различает
         for k, v in sorted(red.items()):
             fh.write(f'"~*^{re.escape(k)}/?$" "{v}";\n')
+        # те же страницы с другим регистром (меню Tilda ссылается на /works/Audi, файл – works/audi): 301 на свой адрес
+        for d in sorted(OUT.glob('works/*/index.html')) + sorted(OUT.glob('multimedia_teyes/**/index.html')):
+            p = page_path(d, OUT)
+            e = re.escape(p)
+            fh.write(f'"~^(?!{e}/?$)(?i){e}/?$" "{p}";\n')
     # HTML – сжатым: index.html.gz, а index.html пустой (нужен try_files), отдаёт nginx gzip_static always + gunzip
     raw = gz = 0
     for f in OUT.rglob('*.html'):

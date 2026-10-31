@@ -1,0 +1,21 @@
+# teyes-sibir.ru на VPS Beget: только статика. Порты не публикуются – Caddy ходит по сети dzenbot_default.
+name: teyes-sibir
+services:
+  teyes-sibir-web:
+    image: nginxinc/nginx-unprivileged:1.27-alpine
+    container_name: teyes-sibir-web
+    restart: unless-stopped
+    volumes:
+      - /opt/teyes-sibir-site/releases:/srv:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./redirects.map:/etc/nginx/redirects.map:ro
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    mem_limit: 96m
+    networks: [proxy]
+networks:
+  proxy:
+    name: dzenbot_default
+    external: true
