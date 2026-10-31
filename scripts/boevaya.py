@@ -43,6 +43,7 @@ JUNK = {
     '/work/toyota/dm7u1on511-ustanovka-teyes-cc4-pro-v-toyota-highlan': '/teyes_cc4pro_toyota_highlander_novosibirsk',
     '/work': '/works',
     # битые ссылки в текстах Tilda
+    '/multimedia_teyes/nissan/x-trail': '/multimedia_teyes/nissan/nissan_xtrail',  # две одинаковые страницы X-Trail
     '/work/infinity': '/works/infiniti', '/teyes_cc3_2k_honda_accordl': '/teyes_cc3_2k_honda_accord', '/portfolio': '/works',
 }
 WHOLE = {'/admin'}  # эти папки убираются целиком, у остальных мусорных адресов – только сама страница
@@ -122,15 +123,21 @@ def fix_links(text, red):
 
 
 def works_title(path, text):
-    m = re.match(r'^/works/([^/]+)$', path)
+    """Разделы по маркам: на Tilda у многих title и description от чужой марки («…на Subaru»). Марка – из H1."""
+    works, hub = re.match(r'^/works/([^/]+)$', path), re.match(r'^/multimedia_teyes/([^/]+)$', path)
     h1 = re.search(r'<h1[^>]*>(.*?)</h1>', text, re.S)
-    if not m or not h1:
+    if not (works or hub) or not h1:
         return text
-    brand = re.sub(r'<[^>]+>|\s+', ' ', h1.group(1)).replace('Наши работы', '').strip()
-    if not brand:
+    brand = re.sub(r'<[^>]+>|\s+', ' ', h1.group(1))
+    brand = re.sub(r'Наши работы|Замена мультимедиа и русификация', '', brand).strip()
+    if not brand or len(brand) > 30:
         return text
-    title = f'Установка Teyes на {brand} в Новосибирске – наши работы Teyes Sibir'
-    desc = f'Наши работы по {brand} в Новосибирске: установка Android-магнитол Teyes, камер и сигнализаций. Фото до и после, что ставили и что сохранили.'
+    if works:
+        title = f'Установка Teyes на {brand} в Новосибирске – наши работы Teyes Sibir'
+        desc = f'Наши работы по {brand} в Новосибирске: установка Android-магнитол Teyes, камер и сигнализаций. Фото до и после, что ставили и что сохранили.'
+    else:
+        title = f'Магнитола Teyes на {brand} в Новосибирске – подбор и установка'
+        desc = f'Подбор и установка Android-магнитол Teyes на {brand} в Новосибирске: модели и поколения, рамка, что сохраняется из штатного. Пришлите фото панели – подберём.'
     text = re.sub(r'<title>.*?</title>', f'<title>{html.escape(title)}</title>', text, count=1, flags=re.S)
     for attr in ('description', 'og:description'):
         text = re.sub(rf'(<meta\s+(?:name|property)="{attr}"\s+content=")[^"]*', lambda x: x.group(1) + html.escape(desc), text)
