@@ -1,4 +1,4 @@
-# teyes-sibir.ru на VPS Beget: только статика. Порты не публикуются – Caddy ходит по сети dzenbot_default.
+# teyes-sibir.ru на VPS FirstVDS Москва: только статика. Порты не публикуются – Caddy ходит по сети caddy.
 name: teyes-sibir
 services:
   teyes-sibir-web:
@@ -13,9 +13,9 @@ services:
     tmpfs: [/tmp]
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
-    mem_limit: 96m
+    mem_limit: 64m
     networks: [proxy]
 networks:
   proxy:
-    name: dzenbot_default
+    name: caddy
     external: true
