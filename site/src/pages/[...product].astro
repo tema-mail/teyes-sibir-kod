@@ -4,7 +4,8 @@
 import Base from '../layouts/Base.astro';
 import ProductBuy from '../islands/ProductBuy';
 import ProductCard from '../islands/ProductCard';
-import { PRODUCTS, videoList, img, sectionHref, sectionName, similar, minPrice, type Product } from '../lib/catalog';
+import Viewed from '../islands/Viewed';
+import { PRODUCTS, videoList, img, sectionHref, sectionName, similar, minPrice, toCard, type Product } from '../lib/catalog';
 import { u, LIVE, BASE, SITE } from '../lib/site';
 import '../styles/shop.css';
 
@@ -82,6 +83,7 @@ const ld = {
         <div class="product__text" set:html={text} />
       </section>
     )}
+    <Viewed client:idle card={toCard(p)} base={u('').replace(/\/$/, '')} />
     {others.length > 0 && (
       <section class="product__block">
         <h2>Похожие товары</h2>

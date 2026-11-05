@@ -1,0 +1,89 @@
+---
+// Образцы новой карточки товара на Teyes CC4: три сетки на выбор владельца. Адреса временные, в боевую сборку не идут.
+import Base from '../../../layouts/Base.astro';
+import ProductPro from '../../../islands/ProductPro';
+import ProductCard from '../../../islands/ProductCard';
+import Viewed from '../../../islands/Viewed';
+import { PRODUCTS, img, sectionHref, sectionName, similar, toCard } from '../../../lib/catalog';
+import { u, SITE, ASSET } from '../../../lib/site';
+import { GIFTS, PERKS, DESCRIPTION, SPECS, FAQ } from '../../../data/card-demo';
+import '../../../styles/shop.css';
+import '../../../styles/product-pro.css';
+
+export const getStaticPaths = () => [1, 2, 3].map((v) => ({ params: { v: String(v) } }));
+const v = Number(Astro.params.v);
+const NAMES = ['Три колонки, как в образце', 'Две колонки, подарки под фото', 'Покупка едет за прокруткой'];
+const p = PRODUCTS.find((x) => x.id === '209607957732')!;
+const others = similar(p, 4);
+const byId = (id: string) => u(PRODUCTS.find((x) => x.id === id)!.path + '/');
+const series = [
+  { name: 'CC4L', href: byId('292601418762'), on: false },
+  { name: 'CC4', href: u(`/store/variant/${v}/`), on: true },
+  { name: 'CC4 Pro', href: byId('735723214102'), on: false },
+];
+const ld = {
+  '@context': 'https://schema.org', '@type': 'FAQPage',
+  mainEntity: FAQ.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })),
+};
+const link = (href: string) => (href === 'tg' ? SITE.telegram : u(href));
+---
+<Base title={`Вариант ${v}: ${p.title}`} description={p.descr}>
+  <div class="wrap product">
+    <nav class="pp-switch" aria-label="Варианты карточки">
+      <span>Образцы карточки:</span>
+      {[1, 2, 3].map((n) => <a class={`chip${n === v ? ' is-on' : ''}`} href={u(`/store/variant/${n}/`)}>Вариант {n}</a>)}
+      <small>{NAMES[v - 1]}</small>
+    </nav>
+    <ol class="crumbs">
+      <li><a href={u('/')}>Главная</a></li>
+      <li><a href={u('/store/')}>Магазин</a></li>
+      <li><a href={u(sectionHref(p.section))}>{sectionName(p.section)}</a></li>
+    </ol>
+    <h1 class="pp-title">{p.title}</h1>
+
+    <ProductPro client:load variant={v} id={p.id} title={p.title} path={p.path} image={img(p.images[0])} price={p.price} priceCard={p.priceCard}
+      options={p.options} editions={p.editions} addons={p.addons} series={series} gifts={GIFTS} orderHref={u('/order/')}
+      certHref={u('/certificates/')} telegram={SITE.telegram} max={SITE.max} tgIcon={u(ASSET.telegram)} maxIcon={u(ASSET.max)}>
+      <div class="gallery">
+        <div class="gallery__track" id="gallery">
+          {p.images.map((name, i) => <img src={img(name)} alt={i ? `${p.title}, фото ${i + 1}` : p.title} width="720" height="720" loading={i ? 'lazy' : 'eager'} decoding="async" />)}
+        </div>
+        <div class="gallery__thumbs">
+          {p.images.map((name, i) => <button type="button" data-go={i} aria-label={`Фото ${i + 1}`}><img src={img(name)} alt="" loading="lazy" width="80" height="80" /></button>)}
+        </div>
+      </div>
+    </ProductPro>
+
+    <section class="pp-perks" aria-label="Почему у нас">
+      {PERKS.map((x) => <article><h2>{x.title}</h2><p>{x.text}</p><a href={link(x.href)}>{x.link} →</a></article>)}
+    </section>
+
+    <nav class="pp-tabs" aria-label="Разделы"><a href="#about">Описание</a><a href="#specs">Характеристики</a><a href="#faq">Вопрос-ответ</a></nav>
+    <div class={`pp-low pp-low--${v}`}>
+      <section id="about" class="pp-about"><h2>Описание</h2>{DESCRIPTION.map((t) => <p>{t}</p>)}</section>
+      <section id="specs" class="pp-specs">
+        <h2>Характеристики</h2>
+        {SPECS.map((g) => <div><h3>{g.group}</h3><dl class="specs">{g.rows.map(([k, val]) => (<><dt>{k}</dt><dd>{val}</dd></>))}</dl></div>)}
+      </section>
+    </div>
+    <section id="faq" class="pp-faq">
+      <h2>Вопрос-ответ</h2>
+      {FAQ.map(([q, a]) => <details><summary>{q}</summary><p>{a}</p></details>)}
+    </section>
+
+    <Viewed client:idle card={toCard(p)} base={u('').replace(/\/$/, '')} />
+    <section class="product__block">
+      <h2>Похожие товары</h2>
+      <div class="grid">{others.map((c) => <ProductCard client:visible card={c} href={u(c.path + '/')} />)}</div>
+    </section>
+  </div>
+  <script type="application/ld+json" set:html={JSON.stringify(ld).replace(/</g, '\\u003c')} />
+  <script>
+    // Миниатюры листают ленту фото; делегирование – содержимое острова может перерисоваться
+    document.addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest<HTMLElement>('[data-go]');
+      const track = document.getElementById('gallery');
+      if (b && track) track.scrollTo({ left: track.clientWidth * Number(b.dataset.go), behavior: 'smooth' });
+    });
+  </script>
+</Base>

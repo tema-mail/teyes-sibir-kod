@@ -70,3 +70,12 @@ export function showToast(text: string) {
   clearTimeout(toastTimer);
   toastTimer = window.setTimeout(() => { toast.value = ''; }, 2200);
 }
+
+// «Вы смотрели»: последние товары, что открывал покупатель, новые первыми
+const VIEWED = 'teyes-viewed';
+export function rememberViewed<T extends { id: string }>(card: T, limit = 13): T[] {
+  if (!browser) return [];
+  const old = read<T[]>(VIEWED, []);
+  try { localStorage.setItem(VIEWED, JSON.stringify([card, ...old.filter((c) => c.id !== card.id)].slice(0, limit))); } catch { /* приватный режим */ }
+  return old.filter((c) => c.id !== card.id);
+}

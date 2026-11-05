@@ -13,7 +13,7 @@ const rub = (n: number) => new Intl.NumberFormat('ru-RU').format(Math.round(n)) 
 
 
 // Что всплывает по знаку вопроса у цены со скидкой
-function CashHint() {
+export function CashHint() {
   const [open, setOpen] = useState(false);
   const box = useRef<HTMLSpanElement>(null);
   useEffect(() => {

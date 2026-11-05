@@ -1,0 +1,23 @@
+---
+// Сертификаты соответствия. РСТ сюда не взят: срок действия закончился 02.04.2022 – заменить, когда будет новый.
+import Base from '../layouts/Base.astro';
+import { u } from '../lib/site';
+import '../styles/shop.css';
+const eac = u('/img/cert/eac-teyes.webp');
+---
+<Base title="Сертификаты соответствия Teyes | TEYES SIBIR" description="Сертификат соответствия ЕАС на мультимедийные автомобильные устройства Teyes: номер, срок действия, модели.">
+  <div class="wrap product">
+    <ol class="crumbs"><li><a href={u('/')}>Главная</a></li><li><a href={u('/store/')}>Магазин</a></li></ol>
+    <h1>Сертификаты соответствия</h1>
+    <section class="product__block">
+      <h2>Сертификат соответствия ЕАС</h2>
+      <dl class="specs">
+        <dt>Номер</dt><dd>ЕАЭС RU C-CN.НА46.В.06808/23</dd>
+        <dt>Срок действия</dt><dd>с 18.08.2023 по 17.08.2028</dd>
+        <dt>Продукция</dt><dd>Мультимедийные автомобильные устройства Teyes, в том числе CC3, CC3L, CC4, CC4 Pro, Lux One</dd>
+        <dt>Требования</dt><dd>ТР ТС 020/2011 «Электромагнитная совместимость технических средств»</dd>
+      </dl>
+      <p><a href={eac} target="_blank" rel="noopener"><img src={eac} alt="Сертификат соответствия ЕАС на мультимедийные устройства Teyes" width="1241" height="1754" loading="lazy" style="max-width:min(100%,640px);height:auto;border:1px solid var(--tx-line);border-radius:12px" /></a></p>
+    </section>
+  </div>
+</Base>

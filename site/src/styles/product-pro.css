@@ -1,0 +1,97 @@
+/* Образцы карточки товара: блоки одни, сетка – по варианту (.pp--1/2/3). Mobile-first: на телефоне порядок один. */
+.pp-switch { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 12px; margin-top: 12px; border-radius: 12px; background: var(--tx-surface); font-size: 14px; }
+.pp-switch small { color: var(--tx-muted); }
+.pp-title { margin: 8px 0 16px; font-size: clamp(26px, 3.2vw, 40px); }
+.pp { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); grid-template-areas: 'gal' 'choose' 'side' 'gifts' 'services'; }
+.pp__gal { grid-area: gal; min-width: 0; }
+.pp__choose { grid-area: choose; display: grid; gap: 16px; min-width: 0; align-content: start; }
+.pp__gifts { grid-area: gifts; min-width: 0; align-self: start; padding: 16px; border-radius: var(--tx-r); background: var(--tx-surface); }
+.pp__services { grid-area: services; min-width: 0; align-self: start; }
+.pp__side { grid-area: side; display: grid; gap: 12px; min-width: 0; align-content: start; }
+.pp__gifts h2 { margin: 0 0 10px; font-size: 17px; }
+.pp__gifts ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; font-size: 14px; line-height: 1.35; }
+.pp__gifts li { position: relative; padding-left: 26px; }
+.pp__gifts li::before { content: '🎁'; position: absolute; left: 0; top: 0; font-size: 15px; }
+.pp__gifts p { margin: 10px 0 0; font-size: 12px; color: var(--tx-muted); }
+.pp__services summary, .pp__pay summary { min-height: 44px; display: flex; align-items: center; font-weight: 700; font-size: 15px; cursor: pointer; }
+.pp__services summary, .pp__pay summary { justify-content: space-between; gap: 12px; list-style: none; }
+.pp__services summary::-webkit-details-marker, .pp__pay summary::-webkit-details-marker { display: none; }
+.pp__services summary::after, .pp__pay summary::after { content: '▾'; color: var(--tx-muted); transition: transform 0.2s; }
+.pp__services[open] summary::after, .pp__pay[open] summary::after { transform: rotate(180deg); }
+.pp__service-list { display: grid; gap: 8px; padding-top: 4px; }
+.pp__service { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 44px; padding: 8px 12px; border: 1px solid var(--tx-line); border-radius: 12px; font-size: 14px; cursor: pointer; }
+.pp__service.is-on { border-color: var(--tx-accent); }
+.pp__service input { width: 18px; height: 18px; margin: 0; accent-color: var(--tx-accent); }
+.pp__service input:disabled { visibility: hidden; }
+.pp__service em { font-style: normal; color: var(--tx-muted); white-space: nowrap; }
+.pp__buy { gap: 12px; }
+.pp__buy > .btn { width: 100%; box-sizing: border-box; text-align: center; }
+.pp__buy .buy__cart { flex: 1 1 140px; }
+.pp__stock { margin: 0; font-size: 13px; color: var(--tx-muted); }
+.pp__stock.is-on { color: var(--tx-ok); }
+.pp__split { background: #d9f26b; color: #111; border: 0; font-weight: 700; }
+.pp__split small { font-weight: 400; opacity: 0.7; margin-left: 6px; }
+.pp__invoice { display: block; min-height: 32px; line-height: 32px; text-align: center; font-size: 13px; color: var(--tx-muted); }
+.pp__pay { border-top: 1px solid var(--tx-line); }
+.pp__pay ul { margin: 0 0 4px; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 13px; line-height: 1.35; }
+.pp__certs { margin: 0; padding: 0 4px; list-style: none; font-size: 14px; }
+.pp__certs li { padding-left: 24px; position: relative; }
+.pp__certs li::before { content: '✔'; position: absolute; left: 2px; color: var(--tx-ok); }
+.pp__chat { display: grid; gap: 8px; }
+.pp__chat a { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; border-radius: 12px; background: var(--tx-surface); color: inherit; font-size: 14px; font-weight: 700; text-decoration: none; }
+.pp-bar {
+  position: fixed; left: 8px; right: 8px; bottom: 8px; z-index: 40; display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 14px; background: var(--tx-bg);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22); transform: translateY(140%); visibility: hidden; transition: transform 0.2s, visibility 0.2s;
+}
+.pp-bar.is-on { transform: none; visibility: visible; }
+.pp-bar img { width: 44px; height: 44px; object-fit: contain; flex: none; }
+.pp-bar__title { flex: 1 1 auto; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 14px; }
+.pp-bar b { white-space: nowrap; font-size: 15px; }
+.pp-bar .btn { flex: none; padding-inline: 14px; }
+.pp-perks { display: grid; gap: 12px; margin-top: 32px; }
+.pp-perks article { display: flex; flex-direction: column; gap: 8px; padding: 16px; border-radius: var(--tx-r); background: var(--tx-surface); }
+.pp-perks h2 { margin: 0; font-size: 16px; line-height: 1.25; }
+.pp-perks p { margin: 0; font-size: 14px; line-height: 1.4; color: var(--tx-muted); flex: 1; }
+.pp-perks a { font-size: 14px; font-weight: 700; color: var(--tx-accent); text-decoration: none; }
+.pp-tabs { display: flex; gap: 6px; margin-top: 32px; padding: 6px; border-radius: 999px; background: var(--tx-surface); overflow-x: auto; }
+.pp-tabs a { flex: 1 0 auto; min-height: 44px; padding: 0 16px; display: flex; align-items: center; justify-content: center; border-radius: 999px; color: inherit; font-size: 14px; font-weight: 700; text-decoration: none; white-space: nowrap; }
+.pp-tabs a:hover { background: var(--tx-bg); }
+.pp-low { display: grid; gap: 32px; margin-top: 24px; }
+.pp-about p { line-height: 1.55; max-width: 68ch; }
+.pp-specs { display: grid; gap: 20px; }
+.pp-specs h2, .pp-about h2, .pp-faq h2 { margin: 0 0 12px; }
+.pp-specs h3 { margin: 0 0 8px; font-size: 15px; }
+.pp-faq { margin-top: 32px; scroll-margin-top: 90px; }
+.pp-faq details { border-top: 1px solid var(--tx-line); }
+.pp-faq details:last-child { border-bottom: 1px solid var(--tx-line); }
+.pp-faq summary { min-height: 52px; padding: 12px 0; display: flex; align-items: center; font-weight: 700; cursor: pointer; }
+.pp-faq p { margin: 0 0 16px; line-height: 1.5; max-width: 76ch; }
+#about, #specs { scroll-margin-top: 90px; }
+@media (min-width: 700px) {
+  .pp-perks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pp-bar { left: 50%; right: auto; width: min(900px, calc(100% - 32px)); transform: translate(-50%, 140%); }
+  .pp-bar.is-on { transform: translate(-50%, 0); }
+  .pp__service-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1100px) {
+  .pp-perks { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .pp { gap: 24px 28px; }
+  /* 1: три колонки – фото, выбор и подарки, покупка */
+  .pp--1 { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 0.95fr); grid-template-rows: auto auto 1fr; grid-template-areas: 'gal choose side' 'gal gifts side' 'gal services side'; }
+  .pp--1 .pp__service-list { grid-template-columns: minmax(0, 1fr); }
+  /* 2: две колонки – под фото подарки полосой, справа выбор и покупка */
+  .pp--2 { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); grid-template-rows: auto 1fr auto; grid-template-areas: 'gal choose' 'gal side' 'gifts side' 'services side'; }
+  .pp--2 .pp__gifts ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pp--2 .pp__chat { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* 3: широкая левая часть, покупка прилипает и едет за прокруткой */
+  .pp--3 { grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); grid-template-rows: auto auto auto 1fr; grid-template-areas: 'gal side' 'choose side' 'gifts side' 'services side'; }
+  .pp--3 .pp__side { position: sticky; top: 16px; align-self: start; }
+  .pp--3 .pp__choose { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pp--3 .pp__gifts ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pp--3 .gallery__track { background: #fff; }
+  .pp--3 .gallery__track img { aspect-ratio: 16 / 10; }
+  .pp-low--2 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-items: start; }
+  .pp-specs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pp-specs > h2 { grid-column: 1 / -1; }
+  .pp-low--2 .pp-specs { grid-template-columns: minmax(0, 1fr); }
+}
