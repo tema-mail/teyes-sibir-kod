@@ -5,9 +5,12 @@ import Base from '../layouts/Base.astro';
 import ProductBuy from '../islands/ProductBuy';
 import ProductCard from '../islands/ProductCard';
 import Viewed from '../islands/Viewed';
+import ProductMeta from '../islands/ProductMeta';
+import { PERKS, DETAILS, COMPARE } from '../data/card-details';
 import { PRODUCTS, videoList, img, sectionHref, sectionName, similar, minPrice, toCard, type Product } from '../lib/catalog';
-import { u, LIVE, BASE, SITE } from '../lib/site';
+import { u, LIVE, BASE, SITE, ASSET } from '../lib/site';
 import '../styles/shop.css';
+import '../styles/product-card.css';
 
 export function getStaticPaths() {
   return PRODUCTS.map((p) => ({ params: { product: p.path.slice(1) }, props: { p } }));
@@ -21,6 +24,9 @@ const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
 const text = esc(p.text.replace(/&(quot|nbsp|amp|lt|gt|apos|#39);/g, (_, k) => ENT[k]))
   .replace(/&lt;(\/?)(p|strong|h3|ul|li|br)\s*\/?&gt;/gi, (_, sl, tag) => `<${sl}${tag.toLowerCase()}>`).replace(/\n/g, '<br>');
 const lowest = minPrice(p);
+const details = DETAILS[p.id];
+const productHref = (id: string) => { const x = PRODUCTS.find((y) => y.id === id); return x ? u(x.path + '/') : undefined; };
+const perkHref = (href: string) => (href === 'tg' ? SITE.telegram : u(href));
 const videos = videoList(p);
 // Видео – сразу после обложки: последним слайдом его не замечают (владелец 17.10)
 const slides: { name: string; video: false | { file: string; poster: string; sound: boolean } }[] = [...p.images.slice(0, 1).map((name) => ({ name, video: false as const })), ...videos.map((v) => ({ name: v.file, video: v })),
@@ -41,6 +47,7 @@ const ld = {
       {p.section !== 'teyes' && p.section !== 'catalog' && p.section !== 'camera' && <li><a href={u('/store/catalog/')}>Комплекты Teyes</a></li>}
       <li><a href={u(sectionHref(p.section))}>{sectionName(p.section)}</a></li>
     </ol>
+    <ProductMeta client:idle id={p.id} model={p.model} title={p.title} compare={!!details} />
     <div class="product__main">
       <div class="gallery">
         <div class="gallery__track" id="gallery">
@@ -68,9 +75,48 @@ const ld = {
         <ProductBuy client:load id={p.id} title={p.title} path={p.path} image={img(p.images[0])} price={p.price} priceOld={p.priceOld} priceCard={p.priceCard}
           options={p.options} editions={p.editions} addons={p.addons} orderHref={u('/order/')} leadHref={u('/contacts/')} />
         <p class="product__note">Подскажем по совместимости с вашей машиной: <a href={SITE.tel}>{SITE.phone}</a>.</p>
+        <div class="pchat">
+          <a href={SITE.telegram} target="_blank" rel="noopener"><img src={u(ASSET.telegram)} alt="" width="24" height="24" />Написать в Telegram</a>
+          <a href={SITE.max} target="_blank" rel="noopener"><img src={u(ASSET.max)} alt="" width="24" height="24" />Написать в MAX</a>
+        </div>
       </div>
     </div>
 
+    <section class="pperks" aria-label="Почему у нас">
+      {PERKS.map((x) => <article><h2>{x.title}</h2><p>{x.text}</p><a href={perkHref(x.href)}>{x.link} →</a></article>)}
+    </section>
+
+    {details ? (
+      <>
+        <nav class="ptabs" aria-label="Разделы"><a href="#about">Описание</a><a href="#specs">Характеристики</a><a href="#faq">Вопрос-ответ</a></nav>
+        <section id="about" class="ppart ppart--text"><h2>Описание</h2>{details.description.map((x) => <p>{x}</p>)}</section>
+        <section id="specs" class="ppart">
+          <h2>Характеристики</h2>
+          <div class="pspecs">{details.specs.map((g) => <div><h3>{g.group}</h3><dl class="specs">{g.rows.map(([k, val]) => (<><dt>{k}</dt><dd>{val}</dd></>))}</dl></div>)}</div>
+        </section>
+        <section id="compare" class="ppart">
+          <h2>Таблица сравнения</h2>
+          <div class="pcmp" tabindex="0" role="region" aria-label="Сравнение магнитол Teyes">
+            <table>
+              <thead><tr><th scope="col">Модель</th>{COMPARE.models.map((m) => <th scope="col" class={m.match === p.model ? 'is-here' : undefined}>{productHref(m.id) ? <a href={productHref(m.id)}>{m.name}</a> : m.name}</th>)}</tr></thead>
+              <tbody>
+                {COMPARE.groups.map((g) => (<>
+                  <tr><th colspan={COMPARE.models.length + 1} scope="colgroup">{g.title}</th></tr>
+                  {g.rows.map(([name, ...cells]) => <tr><th scope="row">{name}</th>{cells.map((c, i) => <td class={COMPARE.models[i].match === p.model ? 'is-here' : undefined}>{c}</td>)}</tr>)}
+                </>))}
+              </tbody>
+            </table>
+          </div>
+          <p class="pcmp-note">Данные производителя. Выделена модель этой карточки.</p>
+        </section>
+        <section id="faq" class="ppart pfaq">
+          <h2>Вопрос-ответ</h2>
+          {details.faq.map(([q, a]) => <details><summary>{q}</summary><p>{a}</p></details>)}
+        </section>
+        <script type="application/ld+json" set:html={JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: details.faq.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) }).replace(/</g, '\\u003c')} />
+      </>
+    ) : (
+      <>
     {p.characteristics.length > 0 && (
       <section class="product__block">
         <h2>Характеристики</h2>
@@ -83,6 +129,9 @@ const ld = {
         <div class="product__text" set:html={text} />
       </section>
     )}
+      </>
+    )}
+
     <Viewed client:idle card={toCard(p)} base={u('').replace(/\/$/, '')} />
     {others.length > 0 && (
       <section class="product__block">

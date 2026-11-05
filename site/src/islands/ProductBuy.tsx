@@ -58,9 +58,18 @@ export default function ProductBuy(p: Props) {
   // «Оформить заказ» после «В корзину» не удваивает позицию
   const order = () => { if (!cart.value.some((i) => i.key === lineKey(p.id, variant, extra))) add(); };
   const fav = mounted && isFav(p.id);
+  const [bar, setBar] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
+  // Панель «В корзину» появляется, когда блок покупки ушёл выше экрана
+  useEffect(() => {
+    if (!box.current || !('IntersectionObserver' in window)) return;
+    const io = new IntersectionObserver(([e]) => setBar(!e.isIntersecting && e.boundingClientRect.top < 0));
+    io.observe(box.current);
+    return () => io.disconnect();
+  }, []);
 
   return (
-    <div class="buy">
+    <div class="buy" ref={box}>
       {nocash > 0 ? (
         <div class="buy__prices">
           <div class="buy__cash">
@@ -117,6 +126,12 @@ export default function ProductBuy(p: Props) {
       <div class="buy__row">
         <a class="btn btn--ghost" href={p.orderHref} onClick={order}>Оформить заказ</a>
         <a class="btn btn--ghost" href={p.leadHref} data-lead={p.title}>Записаться на установку</a>
+      </div>
+      <div class={`pbar${bar ? ' is-on' : ''}`} aria-hidden={!bar}>
+        <img src={p.image} alt="" width="44" height="44" />
+        <span class="pbar__title">{p.title}</span>
+        <b>{rub(unit)}</b>
+        <button type="button" class="btn btn--accent" tabIndex={bar ? 0 : -1} onClick={() => { add(); sheet.value = 'cart'; }}>В корзину</button>
       </div>
     </div>
   );
