@@ -18,6 +18,7 @@
 .card__price { margin-top: auto; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; }
 .card__price b { font-size: 17px; }
 .card__price s, .buy__price s { color: var(--tx-muted); font-size: 14px; }
+.card__nocash { flex-basis: 100%; color: var(--tx-muted); font-size: 12px; }
 .card__fav, .buy__fav {
   width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
   border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.92); color: #c9cdd4; cursor: pointer;
@@ -67,6 +68,22 @@
 .buy { display: flex; flex-direction: column; gap: 16px; padding: 18px; border: 1px solid var(--tx-line); border-radius: var(--tx-r); }
 .buy__price { display: flex; align-items: baseline; gap: 10px; }
 .buy__price b { font-size: 30px; font-family: var(--tx-display); font-weight: 400; }
+.buy__prices { position: relative; display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: flex-start; }
+.buy__cash, .buy__nocash { display: grid; gap: 4px; min-width: 0; }
+.buy__cash { flex: 1 1 190px; }
+.buy__cash b { font-size: 30px; line-height: 1.15; font-family: var(--tx-display); font-weight: 400; }
+.buy__nocash { color: var(--tx-muted); font-size: 18px; padding-top: 8px; }
+.buy__label { font-size: 13px; line-height: 1.35; color: var(--tx-muted); }
+.buy__hint button {
+  width: 22px; height: 22px; padding: 0; margin-left: 2px; vertical-align: -5px; cursor: pointer;
+  border: 1px solid var(--tx-line); border-radius: 50%; background: none; color: var(--tx-muted); font: inherit; font-size: 12px; line-height: 1;
+}
+.buy__hint button:hover, .buy__hint button[aria-expanded='true'] { border-color: currentColor; color: var(--tx-ink); }
+.buy__pop {
+  position: absolute; z-index: 20; left: 0; right: 0; top: calc(100% + 8px); display: grid; gap: 8px; padding: 14px;
+  border: 1px solid var(--tx-line); border-radius: 12px; background: var(--tx-bg); color: var(--tx-ink);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18); font-size: 13px; line-height: 1.45;
+}
 .buy__group { margin: 0; padding: 0; border: 0; display: grid; gap: 8px; min-width: 0; }
 .buy__group legend { padding: 0; margin-bottom: 8px; font-size: 13px; color: var(--tx-muted); }
 .buy__chips { display: flex; flex-wrap: wrap; gap: 8px; }

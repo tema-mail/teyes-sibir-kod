@@ -20,6 +20,7 @@ export default function ProductCard({ card, href }: { card: Card; href: string }
           <span class="card__price">
             <b>{card.from ? 'от ' : ''}{rub(card.price)}</b>
             {card.priceOld > card.price && <s>{rub(card.priceOld)}</s>}
+            {card.priceCard > 0 && <small class="card__nocash">{rub(card.priceCard)} без скидки</small>}
           </span>
         </span>
       </a>

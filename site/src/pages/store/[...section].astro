@@ -33,7 +33,7 @@ export function getStaticPaths() {
 const section = Astro.params.section || '';
 const kits = store.sections.find((s) => s.id === 'kits')!;
 const part = PARTS.find((x) => x.path === '/store/' + section);
-const slug = part ? '' : section === 'catalog_teyes' ? 'teyes' : section === 'catalog' ? 'catalog' : section.startsWith('catalog/') ? section.slice(8) : '';
+const slug = part ? '' : section === 'catalog_teyes' ? 'teyes' : section === 'catalog' ? 'catalog' : section === 'camera' ? 'camera' : section.startsWith('catalog/') ? section.slice(8) : '';
 const sec = store.sections.find((s) => s.href && strip(s.href) === 'store/' + section);
 const info = SECTIONS.find((s) => s.slug === slug);
 // Подраздел без своей плитки (например, омыватели камер внутри «Камер») – название из групп меню
@@ -41,7 +41,7 @@ const sub = store.sections.flatMap((s) => s.groups || []).flatMap((g) => g.items
 const title = !section ? 'Магазин' : part ? part.title : slug ? sectionName(slug) : sec?.title || sub?.name || section;
 const cards = part ? byPart(part.uid).map(toCard) : slug ? bySection(slug).map(toCard) : [];
 const hrefs = Object.fromEntries(cards.map((c) => [c.id, u(c.path + '/')]));
-const h1 = !section ? 'Магазин TEYES SIBIR' : slug && slug !== 'teyes' && slug !== 'catalog' ? `Штатные магнитолы Teyes ${title}` : title;
+const h1 = !section ? 'Магазин TEYES SIBIR' : section.startsWith('catalog/') ? `Штатные магнитолы Teyes ${title}` : title;
 ---
 <Base title={`${h1} – купить с установкой в Новосибирске | TEYES SIBIR`} description={`${h1}: цены, наличие, установка в Новосибирске.`}>
   <div class="wrap shop">

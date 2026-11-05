@@ -37,7 +37,7 @@ const ld = {
     <ol class="crumbs">
       <li><a href={u('/')}>Главная</a></li>
       <li><a href={u('/store/')}>Магазин</a></li>
-      {p.section !== 'teyes' && p.section !== 'catalog' && <li><a href={u('/store/catalog/')}>Комплекты Teyes</a></li>}
+      {p.section !== 'teyes' && p.section !== 'catalog' && p.section !== 'camera' && <li><a href={u('/store/catalog/')}>Комплекты Teyes</a></li>}
       <li><a href={u(sectionHref(p.section))}>{sectionName(p.section)}</a></li>
     </ol>
     <div class="product__main">
@@ -64,7 +64,7 @@ const ld = {
         <h1>{p.title}</h1>
         {p.model && <p class="product__model">Модель магнитолы: <b>Teyes {p.model}</b></p>}
         {p.descr && <p class="product__descr">{p.descr}</p>}
-        <ProductBuy client:load id={p.id} title={p.title} path={p.path} image={img(p.images[0])} price={p.price} priceOld={p.priceOld}
+        <ProductBuy client:load id={p.id} title={p.title} path={p.path} image={img(p.images[0])} price={p.price} priceOld={p.priceOld} priceCard={p.priceCard}
           options={p.options} editions={p.editions} addons={p.addons} orderHref={u('/order/')} leadHref={u('/contacts/')} />
         <p class="product__note">Подскажем по совместимости с вашей машиной: <a href={SITE.tel}>{SITE.phone}</a>.</p>
       </div>

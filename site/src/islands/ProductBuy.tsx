@@ -1,15 +1,41 @@
 // Покупка на странице товара: вариант (память магнитолы – своя цена), доп. опции с доплатой, количество,
 // итог; «В корзину», «Оформить заказ», «Записаться на установку», избранное.
-import { useMemo, useState } from 'preact/hooks';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { Addon, Edition } from '../lib/catalog';
 import { addToCart, cart, isFav, lineKey, toggleFav, favs, sheet, useMounted } from '../lib/store';
 
 type Props = {
-  id: string; title: string; path: string; image: string; price: number; priceOld: number;
+  id: string; title: string; path: string; image: string; price: number; priceOld: number; priceCard?: number;
   options: { title: string; values: string[] }[]; editions: Edition[]; addons: Addon[];
   orderHref: string; leadHref: string;
 };
 const rub = (n: number) => new Intl.NumberFormat('ru-RU').format(Math.round(n)) + ' ₽';
+
+
+// Что всплывает по знаку вопроса у цены со скидкой
+function CashHint() {
+  const [open, setOpen] = useState(false);
+  const box = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: Event) => { if (!(e instanceof KeyboardEvent ? e.key !== 'Escape' : box.current?.contains(e.target as Node))) setOpen(false); };
+    document.addEventListener('click', close);
+    document.addEventListener('keydown', close);
+    return () => { document.removeEventListener('click', close); document.removeEventListener('keydown', close); };
+  }, [open]);
+  return (
+    <span class="buy__hint" ref={box}>
+      <button type="button" aria-label="Почему цена со скидкой" aria-expanded={open} onClick={() => setOpen(!open)}>?</button>
+      {open && (
+        <span class="buy__pop" role="tooltip">
+          <span>Скидка для следующих способов оплаты: наличный расчёт.</span>
+          <span>Данная скидка не предоставляется: при оплате картой по терминалу, QR-коду, при оформлении кредита или при оплате по счёту юр. лицом.</span>
+          <span>Почему так? Мы стараемся обеспечить для вас не только лучший сервис, но и максимально низкие цены, в связи с этим наша наценка для многих товаров меньше, чем комиссии, которые взимают банки. Поэтому мы ввели дополнительную скидку для способов оплаты, не имеющих комиссии.</span>
+        </span>
+      )}
+    </span>
+  );
+}
 
 export default function ProductBuy(p: Props) {
   const [choice, setChoice] = useState<Record<string, string>>(() =>
@@ -25,6 +51,7 @@ export default function ProductBuy(p: Props) {
   const old = edition ? edition.priceOld : p.priceOld;
   const addonsSum = p.addons.filter((a) => extra.includes(a.label)).reduce((n, a) => n + a.price, 0);
   const unit = base + addonsSum;
+  const nocash = edition?.priceCard || p.priceCard || 0;
   const variant = p.options.map((o) => `${o.title}: ${choice[o.title]}`).join(', ');
 
   const add = () => addToCart({ id: p.id, title: p.title, path: p.path, image: p.image, variant, addons: extra, price: unit }, qty);
@@ -34,10 +61,23 @@ export default function ProductBuy(p: Props) {
 
   return (
     <div class="buy">
-      <div class="buy__price">
-        <b>{rub(unit)}</b>
-        {old > base && <s>{rub(old + addonsSum)}</s>}
-      </div>
+      {nocash > 0 ? (
+        <div class="buy__prices">
+          <div class="buy__cash">
+            <b>{rub(unit)}</b>
+            <span class="buy__label">Цена со скидкой при оплате наличными <CashHint /></span>
+          </div>
+          <div class="buy__nocash">
+            <span>{rub(nocash + addonsSum)}</span>
+            <span class="buy__label">Цена без скидки</span>
+          </div>
+        </div>
+      ) : (
+        <div class="buy__price">
+          <b>{rub(unit)}</b>
+          {old > base && <s>{rub(old + addonsSum)}</s>}
+        </div>
+      )}
       {p.options.map((o) => (
         <fieldset class="buy__group">
           <legend>{o.title}</legend>
