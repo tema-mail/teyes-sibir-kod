@@ -86,4 +86,11 @@ export function leadFields(): Record<string, string> {
   return { 'Источник': a.channel, 'Страница заявки': location.pathname, 'Страница входа': a.landing, ...a.marks };
 }
 
+/** Одной строкой – для приёмников, где под источник одно поле. */
+export function sourceLine(): string {
+  const a = capture();
+  const marks = Object.entries(a.marks).map(([k, v]) => `${k}=${v}`).join(' ');
+  return [a.channel, `вход: ${a.landing}`, marks].filter(Boolean).join(' · ');
+}
+
 if (typeof window !== 'undefined') capture();
