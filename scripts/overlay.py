@@ -27,6 +27,12 @@ def overlay():
         out = PUBLIC / rel
         out.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(DIST / rel, out)
+    # Постоянный адрес модуля источника заявки: страницы копии Tilda грузят его из мега-меню (имя в _astro меняется).
+    chunks = sorted((DIST / "_astro").glob("attribution.*.js"))
+    if len(chunks) != 1:
+        raise SystemExit(f"ожидался один модуль attribution в site/dist/_astro, найдено {len(chunks)}")
+    shutil.copyfile(chunks[0], PUBLIC / "assets" / "lead-attribution.js")
+    files.append("assets/lead-attribution.js")
     LIST.write_text("\n".join(files) + "\n", "utf-8")
     return removed, files
 

@@ -1198,3 +1198,11 @@ window.TSB_MENU = {
     if (document.readyState === 'complete') setTimeout(go, 300); else window.addEventListener('load', function () { setTimeout(go, 300); });
   }
 })();
+
+/* Источник заявки запоминается при заходе на любой странице, в том числе на копии Tilda (site/src/lib/attribution.ts). */
+(function () {
+  var s = document.currentScript;
+  if (!s) return;
+  // import через Function: в старом браузере ошибка синтаксиса не должна ронять всё меню.
+  try { new Function('u', 'return import(u)')(new URL('../lead-attribution.js', s.src).href).catch(function () {}); } catch (e) {}
+})();
