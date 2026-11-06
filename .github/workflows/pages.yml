@@ -58,3 +58,5 @@ jobs:
           path: public
       - id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          timeout: 1800000 # сайт 443 МБ, 10 минут по умолчанию иногда не хватает
