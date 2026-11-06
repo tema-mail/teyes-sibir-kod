@@ -17,5 +17,6 @@ $PY scripts/menu.py
 $PY scripts/products.py
 (cd site && npm ci --no-audit --no-fund && npm run build)
 $PY scripts/build.py
+$PY scripts/strip_whatsapp.py  # снятие с Tilda возвращает WhatsApp, владелец 07.11.2026: не нужен нигде
 $PY scripts/dedupe_styles.py  # одинаковые стили страниц Tilda – в общие файлы (лимит Pages 1 ГБ)
 $PY scripts/verify.py
