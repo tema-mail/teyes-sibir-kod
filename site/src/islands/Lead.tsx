@@ -49,7 +49,7 @@ export default function Lead({ policyHref, phone }: { policyHref: string; phone:
     setBusy(true);
     const ok = await sendForm('Запись на установку', {
       'Имя': name.trim(), 'Телефон': tel.trim(), 'Товар': about, 'Автомобиль и комментарий': car.trim(),
-      'Источник': 'сайт на коде (копия teyes-sibir.ru)', 'Согласие': 'yes',
+      'Согласие': 'yes',
     });
     if (ok) await sendLead({ form: 'Запись на установку', name: name.trim(), phone: tel.trim(), comment: car.trim(),
       items: about ? [{ id: '', title: about, path: location.pathname.replace(/^\/teyes-sibir-kod/, '').replace(/\/$/, ''), variant: '', addons: [], qty: 1, price: 0 }] : [] });

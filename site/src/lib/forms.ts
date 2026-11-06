@@ -2,6 +2,8 @@
 // teyes-sibir.ru (сняты с форм сайта 14.10.2026), поэтому заказы и заявки приходят туда же, куда сейчас.
 // Как в milovini-samara: приёмник не отдаёт CORS-заголовки, запрос no-cors – ответ не читается,
 // успехом считается то, что запрос ушёл без сетевой ошибки. Живой заявкой не проверено (нужно «да» владельца).
+import { leadFields } from './attribution';
+
 export const FORM_ACTION = 'https://forms.tildacdn.com/procces/';
 export const FORM_SERVICES = ['bc183f93007c8e91fb51bb54640dd4ac', '831db808dab445004d50692285e8f8b0'];
 export const TILDA = { projectId: '10257003', pageId: '65129687', formsKey: '6587a4c1f594936a29b6b24310257003' };
@@ -14,7 +16,7 @@ export async function sendForm(formName: string, fields: Record<string, string>)
   body.append('tildaspec-pageid', TILDA.pageId);
   body.append('tildaspec-formskey', TILDA.formsKey);
   body.append('tildaspec-referer', location.href);
-  for (const [k, v] of Object.entries(fields)) if (v) body.append(k, v);
+  for (const [k, v] of Object.entries({ ...fields, ...leadFields() })) if (v) body.append(k, v);
   try {
     await fetch(FORM_ACTION, { method: 'POST', mode: 'no-cors', body });
     return true;
@@ -29,12 +31,13 @@ export async function sendForm(formName: string, fields: Record<string, string>)
 export const LEADS_API = 'https://admin.teyes-sibir.ru/api/leads';
 export type LeadItem = { id: string; title: string; path: string; variant: string; addons: string[]; qty: number; price: number };
 export function sendLead(lead: { form: string; name: string; phone: string; email?: string; comment?: string; items?: LeadItem[]; total?: number }) {
-  const q = new URLSearchParams(location.search);
-  const utm = ['utm_source', 'utm_medium', 'utm_campaign'].map((k) => q.get(k) && `${k}=${q.get(k)}`).filter(Boolean).join(' ');
-  const source = utm || (document.referrer ? new URL(document.referrer).hostname : 'прямой заход');
+  const { 'Источник': source, 'Страница заявки': _page, 'Страница входа': landing, ...marks } = leadFields();
+  const utm = Object.entries(marks).map(([k, v]) => `${k}=${v}`).join(' ');
+  // Источник – отдельным коротким значением (по нему фильтр кабинета), вход и метки – в комментарий заявки.
+  const comment = [lead.comment, `Вход: ${landing}`, utm && `Метки: ${utm}`].filter(Boolean).join('\n').slice(0, 2000);
   return fetch(LEADS_API, {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'omit', keepalive: true,
-    body: JSON.stringify({ ...lead, page: location.pathname, source }),
+    body: JSON.stringify({ ...lead, comment, page: location.pathname, source }),
   }).then((r) => r.ok, () => false);
 }
 

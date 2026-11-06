@@ -48,7 +48,7 @@ export default function Order({ storeHref, policyHref, phone }: { storeHref: str
     const ok = await sendForm('Cart', {
       'Номер заказа': num, 'Имя': name.trim(), 'Телефон': tel.trim(), 'Email': email.trim(),
       'Автомобиль и комментарий': car.trim(), 'Заказ': lines, 'Итого': rub(cartTotal.value),
-      'Источник': 'сайт на коде (копия teyes-sibir.ru)', 'Согласие': 'yes',
+      'Согласие': 'yes',
     });
     if (ok) await sendLead({ form: 'Заказ', name: name.trim(), phone: tel.trim(), email: email.trim(), comment: car.trim(),
       total: cartTotal.value, items: items.map((i) => ({ id: i.id, title: i.title, path: i.path, variant: i.variant, addons: i.addons, qty: i.qty, price: i.price })) });
