@@ -44,7 +44,7 @@ const ld = {
     <ol class="crumbs">
       <li><a href={u('/')}>Главная</a></li>
       <li><a href={u('/store/')}>Магазин</a></li>
-      {p.section !== 'teyes' && p.section !== 'catalog' && p.section !== 'camera' && <li><a href={u('/store/catalog/')}>Комплекты Teyes</a></li>}
+      {p.section !== 'teyes' && p.section !== 'catalog' && p.section !== 'camera' && p.section !== 'accessories' && <li><a href={u('/store/catalog/')}>Комплекты Teyes</a></li>}
       <li><a href={u(sectionHref(p.section))}>{sectionName(p.section)}</a></li>
     </ol>
     <ProductMeta client:idle id={p.id} model={p.model} title={p.title} compare={!!details} />

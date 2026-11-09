@@ -33,7 +33,7 @@ export function getStaticPaths() {
 const section = Astro.params.section || '';
 const kits = store.sections.find((s) => s.id === 'kits')!;
 const part = PARTS.find((x) => x.path === '/store/' + section);
-const slug = part ? '' : section === 'catalog_teyes' ? 'teyes' : section === 'catalog' ? 'catalog' : section === 'camera' ? 'camera' : section.startsWith('catalog/') ? section.slice(8) : '';
+const slug = part ? '' : section === 'catalog_teyes' ? 'teyes' : section === 'catalog' ? 'catalog' : section === 'camera' ? 'camera' : section === 'accessories' ? 'accessories' : section.startsWith('catalog/') ? section.slice(8) : '';
 const sec = store.sections.find((s) => s.href && strip(s.href) === 'store/' + section);
 const info = SECTIONS.find((s) => s.slug === slug);
 // Подраздел без своей плитки (например, омыватели камер внутри «Камер») – название из групп меню

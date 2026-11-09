@@ -46,7 +46,8 @@ export const img = (name?: string) => (name ? u(`/img/p/${name}`) : '');
 
 /** Адрес категории в копии: Магнитолы Teyes, Комплекты Teyes (корень), марка в комплектах. */
 export const sectionHref = (slug: string) =>
-  slug === 'teyes' ? '/store/catalog_teyes/' : slug === 'catalog' ? '/store/catalog/' : slug === 'camera' ? '/store/camera/' : `/store/catalog/${slug}/`;
+  slug === 'teyes' ? '/store/catalog_teyes/' : slug === 'catalog' ? '/store/catalog/' : slug === 'camera' ? '/store/camera/'
+    : slug === 'accessories' ? '/store/accessories/' : `/store/catalog/${slug}/`;
 
 export const sectionName = (slug: string) =>
   slug === 'teyes' ? 'Магнитолы Teyes' : slug === 'catalog' ? 'Комплекты Teyes' : slug === 'camera' ? 'Камеры' : SECTIONS.find((s) => s.slug === slug)?.name || slug;
