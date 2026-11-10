@@ -40,6 +40,51 @@ KINDS = [
 ]
 SKIP = r'^(штатная магнитола|магнитола|уценка|планшет)'  # магнитолы идут отдельным шагом, уценку не берём
 
+# Раздел /store/accessories/ – решение владельца 10.11.2026: сначала то, что ставим чаще всего; проводку питания,
+# адаптеры под камеры, переходники HDMI и дисплеи на замену не продаём. GROUPS – типы по порядку показа
+# (он же порядок чипов фильтра), тип ищется по названию; рамки остаются рамками, прочее – «Другое» в конце.
+DROP = r'^(адаптер под|переходник|дисплей для замены|комплект проводов|проводка питания|bc12)'
+GROUPS = [
+    ('Камеры 360', r'360|кругового обзора'),
+    ('Камеры заднего и переднего вида', r'камера (заднего|переднего)'),
+    ('Микрофоны', r'микрофон'),
+    ('OBD-сканеры', r'obd'),
+    ('Видеорегистраторы', r'видеорегистратор|dvr|карта памяти'),
+    ('Доводчики', r'доводчик'),
+    ('GPS-антенны', r'gps антенна'),
+    ('Голосовой помощник Hanna', r'hanna'),
+    ('Фильтры помех', r'фильтр.*помех'),
+    ('Кабели', r'^кабель|^удлинитель'),
+    ('Парктроники', r'парктроник|парковочный датчик'),
+    ('Датчики давления в шинах', r'tpms|давления в шинах'),
+    ('Пластины', r'^пластины|bracket'),
+    ('Кнопки', r'кнопк'),
+    ('Система охраны', r'система охраны'),
+    ('MOST-адаптеры', r'most адаптер'),
+    ('Защитные стёкла', r'защитное стекло'),
+    ('Рамка', r'рамк|frame'),
+    ('Другое', r''),
+]
+INNER = [r'dvr-блок', r'карта памяти']  # внутри типа – в конец: регистраторы, потом блок, потом карты памяти
+
+
+def dropped(title: str, kind: str) -> bool:
+    t = title.lower()
+    return bool(re.search(DROP, t)) or (kind == 'Проводка питания' and not re.search(r'^удлинитель', t))
+
+
+def group_of(title: str, kind: str) -> str:
+    if kind == 'Рамка':
+        return 'Рамка'
+    t = title.lower()
+    return next(g for g, pat in GROUPS if re.search(pat, t))
+
+
+def rank(p: dict) -> tuple:
+    t = p['title'].lower()
+    return ([g for g, _ in GROUPS].index(p['model']) if p['model'] in dict(GROUPS) else len(GROUPS),
+            next((i + 1 for i, pat in enumerate(INNER) if re.search(pat, t)), 0))
+
 
 def kind_of(item: dict) -> str:
     """Тип – из крошек источника («Аксессуары → Видеорегистраторы», «Проводка питания»), иначе по названию."""
@@ -118,8 +163,9 @@ def accessories(have_urls: set, dry: bool) -> list:
         if not t or not item['price'] or re.search(SKIP, t.lower()) or item['url'] in have_urls:
             continue
         kind = kind_of(item)
-        if kind == 'Уценка':  # уценённые экземпляры – разовые, в каталог не берём
+        if kind == 'Уценка' or dropped(t, kind):  # уценённые экземпляры – разовые, в каталог не берём
             continue
+        kind = group_of(t, kind)
         lead, body = accessory_text(item, kind)
         pid = new_id(item['url'])
         images = [] if dry else [webp(RAW / 'img' / u.split('/')[-1]) for u in [u for u in item['images']
@@ -212,8 +258,34 @@ def head_units(only: set, products: list, have_urls: set, sections: dict, parts:
     return out
 
 
+def regroup(products: list) -> tuple[list, list]:
+    """Применить DROP/GROUPS к уже залитым аксессуарам: убрать лишнее, перетипизировать, расставить по порядку.
+    Текст карточки, где тип сменился, собирается заново из сырья (в нём строка «Тип»). → (товары, убранные)."""
+    raw = {}
+    for f in (RAW / 'items').glob('*.json'):
+        item = json.loads(f.read_text(encoding='utf-8'))
+        raw[item['url']] = item
+    rest, acc, gone = [], [], []
+    for p in products:
+        if p['section'] != 'accessories':
+            rest.append(p)
+        elif dropped(p['title'], p['model']):
+            gone.append(p)
+        else:
+            kind = group_of(p['title'], p['model'])
+            item = raw.get(p.get('source', {}).get('url'))
+            if kind != p['model'] and item:
+                lead, p['text'] = accessory_text(item, kind)
+                p['descr'] = lead[:300]
+            p['model'] = kind
+            acc.append(p)
+    acc.sort(key=rank)  # sort стабильный: внутри типа – прежний порядок
+    return rest + acc, gone
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
+    ap.add_argument('--regroup', action='store_true', help='применить порядок и чистку раздела аксессуаров к залитым')
     ap.add_argument('--accessories', action='store_true')
     ap.add_argument('--head-units', metavar='URLS', help='файл с отобранными адресами магнитол (по спросу)')
     ap.add_argument('--dry-run', action='store_true')
@@ -224,6 +296,23 @@ def main() -> None:
     cat = json.loads(CATALOG.read_text(encoding='utf-8'))
     sections = {x['slug']: x for x in cat['sections']}
     parts = {x['title']: x['uid'] for x in cat['parts']}
+    if a.regroup:
+        rows, gone = regroup(products)
+        from collections import Counter
+        print('убрано', len(gone), Counter(p['model'] for p in gone).most_common())
+        print('типы', [(m, n) for m, n in Counter(p['model'] for p in rows if p['section'] == 'accessories').items()])
+        if a.dry_run:
+            return
+        keep = {i for p in rows for i in p['images']}
+        for i in {i for p in gone for i in p['images']} - keep:  # фото убранных, которые больше никому не нужны
+            (OUT_IMG / i).unlink(missing_ok=True)
+        PRODUCTS.write_text('[\n' + ',\n'.join(json.dumps(p, ensure_ascii=False, separators=(',', ':')) for p in rows)
+                            + '\n]\n', encoding='utf-8')
+        for x in cat['sections']:
+            if x['slug'] == 'accessories':
+                x['count'] = x['total'] = sum(p['section'] == 'accessories' for p in rows)
+        CATALOG.write_text(json.dumps(cat, ensure_ascii=False, indent=1), encoding='utf-8')
+        return
     add = []
     if a.accessories:
         add += accessories(have_urls, a.dry_run)

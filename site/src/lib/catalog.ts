@@ -68,9 +68,11 @@ export function similar(p: Product, n = 8): Card[] {
   return [...same, ...rest.filter((x) => x.model !== p.model)].slice(0, n).map(toCard);
 }
 
-/** Модели магнитол в наборе товаров – для фильтра каталога, по частоте. */
-export function models(list: { model: string }[]) {
+/** Модели магнитол в наборе товаров – для фильтра каталога, по частоте; ordered – в порядке товаров
+ *  (раздел аксессуаров: порядок типов задаёт импорт, scripts/import_teyes_com_ru.py GROUPS). */
+export function models(list: { model: string }[], ordered = false) {
   const count = new Map<string, number>();
   list.forEach((p) => p.model && count.set(p.model, (count.get(p.model) || 0) + 1));
-  return [...count.entries()].sort((a, b) => b[1] - a[1]).map(([m]) => m);
+  const out = [...count.entries()];
+  return (ordered ? out : out.sort((a, b) => b[1] - a[1])).map(([m]) => m);
 }

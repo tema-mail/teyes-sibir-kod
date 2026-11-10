@@ -81,7 +81,7 @@ const h1 = !section ? 'Магазин TEYES SIBIR' : section.startsWith('catalog
         {info && info.total > info.count && (
           <p class="shop__sample">На копии сайта – пример: {info.count === 1 ? '1 товар' : `${info.count} товара`} из {info.total} в этой категории.</p>
         )}
-        <Catalog client:load cards={cards} hrefs={hrefs} models={models(cards)} />
+        <Catalog client:load cards={cards} hrefs={hrefs} models={models(cards, slug === 'accessories')} />
       </>
     )}
 
