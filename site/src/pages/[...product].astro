@@ -7,8 +7,9 @@ import ProductCard from '../islands/ProductCard';
 import Viewed from '../islands/Viewed';
 import ProductMeta from '../islands/ProductMeta';
 import { PERKS, DETAILS, COMPARE } from '../data/card-details';
-import { PRODUCTS, videoList, img, sectionHref, sectionName, similar, minPrice, toCard, type Product } from '../lib/catalog';
-import { u, LIVE, BASE, SITE, ASSET } from '../lib/site';
+import { PRODUCTS, videoList, img, similar, toCard, type Product } from '../lib/catalog';
+import { u, SITE, ASSET } from '../lib/site';
+import { productSeo, crumbs, ldScript } from '../lib/seo';
 import '../styles/shop.css';
 import '../styles/product-card.css';
 
@@ -23,7 +24,6 @@ const ENT: Record<string, string> = { quot: '"', nbsp: ' ', amp: '&', lt: '<', g
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const text = esc(p.text.replace(/&(quot|nbsp|amp|lt|gt|apos|#39);/g, (_, k) => ENT[k]))
   .replace(/&lt;(\/?)(p|strong|h3|ul|li|br)\s*\/?&gt;/gi, (_, sl, tag) => `<${sl}${tag.toLowerCase()}>`).replace(/\n/g, '<br>');
-const lowest = minPrice(p);
 const details = DETAILS[p.id];
 const productHref = (id: string) => { const x = PRODUCTS.find((y) => y.id === id); return x ? u(x.path + '/') : undefined; };
 const perkHref = (href: string) => (href === 'tg' ? SITE.telegram : u(href));
@@ -31,21 +31,13 @@ const videos = videoList(p);
 // Видео – сразу после обложки: последним слайдом его не замечают (владелец 17.10)
 const slides: { name: string; video: false | { file: string; poster: string; sound: boolean } }[] = [...p.images.slice(0, 1).map((name) => ({ name, video: false as const })), ...videos.map((v) => ({ name: v.file, video: v })),
   ...p.images.slice(1).map((name) => ({ name, video: false as const }))];
-// Фото – полные адреса там, где они реально лежат: на копии (GitHub Pages) или на своём домене
-const origin = BASE ? 'https://tema-mail.github.io' : LIVE;
-const ld = {
-  '@context': 'https://schema.org', '@type': 'Product', name: p.title, description: p.descr || p.title,
-  image: p.images.map((i) => origin + img(i)), brand: { '@type': 'Brand', name: 'Teyes' },
-  offers: { '@type': 'Offer', priceCurrency: 'RUB', price: lowest, availability: 'https://schema.org/InStock', url: LIVE + p.path },
-};
+// title, description, первый абзац, keywords и разметка – src/lib/seo.ts (SAG, 10.11.2026)
+const seo = productSeo(p);
 ---
-<Base title={`${p.title} – купить с установкой в Новосибирске | TEYES SIBIR`} description={p.descr || p.title}>
+<Base title={seo.title} description={seo.description} keywords={seo.keywords} image={seo.image} ogType="product">
   <div class="wrap product">
     <ol class="crumbs">
-      <li><a href={u('/')}>Главная</a></li>
-      <li><a href={u('/store/')}>Магазин</a></li>
-      {p.section !== 'teyes' && p.section !== 'catalog' && p.section !== 'camera' && p.section !== 'accessories' && <li><a href={u('/store/catalog/')}>Комплекты Teyes</a></li>}
-      <li><a href={u(sectionHref(p.section))}>{sectionName(p.section)}</a></li>
+      {crumbs(p).map((c) => <li><a href={u(c.path)}>{c.name}</a></li>)}
     </ol>
     <ProductMeta client:idle id={p.id} model={p.model} title={p.title} compare={!!details} />
     <div class="product__main">
@@ -70,8 +62,8 @@ const ld = {
       <div class="product__info">
         {p.mark && <span class={`product__mark${p.mark === 'SALE' ? ' is-sale' : ''}`}>{p.mark === 'SALE' ? 'Скидка' : 'Новинка'}</span>}
         <h1>{p.title}</h1>
-        {p.model && <p class="product__model">Модель магнитолы: <b>Teyes {p.model}</b></p>}
-        {p.descr && <p class="product__descr">{p.descr}</p>}
+        {p.model && p.section !== 'accessories' && <p class="product__model">Модель магнитолы: <b>Teyes {p.model}</b></p>}
+        <p class="product__descr">{seo.lead}</p>
         <ProductBuy client:load id={p.id} title={p.title} path={p.path} image={img(p.images[0])} price={p.price} priceOld={p.priceOld} priceCard={p.priceCard}
           options={p.options} editions={p.editions} addons={p.addons} orderHref={u('/order/')} leadHref={u('/contacts/')} />
         <p class="product__note">Подскажем по совместимости с вашей машиной: <a href={SITE.tel}>{SITE.phone}</a>.</p>
@@ -142,7 +134,7 @@ const ld = {
       </section>
     )}
   </div>
-  <script type="application/ld+json" set:html={JSON.stringify(ld).replace(/</g, '\\u003c')} />
+  {seo.ld.map((x) => <script type="application/ld+json" set:html={ldScript(x)} />)}
   <script>
     // Звук видео – только по кнопке: браузеры не дают запускать видео со звуком сами
     document.querySelectorAll<HTMLButtonElement>('[data-unmute]').forEach((b) => b.addEventListener('click', () => {

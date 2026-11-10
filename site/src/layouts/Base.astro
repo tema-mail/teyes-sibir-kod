@@ -7,11 +7,14 @@ import Cart from '../islands/Cart';
 import Lead from '../islands/Lead';
 import '../styles/shop.css';
 import { u, LIVE, NOINDEX, SITE, ASSET, FOOTER } from '../lib/site';
+import { ORIGIN, orgLd, ldScript } from '../lib/seo';
 // theme='dark' – тёмные страницы сайта (всё, кроме магазина: сайт тёмный, магазин белый – владелец 25.10).
-interface Props { title: string; description?: string; current?: string; theme?: 'light' | 'dark' }
-const { title, description = '', current = '', theme = 'light' } = Astro.props;
+// keywords, image (полный адрес), ogType, canonical (путь на живом сайте, если отличается от своего) – для поиска и превью ссылок.
+interface Props { title: string; description?: string; current?: string; theme?: 'light' | 'dark'; keywords?: string; image?: string; ogType?: string; canonical?: string }
+const { title, description = '', current = '', theme = 'light', keywords = '', image = '', ogType = 'website', canonical = '' } = Astro.props;
 const dark = theme === 'dark';
 const path = Astro.url.pathname.replace(import.meta.env.BASE_URL.replace(/\/$/, ''), '') || '/';
+const canonicalUrl = LIVE + (canonical || path).replace(/\/$/, '');
 // Шрифты сайта – файлы копии; адреса зависят от BASE, поэтому @font-face собирается здесь
 const face = (family: string, file: string, format: string, weight: number) =>
   `@font-face{font-family:'${family}';src:url("${u(file)}") format('${format}');font-weight:${weight};font-display:swap}`;
@@ -27,7 +30,16 @@ const fonts = '<style>' + face('CenturyGothic', ASSET.century, 'woff', 400) +
   <Fragment set:html={NOINDEX} />
   <title>{title}</title>
   {description && <meta name="description" content={description} />}
-  <link rel="canonical" href={LIVE + path.replace(/\/$/, '')} />
+  {keywords && <meta name="keywords" content={keywords} />}
+  <link rel="canonical" href={canonicalUrl} />
+  <meta property="og:type" content={ogType} />
+  <meta property="og:site_name" content={SITE.name} />
+  <meta property="og:locale" content="ru_RU" />
+  <meta property="og:title" content={title} />
+  {description && <meta property="og:description" content={description} />}
+  <meta property="og:url" content={canonicalUrl} />
+  <meta property="og:image" content={image || ORIGIN + u(ASSET.logo)} />
+  <script type="application/ld+json" set:html={ldScript(orgLd())} />
   <link rel="icon" type="image/svg+xml" href={u(ASSET.icon)} />
   <link rel="apple-touch-icon" href={u(ASSET.touchIcon)} />
   <link rel="stylesheet" href={u('/assets/menu/megamenu.css')} />
