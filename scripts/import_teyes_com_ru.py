@@ -96,6 +96,15 @@ def kind_of(item: dict) -> str:
     return next((k for pat, k in KINDS if re.search(pat, t)), 'Другое')
 
 
+def sentences(text: str, limit: int = 300) -> str:
+    """Целые предложения в пределах limit – без обрыва посреди слова (было text[:300])."""
+    if len(text) <= limit:
+        return text
+    cut = text[:limit]
+    end = max(cut.rfind('. '), cut.rfind('! '), cut.rfind('? '))
+    return cut[:end + 1] if end > 0 else cut.rsplit(' ', 1)[0] + '…'
+
+
 def new_id(url: str) -> str:
     """Стабильный id по адресу источника: 12 цифр с префиксом 8 (у Tilda 12 цифр, у камер 9000…)."""
     return '8' + str(int(hashlib.sha1(url.encode()).hexdigest(), 16))[:11]
@@ -172,7 +181,7 @@ def accessories(have_urls: set, dry: bool) -> list:
         out.append({
             'addons': [], 'brand': spec(item, 'Марка автомобиля') or 'Teyes',
             'characteristics': [{'title': s['title'], 'value': s['value']} for s in item['specs'] if s['value']],
-            'descr': lead[:300], 'editions': [], 'id': pid, 'images': images, 'mark': '', 'model': kind,
+            'descr': sentences(lead), 'editions': [], 'id': pid, 'images': images, 'mark': '', 'model': kind,
             'options': [], 'parts': [], 'path': f'/store/accessories/tproduct/{pid}-{slug(t)}',
             'price': item['price'], 'priceOld': item['priceOld'], 'section': 'accessories', 'sort': 0,
             'text': body, 'title': t, 'source': {'url': item['url'], 'sku': item['sku'], 'date': SOURCE_DATE},
@@ -230,7 +239,7 @@ def head_units(only: set, products: list, have_urls: set, sections: dict, parts:
         low = min(e['price'] for e in editions)
         gen = crumbs[-2] if len(crumbs) > 4 else ''
         lead = (f'{title} ставится в штатное место вместо заводской магнитолы. Цена от {rub(low)} в Новосибирске,'
-                f' установка – в установочном центре TEYES SIBIR ({INSTALL}), в день обращения.')
+                f' установка – в установочном центре TEYES SIBIR ({INSTALL}).')
         sp = {s['title']: s['value'] for s in base['specs'] if s['value']}
         facts = [('Машина', car), ('Поколение', gen), ('Модель магнитолы', name), ('Память', ', '.join(m.replace('+', '/') for m in mems)),
                  ('Версии', ', '.join(vers) if len(vers) > 1 else ''), ('Экран', sp.get('Диагональ дисплея', '')),
@@ -248,7 +257,7 @@ def head_units(only: set, products: list, have_urls: set, sections: dict, parts:
         out.append({
             'addons': addons.get(ourmodel, []) if ourmodel in ('CC3L', 'CC3 2К', 'Lux One') else [], 'brand': brand,
             'characteristics': [{'title': s['title'], 'value': s['value']} for s in base['specs'] if s['value']],
-            'descr': lead[:300], 'editions': editions, 'id': pid, 'images': images, 'mark': '', 'model': ourmodel,
+            'descr': sentences(lead), 'editions': editions, 'id': pid, 'images': images, 'mark': '', 'model': ourmodel,
             'options': options, 'parts': [MAGNITOLY_PART] + ([parts[brand]] if brand in parts else []),
             'path': f'/store/catalog/{sec}/tproduct/{pid}-{slug(title)}', 'price': low, 'priceOld': 0,
             'section': sec, 'sort': 0, 'text': body, 'title': title,
@@ -275,7 +284,7 @@ def regroup(products: list) -> tuple[list, list]:
             item = raw.get(p.get('source', {}).get('url'))
             if kind != p['model'] and item:
                 lead, p['text'] = accessory_text(item, kind)
-                p['descr'] = lead[:300]
+                p['descr'] = sentences(lead)
             p['model'] = kind
             acc.append(p)
     acc.sort(key=rank)  # sort стабильный: внутри типа – прежний порядок
