@@ -14,6 +14,11 @@ const DESCR_MAX = 160;
 const ADDRESS = 'Сухарная 35';
 
 const fmt = (n: number) => n.toLocaleString('ru-RU').replace(/\s/g, ' ');
+/** 1 товар, 2 товара, 5 товаров. */
+const plural = (n: number, [one, few, many]: string[]) => {
+  const d = n % 10, h = n % 100;
+  return `${n} ${d === 1 && h !== 11 ? one : d >= 2 && d <= 4 && (h < 12 || h > 14) ? few : many}`;
+};
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const fit = (list: string[], max: number) => list.find((s) => s.length <= max) || list[list.length - 1];
 
@@ -144,3 +149,42 @@ export function orgLd() {
 }
 
 export const ldScript = (data: unknown) => JSON.stringify(data).replace(/</g, '\\u003c');
+
+/** Раздел магазина: title с ценой «от», description с числом товаров и моделями, крошки и список товаров в разметке.
+ *  canonical – для служебных страниц Tilda /store/catalog/<uid>-<марка>, повторяющих раздел марки. */
+export function sectionSeo(o: { h1: string; brand: string; cards: { title: string; path: string; price: number; model: string }[];
+  crumbs: { name: string; path: string }[]; path: string; lead?: string; models: string[]; accessories?: boolean }) {
+  const n = o.cards.length;
+  const min = n ? Math.min(...o.cards.map((c) => c.price).filter(Boolean)) : 0;
+  const from = min ? `от ${fmt(min)} ₽` : '';
+  const list = (a: string[]) => (a.length > 1 ? `${a.slice(0, -1).join(', ')} и ${a[a.length - 1]}` : a[0] || '');
+  let title: string; let description: string;
+  if (o.brand) {
+    title = fit([`Магнитолы Teyes на ${o.brand} – ${from} с установкой в Новосибирске`, `Магнитолы Teyes на ${o.brand} – ${from}, Новосибирск`,
+      `Магнитолы Teyes на ${o.brand} – ${from}`], TITLE_MAX);
+    const models = list(o.models.slice(0, 4).map((m) => `Teyes ${m}`));
+    description = fit([
+      `Штатные магнитолы ${models} на ${o.brand}: ${plural(n, ['комплект', 'комплекта', 'комплектов'])} ${from}. Подберём под кузов и год по фото панели, установим в Новосибирске.`,
+      `Штатные магнитолы Teyes на ${o.brand}: ${plural(n, ['комплект', 'комплекта', 'комплектов'])} ${from}. Подберём по фото панели и установим в Новосибирске.`,
+    ], DESCR_MAX);
+  } else if (o.accessories) {
+    title = fit([`${o.h1} – ${from}, Новосибирск`, `${o.h1} – ${from}`], TITLE_MAX);
+    description = fit([`${list(o.models.slice(0, 4).map((m) => m.toLowerCase()))} и переходные рамки для магнитол Teyes – ${from}. Подберём под машину и поставим в Новосибирске, ${ADDRESS}.`,
+      `Камеры, регистраторы и рамки для магнитол Teyes – ${from}. Подберём и поставим в Новосибирске, ${ADDRESS}.`], DESCR_MAX);
+  } else {
+    title = fit(n ? [`${o.h1} – ${from}, Новосибирск`, `${o.h1} – ${from}`, o.h1] : [`${o.h1} – установочный центр в Новосибирске`, o.h1], TITLE_MAX);
+    description = o.lead && o.lead.length <= DESCR_MAX ? o.lead : fit(n
+      ? [`${o.h1}: ${plural(n, ['товар', 'товара', 'товаров'])} ${from}. Подберём по фото панели и установим в Новосибирске, ${ADDRESS}.`, `${o.h1}: ${from}. Установка в Новосибирске, ${ADDRESS}.`]
+      : [`${o.h1} в установочном центре TEYES SIBIR: подбор и установка магнитол Teyes в Новосибирске, ${ADDRESS}.`, `${o.h1}: Новосибирск, ${ADDRESS}.`], DESCR_MAX);
+  }
+  const keywords = o.brand
+    ? [`магнитола teyes ${o.brand.toLowerCase()}`, `штатная магнитола ${o.brand.toLowerCase()}`, `магнитола на ${o.brand.toLowerCase()} купить`, `установка магнитолы ${o.brand.toLowerCase()} новосибирск`].join(', ')
+    : '';
+  const ld: object[] = [{
+    '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+    itemListElement: [...o.crumbs, { name: o.h1, path: o.path }].map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: c.name, item: LIVE + c.path })),
+  }];
+  if (n) ld.push({ '@context': 'https://schema.org', '@type': 'ItemList', name: o.h1, numberOfItems: n,
+    itemListElement: o.cards.slice(0, 24).map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: c.title, url: LIVE + c.path })) });
+  return { title, description, keywords, ld };
+}

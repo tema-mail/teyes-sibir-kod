@@ -5,7 +5,8 @@
 // товары – site/src/data (все товары магазина).
 import Base from '../../layouts/Base.astro';
 import Catalog from '../../islands/Catalog';
-import { SECTIONS, PARTS, bySection, byPart, toCard, models, sectionName } from '../../lib/catalog';
+import { SECTIONS, PARTS, bySection, byPart, toCard, models, sectionName, sectionHref } from '../../lib/catalog';
+import { sectionSeo, ldScript } from '../../lib/seo';
 import { u } from '../../lib/site';
 import menu from '../../../../data/menu.json';
 import '../../styles/shop.css';
@@ -41,14 +42,20 @@ const sub = store.sections.flatMap((s) => s.groups || []).flatMap((g) => g.items
 const title = !section ? 'Магазин' : part ? part.title : slug ? sectionName(slug) : sec?.title || sub?.name || section;
 const cards = part ? byPart(part.uid).map(toCard) : slug ? bySection(slug).map(toCard) : [];
 const hrefs = Object.fromEntries(cards.map((c) => [c.id, u(c.path + '/')]));
-const h1 = !section ? 'Магазин TEYES SIBIR' : section.startsWith('catalog/') ? `Штатные магнитолы Teyes ${title}` : title;
+const h1 = !section ? 'Магазин TEYES SIBIR' : section.startsWith('catalog/') ? `Штатные магнитолы Teyes ${title}`
+  : slug === 'accessories' ? 'Аксессуары и рамки для магнитол Teyes' : title;
+// Служебная страница Tilda /store/catalog/<uid>-<марка> повторяет раздел марки – canonical на раздел (SEO, 10.11.2026)
+const twin = part && SECTIONS.find((x) => x.name.toLowerCase() === part.title.toLowerCase());
+const crumbList = [{ name: 'Главная', path: '/' }, ...(section ? [{ name: 'Магазин', path: '/store/' }] : []),
+  ...(section.startsWith('catalog/') ? [{ name: 'Комплекты Teyes', path: '/store/catalog/' }] : [])];
+const seo = sectionSeo({ h1, brand: section.startsWith('catalog/') ? title : '', cards, crumbs: crumbList, path: '/store/' + (section ? section + '/' : ''),
+  lead: !section ? store.all.text : '', models: models(cards, slug === 'accessories'), accessories: slug === 'accessories' });
 ---
-<Base title={`${h1} – купить с установкой в Новосибирске | TEYES SIBIR`} description={`${h1}: цены, наличие, установка в Новосибирске.`}>
+<Base title={seo.title} description={seo.description} keywords={seo.keywords} canonical={twin ? sectionHref(twin.slug) : ''}>
+  {seo.ld.map((x) => <script type="application/ld+json" set:html={ldScript(x)} />)}
   <div class="wrap shop">
     <ol class="crumbs">
-      <li><a href={u('/')}>Главная</a></li>
-      {section && <li><a href={u('/store/')}>Магазин</a></li>}
-      {section.startsWith('catalog/') && <li><a href={u('/store/catalog/')}>Комплекты Teyes</a></li>}
+      {crumbList.map((c) => <li><a href={u(c.path)}>{c.name}</a></li>)}
     </ol>
     <h1>{h1}</h1>
     {!section && <p class="shop__lead">{store.all.text}</p>}
