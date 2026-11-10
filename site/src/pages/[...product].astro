@@ -33,6 +33,7 @@ const slides: { name: string; video: false | { file: string; poster: string; sou
   ...p.images.slice(1).map((name) => ({ name, video: false as const }))];
 // title, description, первый абзац, keywords и разметка – src/lib/seo.ts (SAG, 10.11.2026)
 const seo = productSeo(p);
+const mark = toCard(p).mark; // «Скидка» – по ценам (catalog.ts onSale), иначе метка из админки
 ---
 <Base title={seo.title} description={seo.description} keywords={seo.keywords} image={seo.image} ogType="product">
   <div class="wrap product">
@@ -60,7 +61,7 @@ const seo = productSeo(p);
         )}
       </div>
       <div class="product__info">
-        {p.mark && <span class={`product__mark${p.mark === 'SALE' ? ' is-sale' : ''}`}>{p.mark === 'SALE' ? 'Скидка' : 'Новинка'}</span>}
+        {mark && <span class={`product__mark${mark === 'SALE' ? ' is-sale' : ''}`}>{mark === 'SALE' ? 'Скидка' : 'Новинка'}</span>}
         <h1>{p.title}</h1>
         {p.model && p.section !== 'accessories' && <p class="product__model">Модель магнитолы: <b>Teyes {p.model}</b></p>}
         <p class="product__descr">{seo.lead}</p>

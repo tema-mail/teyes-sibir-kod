@@ -52,9 +52,13 @@ export const sectionHref = (slug: string) =>
 export const sectionName = (slug: string) =>
   slug === 'teyes' ? 'Магнитолы Teyes' : slug === 'catalog' ? 'Комплекты Teyes' : slug === 'camera' ? 'Камеры' : SECTIONS.find((s) => s.slug === slug)?.name || slug;
 
+/** Скидка есть, если старая цена выше текущей у товара или у любого варианта – тогда бейдж «Скидка» сам. */
+export const onSale = (p: Product) => p.priceOld > p.price || p.editions.some((e) => e.priceOld > (e.price || p.price));
+const markOf = (p: Product) => (onSale(p) ? 'SALE' : p.mark);
+
 export const toCard = (p: Product): Card => ({
   id: p.id, path: p.path, title: p.title, price: minPrice(p), priceOld: p.editions.length ? 0 : p.priceOld, priceCard: minPriceCard(p),
-  from: new Set(p.editions.map((e) => e.price)).size > 1, mark: p.mark, model: p.model,
+  from: new Set(p.editions.map((e) => e.price)).size > 1, mark: markOf(p), model: p.model,
   image: img(p.images[0]), brand: p.brand,
 });
 
